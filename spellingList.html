@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mega-Dictionary | The English Workshop</title>
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --card-yellow: #feca57;
+            --text-dark: #2d3436;
+            --paper-soft: #fff2f2; /* A softer red-tinted paper */
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: white;
+            border: 4px solid var(--text-dark);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%;
+            max-width: 750px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        .category-tag {
+            display: inline-block;
+            background: var(--text-dark);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .label {
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            color: var(--card-red);
+            font-weight: bold;
+        }
+
+        .definition-area {
+            background: var(--card-red); /* Question box is now red */
+            color: black; /* Text inside the box is black */
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.35rem;
+            border: 4px solid var(--text-dark);
+            line-height: 1.4;
+            font-weight: bold;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 3px solid var(--text-dark);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            box-shadow: 4px 4px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background-color: var(--card-yellow);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct {
+            background: #2ecc71 !important;
+            color: white;
+            box-shadow: 2px 2px 0px var(--text-dark);
+        }
+
+        .btn.wrong {
+            background: #e74c3c !important;
+            color: white;
+            box-shadow: 2px 2px 0px var(--text-dark);
+        }
+
+        #next-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--card-blue);
+            color: var(--text-dark);
+            border: 3px solid var(--text-dark);
+            border-radius: 12px;
+            margin-top: 25px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+            font-family: inherit;
+            font-size: 1.2rem;
+            box-shadow: 4px 4px 0px var(--text-dark);
+        }
+
+        #next-btn:hover {
+            background: var(--card-yellow);
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span></span>
+        <span id="progress">1/400</span>
+    </div>
+    
+    <div id="cat-display" class="category-tag">Category</div>
+    <span class="label">Definition:</span>
+    <div class="definition-area" id="target">Loading Dictionary...</div>
+    
+    <span class="label">Pick the right word:</span>
+    <div class="options-grid" id="choices"></div>
+    
+    <button id="next-btn">Next Word ➔</button>
+</div>
+
+<script>
+    // Dictionary data stays the same as your source
+    const dictionary = {
+        "Home": {
+            "attic": "The space or room just below the roof of a house.",
+            "cellar": "An underground room used for storage or keeping fuel.",
+            "chimney": "A vertical pipe that carries smoke up from a fire.",
+            "curtains": "Pieces of fabric used to screen a window.",
+            "cushion": "A soft bag of cloth used for sitting or leaning.",
+            "hearth": "The floor of a fireplace.",
+            "parlour": "A sitting room in a private house for guests.",
+            "scullery": "A small room at the back of a house for washing dishes.",
+            "tumbler": "A drinking glass with no handle or foot.",
+            "detergent": "A chemical substance used for cleaning.",
+            "bolster": "A long, thick pillow for support.",
+            "lobby": "A hall or foyer near the entrance of a building.",
+            "meter": "A device that records the quantity of gas or electricity.",
+            "mirror": "A surface that reflects clear images.",
+            "poker": "A metal rod for stirring a fire.",
+            "saucer": "A small dish on which a cup stands.",
+            "towel": "An absorbent cloth for drying oneself.",
+            "mattress": "A large pad for sleeping on.",
+            "pillow": "A soft support for the head in bed.",
+            "kitchen": "A room where food is cooked."
+        },
+        "People": {
+            "adult": "A person who is fully grown or developed.",
+            "ancestors": "People from whom one is descended.",
+            "aunt": "The sister of one's father or mother.",
+            "babies": "Very young children.",
+            "children": "Young human beings below the age of puberty.",
+            "comrade": "A fellow member of an organization or a companion.",
+            "cousin": "A child of one's uncle or aunt.",
+            "friend": "A person whom one knows and has a bond with.",
+            "guest": "A person invited to visit someone's home.",
+            "hostess": "A woman who receives or entertains guests.",
+            "maiden": "A girl or young unmarried woman.",
+            "nephew": "A son of one's brother or sister.",
+            "niece": "A daughter of one's brother or sister.",
+            "orphan": "A child whose parents are dead.",
+            "parents": "A father or mother.",
+            "relation": "A person connected by blood or marriage.",
+            "uncle": "The brother of one's father or mother.",
+            "visitor": "A person visiting a person or place.",
+            "widower": "A man who has lost his spouse and not remarried.",
+            "youth": "The period between childhood and adult age."
+        },
+        "Body": {
+            "ankles": "The joints connecting the foot with the leg.",
+            "arteries": "Tubes carrying blood away from the heart.",
+            "exercise": "Physical activity to sustain health.",
+            "forehead": "The part of the face above the eyebrows.",
+            "heart": "The organ that pumps blood through the body.",
+            "knees": "The joints between the thigh and the lower leg.",
+            "knuckles": "The joints of a finger.",
+            "limbs": "The arms or legs of a person.",
+            "lungs": "The organs used for breathing.",
+            "muscles": "Tissues that produce movement in the body.",
+            "nostrils": "The two external openings of the nose.",
+            "shoulder": "The joint connecting the arm to the torso.",
+            "skeleton": "The internal framework of bone.",
+            "skull": "The bony structure of the head.",
+            "stomach": "The internal organ where food is digested.",
+            "thigh": "The part of the leg between the hip and knee.",
+            "throat": "The passage from the mouth to the stomach.",
+            "tongue": "The fleshy organ in the mouth used for tasting.",
+            "veins": "Tubes carrying blood toward the heart.",
+            "wrist": "The joint connecting the hand to the arm."
+        },
+        "Food": {
+            "bacon": "Cured meat from the sides or back of a pig.",
+            "biscuits": "Small, flat, dry cakes.",
+            "bread": "Food made of flour, water, and yeast baked together.",
+            "butter": "A pale yellow fatty substance made from cream.",
+            "cheese": "Food made from the pressed curds of milk.",
+            "chocolate": "A food preparation from roasted cacao seeds.",
+            "cocoa": "A powder made from roasted cacao seeds.",
+            "coffee": "A drink made from roasted and ground seeds.",
+            "margarine": "A butter substitute made from vegetable oils.",
+            "marmalade": "A preserve made from citrus fruit and peel.",
+            "mutton": "The flesh of fully grown sheep used as food.",
+            "porridge": "A dish of oatmeal or cereal boiled in water or milk.",
+            "pudding": "A sweet or savory cooked dish, usually for dessert.",
+            "sago": "Starch extracted from the pith of palm stems.",
+            "salmon": "A large edible fish with pink flesh.",
+            "sandwich": "Two pieces of bread with a filling between.",
+            "sausages": "Minced meat seasoned and stuffed into a casing.",
+            "steak": "A thick slice of meat, usually beef.",
+            "sugar": "A sweet crystalline substance.",
+            "venison": "The meat of a deer used for food."
+        },
+        "Clothing": {
+            "braid": "Threads woven into a decorative band.",
+            "cloak": "A sleeveless outdoor garment that hangs loosely.",
+            "costume": "A set of clothes in a particular style.",
+            "cotton": "A soft white fibrous substance from a tropical plant.",
+            "flannel": "A kind of soft woven fabric, typically of wool.",
+            "gabardine": "A smooth, durable, warp-faced woven fabric.",
+            "garments": "An item of clothing.",
+            "jacket": "A short coat.",
+            "linen": "Fabric woven from flax.",
+            "lingerie": "Women's underwear and nightclothes.",
+            "muslin": "Lightweight cotton cloth in a plain weave.",
+            "petticoat": "A woman's light undergarment worn under a skirt.",
+            "satin": "A smooth, glossy fabric, typically of silk.",
+            "stocking": "A close-fitting garment covering the foot and leg.",
+            "trousers": "An outer garment covering the body from the waist down.",
+            "tweed": "A rough-surfaced woolen cloth.",
+            "velour": "A plush, woven fabric resembling velvet.",
+            "velvet": "A closely woven fabric with a thick short pile on one side.",
+            "waistcoat": "A sleeveless garment worn by men over a shirt.",
+            "woollen": "Made of wool."
+        },
+        "Trades": {
+            "butcher": "A person who prepares and sells meat.",
+            "carpenter": "A person who makes or repairs wooden structures.",
+            "chemist": "A person who prepares and sells medicinal drugs.",
+            "clothier": "A person who makes or sells clothes.",
+            "doctor": "A qualified practitioner of medicine.",
+            "draper": "A person who sells cloth and dry goods.",
+            "druggist": "A pharmacist.",
+            "engineer": "A person who designs or builds engines and machines.",
+            "grocer": "A person who sells food and small household goods.",
+            "journalist": "A person who writes for newspapers or magazines.",
+            "lawyer": "A person who practices or studies law.",
+            "mason": "A person who builds with stone.",
+            "mechanic": "A person who maintains and repairs machinery.",
+            "plumber": "A person who installs water and sewage pipes.",
+            "purveyor": "A person who sells or deals in particular goods.",
+            "riveter": "A person who joins metal plates with pins.",
+            "sawyer": "A person who saws timber.",
+            "sculptor": "An artist who makes three-dimensional figures.",
+            "tailor": "A person who makes or alters clothes.",
+            "wright": "A maker or builder of something."
+        },
+        "Travel": {
+            "aeroplane": "A powered flying vehicle with fixed wings.",
+            "airship": "A power-driven aircraft kept buoyant by gas.",
+            "balloon": "A large bag filled with hot air or gas for flight.",
+            "bicycle": "A vehicle with two wheels, one behind the other.",
+            "brakes": "Devices for slowing or stopping a moving vehicle.",
+            "carriage": "A four-wheeled passenger vehicle pulled by horses.",
+            "coach": "A large, closed, four-wheeled horse-drawn carriage.",
+            "cruise": "A voyage on a ship or boat taken for pleasure.",
+            "electricity": "A form of energy used to power engines.",
+            "engine": "A machine with moving parts that converts power into motion.",
+            "express": "A fast train that stops at few stations.",
+            "fares": "The money a passenger on public transport pays.",
+            "gangway": "A narrow passage used for entering or leaving a ship.",
+            "guard": "An official in charge of a train.",
+            "helicopter": "An aircraft with overhead rotating blades.",
+            "label": "A small piece of paper attached to luggage for info.",
+            "locomotive": "A powered railway vehicle used for pulling trains.",
+            "luggage": "Suitcases or bags containing personal belongings.",
+            "machine": "An apparatus using mechanical power.",
+            "parcel": "An object wrapped in paper for carrying or mailing.",
+            "passengers": "People traveling in a vehicle other than the driver.",
+            "pedals": "Foot-operated levers.",
+            "pier": "A structure leading out from the shore into the sea.",
+            "platform": "The raised level area from which passengers board a train.",
+            "purser": "The officer on a ship who handles accounts.",
+            "saloon": "A public room on a ship for social activity.",
+            "seaplane": "An aircraft designed to take off and land on water.",
+            "signal": "A gesture or device giving information.",
+            "skis": "Long runners used for sliding over snow.",
+            "sledge": "A vehicle for traveling over snow, pulled by animals.",
+            "sleigh": "A large sledge pulled by horses.",
+            "steerage": "The cheapest accommodation on a passenger ship.",
+            "steward": "A person who looks after passengers on a ship.",
+            "tramway": "A rail track for trams.",
+            "traveller": "A person who is traveling.",
+            "tunnel": "An artificial passage under the ground.",
+            "vehicle": "A thing used for transporting people or goods.",
+            "wagons": "Four-wheeled vehicles for heavy loads.",
+            "whistles": "Devices used to produce a loud high-pitched sound."
+        },
+        "Land": {
+            "cape": "A headland or promontory of large size.",
+            "cliff": "A steep rock face, especially at the edge of the sea.",
+            "continent": "A large continuous mass of land.",
+            "country": "A nation with its own government.",
+            "headland": "A narrow piece of land that projects from a coastline.",
+            "hillock": "A small hill or mound.",
+            "island": "A piece of land surrounded by water.",
+            "marsh": "Low-lying land which is flooded in wet seasons.",
+            "mound": "A heap or pile of earth or stones.",
+            "mountain": "A large natural elevation of the earth's surface.",
+            "pampas": "Large, treeless plains in South America.",
+            "peninsula": "Land almost surrounded by water.",
+            "plain": "A large area of flat land.",
+            "prairie": "A large open area of grassland.",
+            "precipice": "A very steep rock face or cliff.",
+            "summit": "The highest point of a hill or mountain.",
+            "tundra": "A vast, flat, treeless Arctic region.",
+            "valley": "A low area of land between hills or mountains.",
+            "veldt": "Open uncultivated country or grassland in Africa.",
+            "volcano": "A mountain or hill having a crater through which lava erupts."
+        },
+        "Time": {
+            "ancient": "Belonging to the very distant past.",
+            "annual": "Occurring once every year.",
+            "autumn": "The season between summer and winter.",
+            "century": "A period of one hundred years.",
+            "Christmas": "An annual festival commemorating the birth of Jesus.",
+            "dawn": "The first appearance of light in the sky.",
+            "Easter": "The festival of the resurrection of Jesus.",
+            "era": "A long and distinct period of history.",
+            "gloaming": "Twilight or dusk.",
+            "minutes": "Units of time equal to sixty seconds.",
+            "modern": "Relating to the present or recent times.",
+            "punctual": "Happening or doing something at the correct time.",
+            "Saturday": "The day of the week before Sunday.",
+            "Wednesday": "The day of the week before Thursday."
+        },
+        "Sea": {
+            "billows": "Large undulating masses of water.",
+            "breakers": "Heavy sea waves that break into white foam.",
+            "breakwater": "A barrier built out into the sea to protect a coast.",
+            "channel": "A length of water joining two larger seas.",
+            "crest": "The top of a wave.",
+            "fjord": "A long, narrow, deep inlet of the sea between cliffs.",
+            "harbour": "A sheltered port for ships.",
+            "inlet": "A small arm of the sea, a lake, or a river.",
+            "lagoon": "A stretch of salt water separated from the sea by a reef.",
+            "lake": "A large body of water surrounded by land.",
+            "loch": "A lake or sea inlet in Scotland.",
+            "ocean": "A very large expanse of sea.",
+            "river": "A large natural stream of water flowing in a channel.",
+            "rivulet": "A very small stream.",
+            "sea": "The expanse of salt water that covers most of the earth.",
+            "streamlet": "A small stream.",
+            "torrent": "A fast-moving stream of water.",
+            "tributary": "A river or stream flowing into a larger one.",
+            "trough": "The hollow between two waves.",
+            "waves": "Moving ridges of water on the surface of the sea."
+        },
+        "Sport": {
+            "badminton": "A game played with rackets and a shuttlecock.",
+            "bowls": "A game in which heavy balls are rolled toward a target.",
+            "boxing": "The sport of fighting with the fists.",
+            "cricket": "A game with bats and ball played between two teams of eleven.",
+            "fencing": "The sport of fighting with swords.",
+            "football": "A game played by kicking a ball.",
+            "golf": "A game where a ball is struck with clubs into holes.",
+            "hockey": "A game played between two teams using hooked sticks.",
+            "polo": "A game played on horseback with long-handled mallets.",
+            "putting": "Striking a golf ball gently toward a hole.",
+            "rounders": "A ball game similar to baseball.",
+            "rugby": "A team game played with an oval ball.",
+            "shinty": "A team game similar to hockey, played in Scotland.",
+            "skating": "Moving on ice with metal-bladed boots.",
+            "sprinting": "Running a short distance at full speed.",
+            "swimming": "The sport of moving through water.",
+            "tennis": "A game where a ball is hit over a net with rackets.",
+            "wrestling": "The sport of grappling with an opponent.",
+            "yachting": "The sport of racing in yachts."
+        },
+        "Sky": {
+            "altitude": "The height of an object in relation to sea level.",
+            "astronomy": "The study of stars and planets.",
+            "atmosphere": "The envelope of gases surrounding the earth.",
+            "cloudy": "Covered with or characterized by clouds.",
+            "comet": "A celestial object with a tail of gas and dust.",
+            "creation": "The action or process of bringing something into existence.",
+            "crescent": "The curved shape of the moon in its first quarter.",
+            "eclipse": "The obscuring of the light from one celestial body.",
+            "hazy": "Obscure by a lack of transparency in the air.",
+            "heavens": "The sky as seen from the earth.",
+            "horizon": "The line where the earth and sky appear to meet.",
+            "midnight": "Twelve o'clock at night.",
+            "planet": "A celestial body moving in an orbit round a star.",
+            "solar": "Relating to the sun.",
+            "sunset": "The time in the evening when the sun disappears.",
+            "telescope": "An instrument for making distant objects appear nearer.",
+            "twilight": "The light from the sky at the end of the day.",
+            "universe": "All existing matter and space considered as a whole.",
+            "zenith": "The point in the sky directly above an observer."
+        },
+        "School": {
+            "calendar": "A chart showing the days, weeks, and months.",
+            "ceiling": "The upper interior surface of a room.",
+            "chalk": "A soft white limestone used for writing.",
+            "composition": "A short essay or piece of writing.",
+            "copies": "Things made to be similar to another.",
+            "cupboard": "A piece of furniture with a door and shelves.",
+            "dictation": "The action of saying words to be typed or written down.",
+            "easel": "A wooden frame for holding an artist's canvas.",
+            "grammar": "The whole system and structure of a language.",
+            "history": "The study of past events.",
+            "hymns": "Religious songs of praise to God.",
+            "interval": "A period of time between events or lessons.",
+            "partition": "A structure dividing a space into parts.",
+            "pastels": "Crayons made of powdered pigments.",
+            "pencil": "An instrument for writing or drawing with a lead center.",
+            "picture": "A painting or drawing.",
+            "poetry": "Literary work in which special intensity is given to feelings.",
+            "pupil": "A person who is being taught by another.",
+            "scholar": "A specialist in a particular branch of study.",
+            "teacher": "A person who instructs others."
+        },
+        "Hospital": {
+            "accident": "An unfortunate incident that happens unexpectedly.",
+            "casualty": "A person killed or injured in an accident.",
+            "chloroform": "A liquid used as a general anesthetic.",
+            "disease": "A disorder of structure or function in a human.",
+            "fever": "An abnormally high body temperature.",
+            "infection": "The process of infecting or the state of being infected.",
+            "massage": "The rubbing and kneading of muscles and joints.",
+            "medicine": "The science or practice of diagnosis and treatment.",
+            "ointment": "A smooth oily substance rubbed on the skin.",
+            "operation": "A surgical procedure on a patient.",
+            "paralysis": "The loss of the ability to move a body part.",
+            "physician": "A person qualified to practice medicine.",
+            "plaster": "A bandage with a hard covering for a broken bone.",
+            "poison": "A substance that causes death or injury when swallowed.",
+            "sterilise": "Make something free from bacteria.",
+            "surgeon": "A medical practitioner qualified to perform surgery.",
+            "thermometer": "An instrument for measuring temperature.",
+            "tonic": "A medicinal substance taken to give a feeling of vigor.",
+            "ward": "A separate room in a hospital for a group of patients."
+        },
+        "Animals": {
+            "ape": "A large primate that lacks a tail.",
+            "armadillo": "A mammal with a body covered in bony plates.",
+            "badger": "A nocturnal mammal with a black and white striped face.",
+            "beaver": "A semi-aquatic rodent that builds dams.",
+            "buffalo": "A large wild ox with backward-curving horns.",
+            "camel": "A large mammal with one or two humps on its back.",
+            "deer": "A hoofed grazing animal, the males of which have antlers.",
+            "elephant": "A very large herbivore with a trunk and tusks.",
+            "fox": "A carnivorous mammal with a bushy tail and a pointed muzzle.",
+            "giraffe": "A large mammal with a very long neck and forelegs.",
+            "gorilla": "The largest living primate.",
+            "hippopotamus": "A large thick-skinned semi-aquatic African mammal.",
+            "hyena": "A dog-like African carnivore with a laughing call.",
+            "jaguar": "A large spotted cat found in Central and South America.",
+            "kangaroo": "A large marsupial that moves by hopping.",
+            "leopard": "A large cat that has a yellowish-brown coat with black spots.",
+            "lion": "A large cat with a mane, known as the king of beasts.",
+            "llama": "A domesticated South American pack animal.",
+            "monkey": "A primate that typically has a long tail.",
+            "moose": "A large deer with palmate antlers.",
+            "otter": "A semi-aquatic fish-eating mammal with webbed feet.",
+            "panther": "A black variety of leopard or cougar.",
+            "porcupine": "A rodent with a coat of sharp spines.",
+            "reindeer": "A deer with large antlers, found in Arctic regions.",
+            "seal": "A fish-eating aquatic mammal with flippers.",
+            "skunk": "A mammal that emits a foul-smelling spray.",
+            "squirrel": "A rodent with a bushy tail that lives in trees.",
+            "tiger": "A large cat with a yellow-orange coat and black stripes.",
+            "walrus": "A large marine mammal with long tusks.",
+            "whale": "A very large marine mammal that breathes through a blowhole.",
+            "zebra": "An African wild horse with black and white stripes."
+        },
+        "Birds": {
+            "albatross": "A large sea bird with very long wings.",
+            "canary": "A small yellow songbird.",
+            "crow": "A large black bird with a raucous cry.",
+            "cuckoo": "A bird known for laying its eggs in other birds' nests.",
+            "duck": "A waterbird with a broad blunt bill and webbed feet.",
+            "eagle": "A large bird of prey with a powerful hooked bill.",
+            "falcon": "A bird of prey with long pointed wings.",
+            "flamingo": "A tall wading bird with pink plumage.",
+            "goose": "A large waterbird with a long neck and webbed feet.",
+            "hawk": "A bird of prey with broad rounded wings.",
+            "heron": "A large wading bird with long legs and a long neck.",
+            "kingfisher": "A brightly colored bird that dives for fish.",
+            "owl": "A nocturnal bird of prey with large eyes.",
+            "parrot": "A bird with a curved beak and bright plumage, able to mimic speech.",
+            "penguin": "A flightless sea bird of the Southern Hemisphere.",
+            "pigeon": "A bird with a small head and a heavy body.",
+            "robin": "A small bird with a red breast.",
+            "swan": "A large waterbird with a long flexible neck.",
+            "vulture": "A large bird of prey that feeds on carrion.",
+            "woodpecker": "A bird with a strong bill for drumming on tree trunks."
+        },
+        "Nature": {
+            "apple": "The round fruit of a tree of the rose family.",
+            "ash": "A tree with silver-gray bark and compound leaves.",
+            "beech": "A tree with smooth gray bark and small nuts.",
+            "birch": "A tree with thin peeling bark.",
+            "oak": "A large tree that produces acorns.",
+            "pine": "An evergreen tree with needle-shaped leaves.",
+            "poplar": "A tall, slender tree with triangular leaves.",
+            "yew": "A coniferous tree with poisonous red berries.",
+            "bluebell": "A woodland plant with nodding bell-shaped blue flowers.",
+            "buttercup": "A plant with bright yellow cup-shaped flowers.",
+            "daffodil": "A spring-flowering plant with a yellow trumpet.",
+            "daisy": "A flower with a yellow center and white petals.",
+            "poppy": "A plant with large, usually red, flowers and milky sap.",
+            "rose": "A prickly bush that typically bears fragrant flowers.",
+            "sunflower": "A tall plant with a very large yellow flower head.",
+            "thistle": "A prickly plant with purple flower heads.",
+            "tulip": "A spring-flowering plant with boldly colored cup-shaped flowers.",
+            "ant": "A small insect typically living in colonies.",
+            "bee": "A stinging winged insect that collects nectar.",
+            "beetle": "An insect with hard wing-covers.",
+            "butterfly": "An insect with broad, often brightly colored wings.",
+            "dragonfly": "A fast-flying insect with two pairs of large transparent wings.",
+            "flea": "A small wingless jumping insect that feeds on blood.",
+            "fly": "An insect with a single pair of transparent wings.",
+            "mosquito": "A slender long-legged fly that sucks blood.",
+            "wasp": "A stinging winged insect with a black and yellow body."
+        }
+    };
+
+    let lexiconData = [];
+    for (let cat in dictionary) {
+        for (let word in dictionary[cat]) {
+            let allWords = [];
+            for(let c in dictionary) allWords = allWords.concat(Object.keys(dictionary[c]));
+            let wrong = allWords.filter(w => w !== word).sort(() => Math.random() - 0.5).slice(0, 3);
+            
+            lexiconData.push({
+                c: cat,
+                q: dictionary[cat][word],
+                a: word,
+                o: wrong
+            });
+        }
+    }
+
+    let deck = lexiconData.slice(0, 400).sort(() => Math.random() - 0.5);
+    let current = 0; let score = 0;
+
+    function load() {
+        if (current >= 400) return;
+        const item = deck[current];
+        document.getElementById('cat-display').textContent = item.c;
+        document.getElementById('target').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/400`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 400) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h2 style="color:var(--card-red)">Lexicon Master! 📚</h2>
+                <div class="definition-area">Final Score: ${score}/400</div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Play Again!</button>
+                <br><br>
+                <a href="index.html" style="text-decoration:none; color:var(--text-dark); font-weight:bold;">← Back to Workshop</a>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>
