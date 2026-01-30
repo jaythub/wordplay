@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Talk | The English Workshop</title>
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --card-yellow: #feca57;
+            --text-dark: #2d3436;
+            --paper-soft: #fef5d1;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: white;
+            border: 4px solid var(--text-dark);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            border-bottom: 3px solid var(--bg-color);
+            padding-bottom: 10px;
+        }
+
+        .label {
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: var(--card-red);
+            font-weight: bold;
+        }
+
+        .question-area {
+            background: var(--paper-soft); /* Switched to a softer yellow paper tone */
+            color: var(--text-dark);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.4rem;
+            border: 3px dashed var(--text-dark); /* Playful dashed border */
+            line-height: 1.3;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 3px solid var(--text-dark);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            box-shadow: 4px 4px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background-color: var(--card-blue); /* Highlighting the choice in blue */
+            color: white;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct {
+            background: #2ecc71 !important;
+            color: white;
+            border-style: solid;
+        }
+
+        .btn.wrong {
+            background: var(--card-red) !important;
+            color: white;
+            border-style: solid;
+        }
+
+        #next-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--text-dark);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            margin-top: 25px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+            font-family: inherit;
+            font-size: 1.2rem;
+        }
+
+        #next-btn:hover {
+            background: var(--card-yellow);
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span></span>
+        <span>Round: <span id="progress">1/80</span></span>
+    </div>
+    
+    <span class="label">Definition:</span>
+    <div class="question-area" id="target">...</div>
+    
+    <span class="label">What is it?</span>
+    <div class="options-grid" id="choices"></div>
+    
+    <button id="next-btn">Got it! Next one ➔</button>
+</div>
+
+<script>
+    // Data remains identical to your source file
+    const scienceData = [
+        {q: "Doctor's 'listening' instrument.", a: "Stethoscope", o: ["Microscope", "Microphone", "Thermometer"]},
+        {q: "Instrument that magnifies tiny objects.", a: "Microscope", o: ["Telescope", "Spectacles", "Periscope"]},
+        {q: "Makes distant objects look bigger and nearer.", a: "Telescope", o: ["Microscope", "Binoculars", "Camera"]},
+        {q: "Measures heat and cold.", a: "Thermometer", o: ["Barometer", "Hygrometer", "Seismograph"]},
+        {q: "Specifically measures the heat of the body.", a: "Clinical Thermometer", o: ["Pyrometer", "Stethoscope", "Meter"]},
+        {q: "Indicates the weather by measuring air pressure.", a: "Barometer", o: ["Anemometer", "Thermometer", "Altimeter"]},
+        {q: "Measures gas or electricity used in a building.", a: "Meter", o: ["Dynamo", "Magneto", "Alternator"]},
+        {q: "Helps the human voice to carry across a distance.", a: "Megaphone", o: ["Microphone", "Telephone", "Radio"]},
+        {q: "Picks up sound for sending out again.", a: "Microphone", o: ["Megaphone", "Speaker", "Amplifier"]},
+        {q: "Carries messages by wire.", a: "Telephone", o: ["Radio", "Telegraph", "Cable"]},
+        {q: "Carries sound without the use of wires.", a: "Radio", o: ["Telephone", "Cable", "X-ray"]},
+        {q: "Carries messages by wire across the sea.", a: "Cable", o: ["Radio", "Satellite", "Sonar"]},
+        {q: "Apparatus used to take photographs.", a: "Camera", o: ["X-ray", "Spectacles", "Telescope"]},
+        {q: "Takes photographs through the body.", a: "X-rays", o: ["Spectacles", "Microscope", "Scanner"]},
+        {q: "Glasses used for bettering the eyesight.", a: "Spectacles", o: ["Telescope", "Microscope", "Goggles"]},
+        {q: "Portable instrument used for telling time.", a: "Watch", o: ["Clock", "Chronometer", "Metronome"]},
+        {q: "Tells if a thing is perfectly horizontal.", a: "Spirit-level", o: ["Plumb-line", "Theodolite", "Compass"]},
+        {q: "Tells if a thing is perfectly vertical.", a: "Plumb-line", o: ["Spirit-level", "Theodolite", "Protractor"]},
+        {q: "Gives direction relative to the North Pole.", a: "Compass", o: ["Chart", "Sextant", "Radar"]},
+        {q: "A sailor's map.", a: "Chart", o: ["Atlas", "Blueprint", "Compass"]},
+        {q: "A ship which can travel below the water.", a: "Submarine", o: ["Turbine", "Dynamo", "Schooner"]},
+        {q: "A material that attracts iron.", a: "Magnet", o: ["Dynamo", "Alternator", "Copper"]},
+        {q: "A machine that generates electricity.", a: "Dynamo / Alternator", o: ["Magneto", "Turbine", "Battery"]},
+        {q: "A ship's engine which works by steam.", a: "Turbine", o: ["Dynamo", "Magneto", "Alternator"]},
+        {q: "A stationary machine for measuring time.", a: "Clock", o: ["Watch", "Metronome", "Timer"]},
+        {q: "Measures angles in surveying.", a: "Theodolite", o: ["Sextant", "Protractor", "Compass"]},
+        {q: "Instrument used for drawing circles.", a: "Compasses", o: ["Protractor", "Ruler", "Scribe"]},
+        {q: "Releases over-pressure of steam.", a: "Safety-valve", o: ["Turbine", "Dynamo", "Regulator"]},
+        {q: "Machine used in business for letter-writing/data.", a: "Computer / Word Processor", o: ["Magneto", "Dynamo", "Telegraph"]},
+        {q: "Causes the spark in a motor engine.", a: "Magneto / Distributor", o: ["Dynamo", "Alternator", "Turbine"]},
+        {q: "Sound travels 1.6 km in how many seconds?", a: "5 seconds", o: ["1 second", "10 seconds", "60 seconds"]},
+        {q: "Light travels approximately how many km in 1 second?", a: "300,000 km", o: ["150,000 km", "1,000,000 km", "3,000 km"]},
+        {q: "How many minutes does sunlight take to reach Earth?", a: "8 minutes", o: ["1 minute", "20 minutes", "8 seconds"]},
+        {q: "What speed in km/h is equal to 10 m per second?", a: "36 km/h", o: ["10 km/h", "60 km/h", "100 km/h"]},
+        {q: "1 litre of water weighs exactly how many kg?", a: "1 kg", o: ["0.5 kg", "2 kg", "1.5 kg"]},
+        {q: "1 nautical mile is equal to how many km?", a: "1.85 km", o: ["1.0 km", "1.6 km", "2.1 km"]},
+        {q: "Measures the depth of water using sound waves.", a: "Sonar", o: ["Radar", "Lidar", "Sextant"]},
+        {q: "Measures the speed of a vehicle.", a: "Speedometer", o: ["Odometer", "Altimeter", "Tachometer"]},
+        {q: "Measures the distance traveled by a vehicle.", a: "Odometer", o: ["Speedometer", "Tachometer", "Compass"]},
+        {q: "Measures humidity in the air.", a: "Hygrometer", o: ["Barometer", "Anemometer", "Thermometer"]},
+        {q: "Measures the speed of wind.", a: "Anemometer", o: ["Barometer", "Hygrometer", "Altimeter"]},
+        {q: "Measures the altitude above sea level.", a: "Altimeter", o: ["Barometer", "Speedometer", "Bathometer"]},
+        {q: "Used to see over or around obstacles.", a: "Periscope", o: ["Telescope", "Microscope", "Kaleidoscope"]},
+        {q: "Measures the intensity of light.", a: "Photometer", o: ["Spectrometer", "Voltmeter", "Ammeter"]},
+        {q: "Measures electric current.", a: "Ammeter", o: ["Voltmeter", "Ohmmeter", "Galvanometer"]},
+        {q: "Measures electric potential (voltage).", a: "Voltmeter", o: ["Ammeter", "Wattmeter", "Ohmmeter"]},
+        {q: "Measures electrical resistance.", a: "Ohmmeter", o: ["Ammeter", "Voltmeter", "Galvanometer"]},
+        {q: "Used to detect and measure earthquakes.", a: "Seismograph", o: ["Hygrometer", "Barometer", "Pyrometer"]},
+        {q: "Measures very high temperatures.", a: "Pyrometer", o: ["Thermometer", "Barometer", "Calorimeter"]},
+        {q: "Measures the amount of heat involved in a chemical reaction.", a: "Calorimeter", o: ["Thermometer", "Pyrometer", "Manometer"]},
+        {q: "Measures the pressure of liquids and gases.", a: "Manometer", o: ["Barometer", "Hygrometer", "Altimeter"]},
+        {q: "Splits light into its component colors (spectrum).", a: "Prism", o: ["Lens", "Mirror", "Filter"]},
+        {q: "Measures the purity of milk.", a: "Lactometer", o: ["Hydrometer", "Barometer", "Thermometer"]},
+        {q: "Measures the specific gravity of liquids.", a: "Hydrometer", o: ["Hygrometer", "Lactometer", "Barometer"]},
+        {q: "Used to measure the diameter of small objects with high precision.", a: "Micrometer", o: ["Ruler", "Theodolite", "Caliper"]},
+        {q: "Instrument used by navigators to measure the angle between a celestial object and the horizon.", a: "Sextant", o: ["Compass", "Theodolite", "Barometer"]},
+        {q: "A device that converts chemical energy into electrical energy.", a: "Battery", o: ["Dynamo", "Motor", "Generator"]},
+        {q: "Converts electrical energy into mechanical energy.", a: "Motor", o: ["Generator", "Dynamo", "Battery"]},
+        {q: "Measures the rate of rotation of a shaft (RPM).", a: "Tachometer", o: ["Speedometer", "Odometer", "Anemometer"]},
+        {q: "Used to observe objects under the surface of the sea from a ship.", a: "Bathyscope", o: ["Periscope", "Telescope", "Microscope"]},
+        {q: "What is the freezing point of water in Celsius?", a: "0 degrees", o: ["32 degrees", "10 degrees", "-10 degrees"]},
+        {q: "What is the boiling point of water in Celsius?", a: "100 degrees", o: ["212 degrees", "80 degrees", "150 degrees"]},
+        {q: "What is the approximate speed of sound in air?", a: "343 m/s", o: ["300,000 km/s", "100 km/h", "1,000 m/s"]},
+        {q: "Which force pulls objects toward the center of the Earth?", a: "Gravity", o: ["Magnetism", "Inertia", "Friction"]},
+        {q: "A substance that allows electricity to flow through it easily.", a: "Conductor", o: ["Insulator", "Resistor", "Capacitor"]},
+        {q: "A substance that blocks the flow of electricity.", a: "Insulator", o: ["Conductor", "Semiconductor", "Inductor"]},
+        {q: "The smallest unit of a chemical element.", a: "Atom", o: ["Molecule", "Cell", "Electron"]},
+        {q: "A group of atoms bonded together.", a: "Molecule", o: ["Atom", "Element", "Compound"]},
+        {q: "Used for detecting aircraft or ships via radio waves.", a: "Radar", o: ["Sonar", "Lidar", "Infrared"]},
+        {q: "A glass used to concentrate light rays to a point.", a: "Convex Lens", o: ["Concave Lens", "Prism", "Mirror"]},
+        {q: "The tendency of an object to resist changes in its state of motion.", a: "Inertia", o: ["Momentum", "Gravity", "Velocity"]},
+        {q: "Used to amplify or switch electronic signals.", a: "Transistor", o: ["Resistor", "Capacitor", "Diode"]},
+        {q: "Device that stores electrical charge.", a: "Capacitor", o: ["Resistor", "Transistor", "Inductor"]},
+        {q: "The unit of frequency, equal to one cycle per second.", a: "Hertz", o: ["Watt", "Volt", "Ampere"]},
+        {q: "A device for producing a very narrow and intense beam of light.", a: "Laser", o: ["Flashlight", "LED", "Neon"]},
+        {q: "Standard unit of power.", a: "Watt", o: ["Joule", "Volt", "Ampere"]},
+        {q: "Standard unit of work or energy.", a: "Joule", o: ["Watt", "Newton", "Volt"]},
+        {q: "Standard unit of force.", a: "Newton", o: ["Joule", "Pascal", "Gram"]},
+        {q: "Instrument to measure the growth in plants.", a: "Crescograph", o: ["Hygrometer", "Anemometer", "Thermometer"]},
+        {q: "Device used to measure the power of an engine.", a: "Dynamometer", o: ["Tachometer", "Speedometer", "Voltmeter"]}
+    ];
+
+    let current = 0; let score = 0; 
+    let deck = [...scienceData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('target').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/80`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 80) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h2 style="color:var(--card-red)">Workshop Complete! 🛠️</h2>
+                <div class="question-area">Final Result: ${score}/80</div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Try Again!</button>
+                <br><br>
+                <a href="index.html" style="text-decoration:none; color:var(--text-dark); font-weight:bold;">← Back to the Shelf</a>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>
