@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Word Weaver | The English Workshop</title>
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --weaver-purple: #512da8;
+            --card-yellow: #feca57;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--weaver-purple) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+            transform: rotate(0deg); /* Rotation removed */
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .instruction {
+            display: inline-block;
+            background: var(--card-blue);
+            color: var(--text-dark);
+            padding: 8px 20px;
+            border-radius: 15px;
+            border: 3px solid var(--text-dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-weight: 900;
+            transform: rotate(-2deg); /* This stays tilted as requested */
+        }
+
+        .sentence-display {
+            font-size: 1.6rem;
+            line-height: 1.4;
+            color: #000000;
+            background: var(--card-yellow);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 5px solid var(--text-dark);
+            box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
+            font-weight: 700;
+            transform: rotate(0deg); /* Rotation removed */
+        }
+
+        .target {
+            color: var(--card-red);
+            text-decoration: underline wavy var(--text-dark);
+            font-weight: 900;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .btn {
+            background: white;
+            border: 4px solid var(--text-dark);
+            padding: 18px;
+            border-radius: 15px;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            box-shadow: 6px 6px 0px var(--text-dark);
+            transform: rotate(0deg); /* Rotation removed */
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: scale(1.05) translate(-2px, -2px);
+            background-color: var(--card-blue);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct {
+            background: var(--success) !important;
+            color: white;
+        }
+
+        .btn.wrong {
+            background: var(--error) !important;
+            color: white;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        #next-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--card-red);
+            color: var(--text-dark);
+            border: 4px solid var(--text-dark);
+            border-radius: 15px;
+            margin-top: 30px;
+            cursor: pointer;
+            display: none;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 1.4rem;
+            box-shadow: 6px 6px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        #next-btn:hover {
+            background: var(--card-yellow);
+            transform: translateY(-3px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover { text-decoration: underline; }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+            #game-box { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🧵</span>
+        <span id="progress">0/150</span>
+    </div>
+    
+    <div class="instruction">Find the matching word:</div>
+    
+    <div id="sentence-area" class="sentence-display">...</div>
+    
+    <div class="options-grid" id="choices"></div>
+    
+    <button id="next-btn">Next Thread ➔</button>
+
+    <a href="index.html" class="back-link">← Back to Workshop</a>
+</div>
+
+<script>
+    // Data and Logic from
+    const synonymData = [
+        {s: "The diplomat worked <span class='target'>abroad</span> for years.", a: "overseas", ant: "home"},
+        {s: "His <span class='target'>absence</span> from the meeting was noted.", a: "lack", ant: "presence"},
+        {s: "Will you <span class='target'>accept</span> the responsibility?", a: "receive", ant: "refuse"},
+        {s: "He is a fully grown <span class='target'>adult</span>.", a: "mature", ant: "child"},
+        {s: "The patient is <span class='target'>alive</span> and well.", a: "living", ant: "dead"},
+        {s: "He honored his <span class='target'>ancestor</span> at the shrine.", a: "forefather", ant: "descendant"},
+        {s: "The <span class='target'>ancient</span> scrolls were delicate.", a: "aged", ant: "modern"},
+        {s: "She gave a short <span class='target'>answer</span>.", a: "reply", ant: "question"},
+        {s: "The train will <span class='target'>arrive</span> shortly.", a: "reach", ant: "depart"},
+        {s: "The toddler was fast <span class='target'>asleep</span>.", a: "napping", ant: "awake"},
+        {s: "Please <span class='target'>assemble</span> the parts carefully.", a: "gather", ant: "disperse"},
+        {s: "The garden is at the <span class='target'>back</span>.", a: "rear", ant: "front"},
+        {s: "He took a <span class='target'>backward</span> glance.", a: "rearward", ant: "forward"},
+        {s: "The smell was quite <span class='target'>bad</span>.", a: "awful", ant: "good"},
+        {s: "The <span class='target'>barren</span> desert stretched for miles.", a: "unfruitful", ant: "fertile"},
+        {s: "It was a <span class='target'>beautiful</span> morning.", a: "lovely", ant: "ugly"},
+        {s: "The wire was <span class='target'>bent</span>.", a: "curved", ant: "straight"},
+        {s: "He is a <span class='target'>better</span> student this year.", a: "improved", ant: "worse"},
+        {s: "The <span class='target'>big</span> dog barked loudly.", a: "large", ant: "small"},
+        {s: "The coffee had a <span class='target'>bitter</span> edge.", a: "sharp", ant: "sweet"},
+        {s: "The sky turned <span class='target'>black</span> before the storm.", a: "dark", ant: "white"},
+        {s: "May the gods <span class='target'>bless</span> this house.", a: "hallow", ant: "curse"},
+        {s: "She made a <span class='target'>bold</span> move in the game.", a: "brave", ant: "timid"},
+        {s: "Look at the <span class='target'>bottom</span> of the page.", a: "base", ant: "top"},
+        {s: "The <span class='target'>bow</span> of the boat cut through the ice.", a: "front", ant: "stern"},
+        {s: "The <span class='target'>bright</span> light flickered.", a: "shining", ant: "dull"},
+        {s: "The river is quite <span class='target'>broad</span> here.", a: "wide", ant: "narrow"},
+        {s: "He went to <span class='target'>buy</span> a newspaper.", a: "purchase", ant: "sell"},
+        {s: "The <span class='target'>captive</span> bird sang sadly.", a: "prisoner", ant: "free"},
+        {s: "He was held in <span class='target'>captivity</span>.", a: "confinement", ant: "freedom"},
+        {s: "The tickets were very <span class='target'>cheap</span>.", a: "inexpensive", ant: "expensive"},
+        {s: "The baby had <span class='target'>chubby</span> arms.", a: "plump", ant: "slim"},
+        {s: "Keep your workspace <span class='target'>clean</span>.", a: "tidy", ant: "dirty"},
+        {s: "She is a <span class='target'>clever</span> girl.", a: "smart", ant: "stupid"},
+        {s: "The <span class='target'>coarse</span> fabric irritated his skin.", a: "rough", ant: "smooth"},
+        {s: "The <span class='target'>cold</span> wind bit through his coat.", a: "chilly", ant: "hot"},
+        {s: "Please <span class='target'>come</span> here.", a: "approach", ant: "go"},
+        {s: "He tried to <span class='target'>conceal</span> his identity.", a: "hide", ant: "reveal"},
+        {s: "The judge will <span class='target'>condemn</span> the criminal.", a: "doom", ant: "praise"},
+        {s: "The gas began to <span class='target'>contract</span>.", a: "shrink", ant: "expand"},
+        {s: "Is this the <span class='target'>correct</span> address?", a: "right", ant: "wrong"},
+        {s: "He was called a <span class='target'>coward</span>.", a: "craven", ant: "hero"},
+        {s: "The air felt <span class='target'>damp</span>.", a: "moist", ant: "dry"},
+        {s: "It was <span class='target'>dark</span> outside.", a: "gloomy", ant: "light"},
+        {s: "The water is very <span class='target'>deep</span>.", a: "profound", ant: "shallow"},
+        {s: "They faced a bitter <span class='target'>defeat</span>.", a: "loss", ant: "victory"},
+        {s: "Soldiers must <span class='target'>defend</span> the castle.", a: "protect", ant: "attack"},
+        {s: "He will <span class='target'>deny</span> the rumors.", a: "refute", ant: "admit"},
+        {s: "The train will <span class='target'>depart</span> at five.", a: "leave", ant: "arrive"},
+        {s: "What is the <span class='target'>depth</span> of the lake?", a: "deepness", ant: "height"},
+        {s: "Flowers <span class='target'>die</span> without light.", a: "perish", ant: "live"},
+        {s: "This is a <span class='target'>difficult</span> puzzle.", a: "hard", ant: "easy"},
+        {s: "His shirt was <span class='target'>dirty</span>.", a: "filthy", ant: "clean"},
+        {s: "The crowd began to <span class='target'>disperse</span>.", a: "scatter", ant: "assemble"},
+        {s: "We must <span class='target'>divide</span> the labor.", a: "separate", ant: "multiply"},
+        {s: "He was <span class='target'>drunk</span> at the pub.", a: "intoxicated", ant: "sober"},
+        {s: "The land is very <span class='target'>dry</span>.", a: "arid", ant: "wet"},
+        {s: "The lecture was <span class='target'>dull</span>.", a: "boring", ant: "bright"},
+        {s: "He planted a <span class='target'>dwarf</span> tree.", a: "tiny", ant: "giant"},
+        {s: "I woke up <span class='target'>early</span> today.", a: "soon", ant: "late"},
+        {s: "The math was <span class='target'>easy</span>.", a: "simple", ant: "difficult"},
+        {s: "We watched the tide <span class='target'>ebb</span>.", a: "recede", ant: "flow"},
+        {s: "She is a very <span class='target'>educated</span> woman.", a: "learned", ant: "ignorant"},
+        {s: "The bottle was <span class='target'>empty</span>.", a: "vacant", ant: "full"},
+        {s: "He is my greatest <span class='target'>enemy</span>.", a: "foe", ant: "friend"},
+        {s: "Where is the <span class='target'>entrance</span>?", a: "entry", ant: "exit"},
+        {s: "The <span class='target'>evening</span> sky was red.", a: "dusk", ant: "morning"},
+        {s: "I will <span class='target'>ever</span> remember this.", a: "always", ant: "never"},
+        {s: "He looked <span class='target'>everywhere</span>.", a: "universal", ant: "nowhere"},
+        {s: "Please find the <span class='target'>exit</span>.", a: "way out", ant: "entrance"},
+        {s: "The business will <span class='target'>expand</span>.", a: "grow", ant: "contract"},
+        {s: "The plan was a <span class='target'>failure</span>.", a: "flop", ant: "success"},
+        {s: "His pulse was <span class='target'>faint</span>.", a: "weak", ant: "bold"},
+        {s: "The judge was <span class='target'>fair</span>.", a: "just", ant: "unfair"},
+        {s: "The story was <span class='target'>false</span>.", a: "untrue", ant: "true"},
+        {s: "His name is <span class='target'>famous</span>.", a: "noted", ant: "unknown"},
+        {s: "It was a <span class='target'>fancy</span> restaurant.", a: "ornate", ant: "plain"},
+        {s: "The goal is <span class='target'>far</span> away.", a: "distant", ant: "near"},
+        {s: "The pig was <span class='target'>fat</span>.", a: "obese", ant: "thin"},
+        {s: "He felt <span class='target'>feeble</span>.", a: "weak", ant: "strong"},
+        {s: "The field is <span class='target'>fertile</span>.", a: "fruitful", ant: "barren"},
+        {s: "We have <span class='target'>few</span> options.", a: "some", ant: "many"},
+        {s: "This is the <span class='target'>first</span> step.", a: "initial", ant: "last"},
+        {s: "Water will <span class='target'>flow</span> downhill.", a: "stream", ant: "ebb"},
+        {s: "It was a <span class='target'>foolish</span> mistake.", a: "silly", ant: "wise"},
+        {s: "He traveled to a <span class='target'>foreign</span> land.", a: "alien", ant: "native"},
+        {s: "I <span class='target'>found</span> the keys.", a: "located", ant: "lost"},
+        {s: "He is finally <span class='target'>free</span>.", a: "liberated", ant: "confined"},
+        {s: "They fought for <span class='target'>freedom</span>.", a: "liberty", ant: "captivity"},
+        {s: "The <span class='target'>front</span> of the car was damaged.", a: "fore", ant: "back"},
+        {s: "She had a <span class='target'>frown</span>.", a: "scowl", ant: "smile"},
+        {s: "The tank is <span class='target'>full</span>.", a: "packed", ant: "empty"},
+        {s: "Think about the <span class='target'>future</span>.", a: "tomorrow", ant: "past"},
+        {s: "The <span class='target'>gaunt</span> figure stood in the door.", a: "scrawny", ant: "obese"},
+        {s: "He is a <span class='target'>generous</span> man.", a: "giving", ant: "mean"},
+        {s: "A <span class='target'>giant</span> wave hit the shore.", a: "huge", ant: "dwarf"},
+        {s: "It is <span class='target'>good</span> to see you.", a: "fine", ant: "bad"},
+        {s: "The jury found him <span class='target'>guilty</span>.", a: "culpable", ant: "innocent"},
+        {s: "The rock was <span class='target'>hard</span>.", a: "tough", ant: "soft"},
+        {s: "I <span class='target'>hate</span> traffic.", a: "detest", ant: "love"},
+        {s: "The load was <span class='target'>heavy</span>.", a: "weighty", ant: "light"},
+        {s: "The mountain's <span class='target'>height</span> is incredible.", a: "altitude", ant: "depth"},
+        {s: "He was a <span class='target'>hero</span>.", a: "champion", ant: "villain"},
+        {s: "It was a <span class='target'>heroic</span> act.", a: "valiant", ant: "cowardly"},
+        {s: "They tried to <span class='target'>hide</span> the evidence.", a: "conceal", ant: "reveal"},
+        {s: "The wall is very <span class='target'>high</span>.", a: "lofty", ant: "low"},
+        {s: "The pipe was <span class='target'>hollow</span>.", a: "empty", ant: "solid"},
+        {s: "The man was <span class='target'>honest</span>.", a: "sincere", ant: "dishonest"},
+        {s: "The desert is <span class='target'>hot</span>.", a: "burning", ant: "cold"},
+        {s: "He remained <span class='target'>humble</span>.", a: "modest", ant: "proud"},
+        {s: "She was <span class='target'>ignorant</span> of the truth.", a: "unaware", ant: "knowledgeable"},
+        {s: "The task was <span class='target'>immense</span>.", a: "vast", ant: "minute"},
+        {s: "The quality was <span class='target'>inferior</span>.", a: "lower", ant: "superior"},
+        {s: "The <span class='target'>innocent</span> child smiled.", a: "blameless", ant: "guilty"},
+        {s: "Please <span class='target'>join</span> the two ends.", a: "connect", ant: "separate"},
+        {s: "He is a <span class='target'>junior</span> officer.", a: "younger", ant: "senior"},
+        {s: "It was a <span class='target'>juvenile</span> prank.", a: "youthful", ant: "adult"},
+        {s: "The plane hit the <span class='target'>land</span>.", a: "ground", ant: "sea"},
+        {s: "That was the <span class='target'>last</span> straw.", a: "final", ant: "first"},
+        {s: "He was <span class='target'>late</span> for class.", a: "tardy", ant: "early"},
+        {s: "The meat was <span class='target'>lean</span>.", a: "thin", ant: "fat"},
+        {s: "They celebrated their <span class='target'>liberty</span>.", a: "freedom", ant: "captivity"},
+        {s: "The room was <span class='target'>light</span>.", a: "bright", ant: "dark"},
+        {s: "He wants to <span class='target'>live</span> in peace.", a: "exist", ant: "die"},
+        {s: "It was a <span class='target'>long</span> wait.", a: "lengthy", ant: "short"},
+        {s: "The dog was <span class='target'>lost</span>.", a: "missing", ant: "found"},
+        {s: "The music was <span class='target'>loud</span>.", a: "noisy", ant: "soft"},
+        {s: "I <span class='target'>love</span> the rain.", a: "adore", ant: "hate"},
+        {s: "The ceiling is <span class='target'>low</span>.", a: "short", ant: "high"},
+        {s: "He was <span class='target'>mad</span> with grief.", a: "crazy", ant: "sane"},
+        {s: "Set the dial to <span class='target'>maximum</span>.", a: "most", ant: "minimum"},
+        {s: "He was a <span class='target'>merry</span> fellow.", a: "jolly", ant: "sad"},
+        {s: "Noise was kept to a <span class='target'>minimum</span>.", a: "least", ant: "maximum"},
+        {s: "They are a <span class='target'>minority</span> group.", a: "fewest", ant: "majority"},
+        {s: "The <span class='target'>miser</span> wouldn't spend a cent.", a: "hoarder", ant: "spendthrift"},
+        {s: "The weather was <span class='target'>miserable</span>.", a: "unhappy", ant: "happy"},
+        {s: "It is a <span class='target'>modern</span> building.", a: "current", ant: "ancient"},
+        {s: "He works in the <span class='target'>morning</span>.", a: "dawn", ant: "evening"},
+        {s: "The <span class='target'>motorist</span> swerved.", a: "driver", ant: "pedestrian"},
+        {s: "The <span class='target'>moving</span> bus slowed down.", a: "active", ant: "stationary"},
+        {s: "The hallway was <span class='target'>narrow</span>.", a: "thin", ant: "wide"},
+        {s: "He is a <span class='target'>native</span> speaker.", a: "local", ant: "foreigner"},
+        {s: "The station is <span class='target'>near</span>.", a: "close", ant: "far"},
+        {s: "I <span class='target'>never</span> eat meat.", a: "at no time", ant: "always"},
+        {s: "This is a <span class='target'>new</span> idea.", a: "fresh", ant: "old"},
+        {s: "The cat hunts at <span class='target'>night</span>.", a: "darkness", ant: "day"},
+        {s: "There was a strange <span class='target'>noise</span>.", a: "sound", ant: "silence"},
+        {s: "The <span class='target'>north</span> wind is cold.", a: "arctic", ant: "south"},
+        {s: "I am going <span class='target'>nowhere</span>.", a: "not anywhere", ant: "everywhere"},
+        {s: "The stars are <span class='target'>numerous</span>.", a: "many", ant: "few"},
+        {s: "I <span class='target'>often</span> walk to work.", a: "frequently", ant: "seldom"},
+        {s: "He told an <span class='target'>old</span> story.", a: "ancient", ant: "new"},
+        {s: "The glass is <span class='target'>opaque</span>.", a: "cloudy", ant: "transparent"}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...synonymData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--weaver-purple)">WEAVER MASTER! 🏆</h1>
+                <div class="sentence-display">Thread Complete! Score: ${score} / ${deck.length}</div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Play Again!</button>
+                <a href="index.html" class="back-link">← Back to Workshop</a>
+            `;
+            return; 
+        }
+        const item = deck[current];
+        document.getElementById('sentence-area').innerHTML = item.s;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, item.ant];
+        while(choices.length < 4) {
+            let r = synonymData[Math.floor(Math.random() * synonymData.length)].a;
+            if(!choices.includes(r)) choices.push(r);
+        }
+        
+        choices.sort(() => Math.random() - 0.5).forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+    init();
+</script>
+</body>
+</html>

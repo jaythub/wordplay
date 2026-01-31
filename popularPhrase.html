@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Popular Phrase Match | The English Workshop</title>
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --phrase-blue: #0277bd;
+            --card-yellow: #feca57;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--phrase-blue) 0.5px, transparent 0);
+            background-size: 35px 35px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            width: 100%;
+            max-width: 650px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .label { 
+            display: inline-block;
+            background: var(--card-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 10px;
+            border: 3px solid var(--text-dark);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 900;
+            transform: rotate(-2deg); /* Playful label tilt */
+        }
+
+        .explanation-display { 
+            font-size: 1.5rem;
+            line-height: 1.4;
+            color: white;
+            background: var(--phrase-blue);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 5px solid var(--text-dark);
+            box-shadow: inset 5px 5px 0px rgba(0,0,0,0.2);
+            font-weight: 700;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-list { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+        }
+        
+        .btn { 
+            background: white;
+            border: 4px solid var(--text-dark);
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            box-shadow: 5px 5px 0px var(--text-dark);
+            text-align: left;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background-color: var(--card-yellow);
+            transform: scale(1.02) translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct {
+            background: var(--success) !important;
+            color: white;
+        }
+
+        .btn.wrong {
+            background: var(--error) !important;
+            color: white;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        #next-btn { 
+            width: 100%;
+            padding: 18px;
+            background: var(--card-yellow);
+            color: var(--text-dark);
+            border: 4px solid var(--text-dark);
+            border-radius: 15px;
+            margin-top: 25px;
+            cursor: pointer;
+            display: none;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 1.3rem;
+            box-shadow: 5px 5px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        #next-btn:hover {
+            background: var(--card-blue);
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover { text-decoration: underline; }
+
+        @media (max-width: 500px) {
+            #game-box { padding: 20px; }
+            .explanation-display { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🌟</span>
+        <span id="progress">1/80</span>
+    </div>
+
+    <span class="label">The Meaning:</span>
+    <div class="explanation-display" id="explanation-target">...</div>
+
+    <span class="label" style="background:var(--card-blue); transform: rotate(2deg);">The Phrase:</span>
+    <div class="options-list" id="choices"></div>
+
+    <button id="next-btn">Next Phrase ➔</button>
+
+    <a href="index.html" class="back-link">← Back to English Workshop</a>
+</div>
+
+<script>
+    // Data and Logic preserved from original popularPhrase.html
+    const phraseData = [
+        {e: "\"Rough, boisterous, or noisy play.\"", c: "Horse play", o: ["Child's play", "Fair play", "Play second fiddle"]},
+        {e: "\"A situation that is very easy to accomplish.\"", c: "A piece of cake", o: ["A hard nut to crack", "A bitter pill", "A cup of tea"]},
+        {e: "\"To be extremely happy or excited.\"", c: "On cloud nine", o: ["Under the weather", "Down in the mouth", "In the red"]},
+        {e: "\"To tell a secret.\"", c: "Let the cat out of the bag", o: ["Bark up the wrong tree", "Bite the bullet", "Kill two birds with one stone"]},
+        {e: "\"To feel slightly ill.\"", c: "Under the weather", o: ["Over the moon", "On the mend", "In the pink"]},
+        {e: "\"Something that occurs very rarely.\"", c: "Once in a blue moon", o: ["Time and again", "Every so often", "Behind the times"]},
+        {e: "\"To avoid getting to the point.\"", c: "Beat around the bush", o: ["Hit the nail on the head", "Break the ice", "Call it a day"]},
+        {e: "\"To reveal a secret by mistake.\"", c: "Spill the beans", o: ["Eat your words", "Hold your tongue", "Bite your lip"]},
+        {e: "\"To accept something difficult or unpleasant.\"", c: "Bite the bullet", o: ["Face the music", "Kick the bucket", "Throw in the towel"]},
+        {e: "\"A person who is lazy and watches a lot of television.\"", c: "Couch potato", o: ["Early bird", "Night owl", "Busy bee"]},
+        {e: "\"To hear a rumor about something.\"", c: "Hear it on the grapevine", o: ["Read between the lines", "See eye to eye", "Keep an ear to the ground"]},
+        {e: "\"To stop working on something.\"", c: "Call it a day", o: ["Burn the midnight oil", "Hit the hay", "Get the ball rolling"]},
+        {e: "\"To be in the same unpleasant situation as someone else.\"", c: "In the same boat", o: ["On the same page", "In the dark", "Up a creek"]},
+        {e: "\"Exactly the right answer or solution.\"", c: "Hit the nail on the head", o: ["Miss the mark", "Shoot from the hip", "Draw a blank"]},
+        {e: "\"To start a conversation or a social interaction.\"", c: "Break the ice", o: ["Fan the flames", "Burn bridges", "Cool your heels"]},
+        {e: "\"To tease or joke with someone.\"", c: "Pull someone's leg", o: ["Twist someone's arm", "Give someone the cold shoulder", "Prithee"]},
+        {e: "\"To be very expensive.\"", c: "Cost an arm and a leg", o: ["A dime a dozen", "Break even", "Pay peanuts"]},
+        {e: "\"To do something at the last possible minute.\"", c: "At the eleventh hour", o: ["Behind the scenes", "In the long run", "Ahead of the curve"]},
+        {e: "\"To be undecided about something.\"", c: "On the fence", o: ["In the bag", "On the ball", "Under the thumb"]},
+        {e: "\"To work late into the night.\"", c: "Burn the midnight oil", o: ["Rise and shine", "Take five", "Watch the clock"]},
+        {e: "\"To fail to take an opportunity.\"", c: "Miss the boat", o: ["Rock the boat", "Sail through", "Clear the decks"]},
+        {e: "\"To experience your own negative behavior back at you.\"", c: "Taste of your own medicine", o: ["Blessing in disguise", "Dose of reality", "Silver lining"]},
+        {e: "\"To ignore a situation that is wrong.\"", c: "Turn a blind eye", o: ["See the light", "Keep a look out", "Look sharp"]},
+        {e: "\"To share the same opinion or perspective.\"", c: "See eye to eye", o: ["Look the other way", "Turn your back", "Close your eyes"]},
+        {e: "\"To give up or admit defeat.\"", c: "Throw in the towel", o: ["Hang in there", "Go the distance", "Put your foot down"]},
+        {e: "\"A hidden problem in an otherwise good situation.\"", c: "Fly in the ointment", o: ["Skeleton in the closet", "Bird in the hand", "Cat's pajamas"]},
+        {e: "\"To make a big deal out of a small problem.\"", c: "Mountain out of a molehill", o: ["Storm in a teacup", "Tempest in a teapot", "Drop in the ocean"]},
+        {e: "\"To start something over from the beginning.\"", c: "Back to the drawing board", o: ["Back to square one", "The beginning of the end", "Full circle"]},
+        {e: "\"To go to sleep.\"", c: "Hit the hay", o: ["Hit the road", "Hit the ceiling", "Hit the spot"]},
+        {e: "\"Something that is very common and cheap.\"", c: "A dime a dozen", o: ["One in a million", "Worth its weight in gold", "The cream of the crop"]},
+        {e: "\"To be extremely nervous.\"", c: "Butterflies in the stomach", o: ["Heart of gold", "Cold feet", "Head in the clouds"]},
+        {e: "\"To have no idea about something.\"", c: "Your guess is as good as mine", o: ["I have a hunch", "Mark my words", "Read my lips"]},
+        {e: "\"A major problem that everyone is ignoring.\"", c: "Elephant in the room", o: ["Wolf at the door", "Dog in the manger", "Bull in a china shop"]},
+        {e: "\"To wait and be patient.\"", c: "Hold your horses", o: ["Pull out all the stops", "Jump the gun", "Full steam ahead"]},
+        {e: "\"To be alert and competent.\"", c: "On the ball", o: ["Off the wall", "In the dark", "Under the weather"]},
+        {e: "\"To do something very easily.\"", c: "Sail through", o: ["Walk on eggshells", "Run on fumes", "Swim against the tide"]},
+        {e: "\"To take a risk to help someone.\"", c: "Stick your neck out", o: ["Keep your head down", "Wash your hands of", "Watch your back"]},
+        {e: "\"To tell a short version of a long story.\"", c: "In a nutshell", o: ["Long story short", "Word for word", "By the book"]},
+        {e: "\"To be exactly what is needed.\"", c: "Hit the spot", o: ["Miss the mark", "Wide of the mark", "Close but no cigar"]},
+        {e: "\"To perform very well or with great energy.\"", c: "On fire", o: ["Under fire", "In hot water", "Out of the frying pan"]},
+        {e: "\"To take credit for someone else's achievement.\"", c: "Steal someone's thunder", o: ["Rain on a parade", "Break a leg", "Bite the dust"]},
+        {e: "\"To get to the point without wasting time.\"", c: "Cut to the chase", o: ["Beat around the bush", "Take the long way", "Go in circles"]},
+        {e: "\"To be very successful in a short time.\"", c: "Hit the ground running", o: ["Drag your feet", "Spin your wheels", "Stall for time"]},
+        {e: "\"To face the consequences of your actions.\"", c: "Face the music", o: ["Dance to the tune", "Play the field", "Blow your own trumpet"]},
+        {e: "\"To be very surprised or shocked.\"", c: "Taken aback", o: ["In the know", "Beside yourself", "Hard to swallow"]},
+        {e: "\"To do something at the same time as something else.\"", c: "Kill two birds with one stone", o: ["Bird's eye view", "Early bird", "Fine feathers"]},
+        {e: "\"To make someone feel more comfortable.\"", c: "Put someone at ease", o: ["Get on someone's nerves", "Push someone's buttons", "Drive someone crazy"]},
+        {e: "\"To do a job poorly to save time or money.\"", c: "Cut corners", o: ["Go the extra mile", "By the book", "Cross the t's"]},
+        {e: "\"To reach a point of no return.\"", c: "Cross the Rubicon", o: ["Burn bridges", "Bridge the gap", "Water under the bridge"]},
+        {e: "\"To be very knowledgeable about something.\"", c: "Know it inside out", o: ["Not have a clue", "In over your head", "Out of your depth"]},
+        {e: "\"To be in a very difficult situation.\"", c: "Between a rock and a hard place", o: ["On easy street", "In the pink", "On top of the world"]},
+        {e: "\"To make a situation more intense.\"", c: "Add fuel to the fire", o: ["Pour oil on troubled waters", "Blow off steam", "Cool down"]},
+        {e: "\"To keep something secret.\"", c: "Keep it under wraps", o: ["Spread the word", "Shout from the rooftops", "Blow the whistle"]},
+        {e: "\"To think creatively or unconventionally.\"", c: "Think outside the box", o: ["Follow the crowd", "Toe the line", "Play it safe"]},
+        {e: "\"To do something perfectly the first time.\"", c: "First time lucky", o: ["Third time's a charm", "Beginner's luck", "Hit the jackpot"]},
+        {e: "\"To be very similar to a parent.\"", c: "Chip off the old block", o: ["Black sheep", "Lame duck", "Dead ringer"]},
+        {e: "\"To take the blame for someone else.\"", c: "Take the fall", o: ["Pass the buck", "Shift the blame", "Wash your hands of it"]},
+        {e: "\"To be suspicious of something.\"", c: "Smell a rat", o: ["See ghosts", "Hear things", "Feel uneasy"]},
+        {e: "\"To do something with great determination.\"", c: "With a vengeance", o: ["Half-heartedly", "By the way", "In passing"]},
+        {e: "\"To be very close to happening.\"", c: "Just around the corner", o: ["Miles away", "In the distant future", "Once upon a time"]},
+        {e: "\"To be out of practice or lose skill.\"", c: "Lose your touch", o: ["Keep your hand in", "Get the hang of it", "Master the craft"]},
+        {e: "\"To summarize something briefly.\"", c: "To make a long story short", o: ["To go on and on", "To talk your ear off", "To spill the beans"]},
+        {e: "\"To work together perfectly.\"", c: "Hand in glove", o: ["At loggerheads", "Pole apart", "Worlds away"]},
+        {e: "\"To be very clear and easy to understand.\"", c: "Plain as day", o: ["Clear as mud", "In the dark", "Greek to me"]},
+        {e: "\"To do something immediately without delay.\"", c: "At the drop of a hat", o: ["In due course", "Slowly but surely", "Better late than never"]},
+        {e: "\"To be very poor.\"", c: "Down and out", o: ["Sitting pretty", "Rolling in it", "Well-to-do"]},
+        {e: "\"To start over from the very beginning.\"", c: "Back to square one", o: ["Ahead of the game", "In the lead", "Top of the class"]},
+        {e: "\"To have complete control over a situation.\"", c: "In the driver's seat", o: ["A back-seat driver", "On the sidelines", "In the dark"]},
+        {e: "\"To be very happy about something.\"", c: "Over the moon", o: ["Down in the dumps", "Sick and tired", "Out of sorts"]},
+        {e: "\"To do something for the first time.\"", c: "Break new ground", o: ["Follow in footsteps", "Stay in your lane", "Keep the status quo"]},
+        {e: "\"To be very common.\"", c: "A dime a dozen", o: ["Rare as hen's teeth", "Unique", "One of a kind"]},
+        {e: "\"To be extremely clumsy.\"", c: "All thumbs", o: ["Light-fingered", "Green-fingered", "A steady hand"]},
+        {e: "\"To be very angry.\"", c: "See red", o: ["Feel blue", "Green with envy", "In the pink"]},
+        {e: "\"To be very easy to see.\"", c: "Stand out like a sore thumb", o: ["Blend into the background", "Fly under the radar", "Keep a low profile"]},
+        {e: "\"To be very busy.\"", c: "Snowed under", o: ["High and dry", "Left in the lurch", "On a roll"]},
+        {e: "\"To be very brave.\"", c: "Heart of a lion", o: ["Chicken-hearted", "Lily-livered", "Cold-blooded"]},
+        {e: "\"To be very quiet.\"", c: "Quiet as a mouse", o: ["Loud as thunder", "Sound like a broken record", "Make a scene"]},
+        {e: "\"To be very honest.\"", c: "Above board", o: ["Under the table", "Behind someone's back", "Shady"]},
+        {e: "\"To be very careful.\"", c: "Walk on eggshells", o: ["Barge in", "Throw caution to the wind", "Go for broke"]},
+        {e: "\"To be very successful.\"", c: "On a roll", o: ["In a rut", "Down on your luck", "Out of favor"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [...phraseData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('explanation-target').textContent = item.e;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.c, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.c) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.c) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h2 style="color:var(--phrase-blue)">Phrase Master! 🏆</h2>
+                <p>80 Common Expressions Decoded.<br>Final Score: ${score}/80</p>
+                <button onclick="location.reload()" class="btn" style="width:100%; text-align:center;">Restart Game</button>
+                <a href="index.html" class="back-link">← Back to Workshop</a>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

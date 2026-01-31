@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Word Builder | The English Workshop</title>
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --build-blue: #0277bd;
+            --card-yellow: #feca57;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--build-blue) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .task-header {
+            display: inline-block;
+            background: var(--card-red);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 15px;
+            border: 3px solid var(--text-dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-weight: 900;
+            transform: rotate(-2deg);
+        }
+
+        .sentence-display {
+            font-size: 1.5rem;
+            line-height: 1.5;
+            color: #000000;
+            background: #e1f5fe; /* Blueprint blue */
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 4px dashed var(--build-blue);
+            box-shadow: inset 4px 4px 0px rgba(0,0,0,0.05);
+            font-weight: 700;
+        }
+
+        .root-hint {
+            color: var(--card-red);
+            background: white;
+            padding: 2px 10px;
+            border-radius: 8px;
+            border: 2px solid var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 4px solid var(--text-dark);
+            padding: 18px;
+            border-radius: 15px;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            box-shadow: 6px 6px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: scale(1.03) translate(-2px, -2px);
+            background-color: var(--card-yellow);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct {
+            background: var(--success) !important;
+            color: white;
+        }
+
+        .btn.wrong {
+            background: var(--error) !important;
+            color: white;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        #next-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--card-blue);
+            color: var(--text-dark);
+            border: 4px solid var(--text-dark);
+            border-radius: 15px;
+            margin-top: 30px;
+            cursor: pointer;
+            display: none;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 1.4rem;
+            box-shadow: 6px 6px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        #next-btn:hover {
+            background: var(--card-yellow);
+            transform: translateY(-3px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+            #game-box { padding: 20px; }
+            .sentence-display { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🔨</span>
+        <span id="progress">1/125</span>
+    </div>
+    
+    <div id="task" class="task-header">TASK</div>
+    
+    <div class="sentence-display" id="sentence">...</div>
+    
+    <div class="options-grid" id="choices"></div>
+    
+    <button id="next-btn">Build Next Word ➔</button>
+
+    <a href="index.html" class="back-link">← Back to Workshop</a>
+</div>
+
+<script>
+    // Data remains identical to the original wordBuilding.html
+    const buildData = [
+        {t: "Convert to NOUN", s: "He has the ____ to play better.", r: "able", a: "ability", d: ["ably", "abled", "ableness"]},
+        {t: "Convert to NOUN", s: "His ____ from class was noticed.", r: "absent", a: "absence", d: ["absently", "absenting", "absented"]},
+        {t: "Convert to NOUN", s: "There is an ____ of fruit this year.", r: "abundant", a: "abundance", d: ["abundantly", "abound", "abundancy"]},
+        {t: "Convert to NOUN", s: "Check the ____ of your data.", r: "accurate", a: "accuracy", d: ["accurately", "accurateness", "accretion"]},
+        {t: "Convert to NOUN", s: "He is a close ____ of mine.", r: "acquaint", a: "acquaintance", d: ["acquainted", "acquainting", "acquaints"]},
+        {t: "Convert to NOUN", s: "His heroic ____ saved the day.", r: "act", a: "action", d: ["active", "actor", "activity"]},
+        {t: "Convert to NOUN", s: "I have great ____ for your work.", r: "admire", a: "admiration", d: ["admiringly", "admirable", "admirer"]},
+        {t: "Convert to NOUN", s: "The family celebrated the ____.", r: "adopt", a: "adoption", d: ["adopted", "adoptive", "adopting"]},
+        {t: "Convert to NOUN", s: "I saw an ____ for a new car.", r: "advertise", a: "advertisement", d: ["advertising", "advertiser", "advertised"]},
+        {t: "Convert to NOUN", s: "Do you have ____ to enter?", r: "allow", a: "allowance", d: ["allowed", "allowing", "allowable"]},
+        {t: "Convert to NOUN", s: "The circus provided much ____.", r: "amuse", a: "amusement", d: ["amusing", "amused", "amuser"]},
+        {t: "Convert to NOUN", s: "He could not hide his ____.", r: "angry", a: "anger", d: ["angrily", "angriness", "angered"]},
+        {t: "Convert to NOUN", s: "Waiting for news caused ____.", r: "anxious", a: "anxiety", d: ["anxiously", "anxiousness", "anxiolytic"]},
+        {t: "Convert to NOUN", s: "The ____ of the ghost scared them.", r: "appear", a: "appearance", d: ["appearing", "appeared", "apparent"]},
+        {t: "Convert to NOUN", s: "The crowd erupted in ____.", r: "applaud", a: "applause", d: ["applauded", "applauding", "applaudable"]},
+        {t: "Convert to NOUN", s: "Send in your job ____ today.", r: "apply", a: "application", d: ["applied", "applicant", "applying"]},
+        {t: "Convert to NOUN", s: "We are waiting for your ____.", r: "approve", a: "approval", d: ["approved", "approving", "approvable"]},
+        {t: "Convert to NOUN", s: "The train's ____ was delayed.", r: "arrive", a: "arrival", d: ["arriving", "arrived", "arrivals"]},
+        {t: "Convert to NOUN", s: "The mountain ____ was difficult.", r: "ascend", a: "ascent", d: ["ascending", "ascension", "ascended"]},
+        {t: "Convert to NOUN", s: "The nurse gave me ____.", r: "assist", a: "assistance", d: ["assistant", "assisted", "assisting"]},
+        {t: "Convert to NOUN", s: "Your ____ at the meeting is vital.", r: "attend", a: "attendance", d: ["attendant", "attended", "attending"]},
+        {t: "Convert to NOUN", s: "The park is a great ____.", r: "attract", a: "attraction", d: ["attractive", "attracted", "attractor"]},
+        {t: "Convert to VERB", s: "Will you ____ these groceries?", r: "bag", a: "bag", d: ["baggy", "baggage", "bagged"]},
+        {t: "Convert to VERB", s: "She wanted to ____ the room.", r: "beautiful", a: "beautify", d: ["beautifully", "beautician", "beauty"]},
+        {t: "Convert to NOUN", s: "The ____ asked for some spare change.", r: "beg", a: "beggar", d: ["begged", "begging", "beggary"]},
+        {t: "Convert to NOUN", s: "This is only the ____.", r: "begin", a: "beginning", d: ["began", "beginner", "begun"]},
+        {t: "Convert to NOUN", s: "The child's ____ was excellent.", r: "behave", a: "behavior", d: ["behaved", "behaving", "behavioral"]},
+        {t: "Convert to NOUN", s: "It is my firm ____ that he is right.", r: "believe", a: "belief", d: ["believable", "believer", "believing"]},
+        {t: "Convert to NOUN", s: "The ____ of the coffee was strong.", r: "bitter", a: "bitterness", d: ["bitterly", "bittered", "bittering"]},
+        {t: "Convert to ADJECTIVE", s: "He has a very ____ face.", r: "boy", a: "boyish", d: ["boyhood", "boyfriend", "boyly"]},
+        {t: "Convert to NOUN", s: "The soldier showed great ____.", r: "brave", a: "bravery", d: ["bravely", "braveness", "braved"]},
+        {t: "Convert to NOUN", s: "Take a deep ____.", r: "breathe", a: "breath", d: ["breathing", "breathless", "breather"]},
+        {t: "Convert to NOUN", s: "The ____ of the sun was blinding.", r: "bright", a: "brightness", d: ["brightly", "brighten", "brightened"]},
+        {t: "Convert to VERB", s: "Can you ____ this check for me?", r: "cash", a: "cash", d: ["cashier", "cashing", "cashed"]},
+        {t: "Convert to NOUN", s: "I had a very happy ____.", r: "child", a: "childhood", d: ["childish", "childly", "children"]},
+        {t: "Convert to NOUN", s: "You have a difficult ____ to make.", r: "choose", a: "choice", d: ["chosen", "choosing", "choosy"]},
+        {t: "Convert to NOUN", s: "Modern ____ has come a long way.", r: "civilise", a: "civilization", d: ["civilised", "civilian", "civility"]},
+        {t: "Convert to NOUN", s: "The ____ of the room was impressive.", r: "clean", a: "cleanliness", d: ["cleanly", "cleansed", "cleaning"]},
+        {t: "Convert to NOUN", s: "He has a large stamp ____.", r: "collect", a: "collection", d: ["collector", "collectable", "collecting"]},
+        {t: "Convert to NOUN", s: "The ____ of the ceremony is at 9am.", r: "commence", a: "commencement", d: ["commenced", "commencing", "commencer"]},
+        {t: "Convert to NOUN", s: "There is no ____ between them.", r: "compare", a: "comparison", d: ["comparative", "comparable", "comparing"]},
+        {t: "Convert to NOUN", s: "The ____ of the story was sad.", r: "conclude", a: "conclusion", d: ["conclusive", "concluded", "concluding"]},
+        {t: "Convert to NOUN", s: "She has the ____ to succeed.", r: "confident", a: "confidence", d: ["confidently", "confiding", "confider"]},
+        {t: "Convert to NOUN", s: "The traffic caused much ____.", r: "confuse", a: "confusion", d: ["confusing", "confusedly", "confusable"]},
+        {t: "Convert to NOUN", s: "He lived a life of ____.", r: "content", a: "contentment", d: ["contented", "containing", "contentious"]},
+        {t: "Convert to NOUN", s: "The artist's ____ was beautiful.", r: "create", a: "creation", d: ["creative", "creativity", "creator"]},
+        {t: "Convert to ADJECTIVE", s: "His story was not very ____.", r: "credit", a: "credible", d: ["creditor", "credited", "crediting"]},
+        {t: "Convert to NOUN", s: "The ____ of the tyrant was known.", r: "cruel", a: "cruelty", d: ["cruelly", "cruelness", "crueler"]},
+        {t: "Convert to NOUN", s: "Children have a lot of ____.", r: "curious", a: "curiosity", d: ["curiously", "curiousness", "curio"]},
+        {t: "Convert to NOUN", s: "The ____ of the night was scary.", r: "dark", a: "darkness", d: ["darkly", "darken", "darkened"]},
+        {t: "Convert to NOUN", s: "The magician's ____ was clever.", r: "deceive", a: "deception", d: ["deceptive", "deceived", "deceiver"]},
+        {t: "Convert to NOUN", s: "He acted with great ____.", r: "decent", a: "decency", d: ["decently", "decentness", "decented"]},
+        {t: "Convert to NOUN", s: "Have you made a ____ yet?", r: "decide", a: "decision", d: ["decisive", "decided", "decider"]},
+        {t: "Convert to NOUN", s: "The ____ of the lake is unknown.", r: "deep", a: "depth", d: ["deeply", "deepen", "deepened"]},
+        {t: "Convert to NOUN", s: "He stood in ____ of the castle.", r: "defend", a: "defense", d: ["defensive", "defender", "defended"]},
+        {t: "Convert to NOUN", s: "The plane's ____ was on time.", r: "depart", a: "departure", d: ["departed", "departing", "department"]},
+        {t: "Convert to NOUN", s: "Her ____ of the man was vivid.", r: "describe", a: "description", d: ["descriptive", "described", "describer"]},
+        {t: "Convert to NOUN", s: "The storm caused massive ____.", r: "destroy", a: "destruction", d: ["destructive", "destroyed", "destroyer"]},
+        {t: "Convert to NOUN", s: "The ____ of the city was fast.", r: "develop", a: "development", d: ["developed", "developing", "developer"]},
+        {t: "Convert to NOUN", s: "The ____ of gold changed everything.", r: "discover", a: "discovery", d: ["discovered", "discovering", "discoverer"]},
+        {t: "Convert to NOUN", s: "The ____ of the cake was uneven.", r: "divide", a: "division", d: ["divisible", "divided", "divider"]},
+        {t: "Convert to NOUN", s: "The ____ of the crime remains unknown.", r: "do", a: "doer", d: ["doing", "done", "did"]},
+        {t: "Convert to NOUN", s: "I need some ____ to finish this.", r: "encourage", a: "encouragement", d: ["encouraging", "encouraged", "encourager"]},
+        {t: "Convert to NOUN", s: "The party was a great ____.", r: "enjoy", a: "enjoyment", d: ["enjoyable", "enjoyed", "enjoying"]},
+        {t: "Convert to NOUN", s: "Where is the ____ to the building?", r: "enter", a: "entrance", d: ["entered", "entering", "entry"]},
+        {t: "Convert to NOUN", s: "They fought for ____.", r: "equal", a: "equality", d: ["equally", "equalize", "equaled"]},
+        {t: "Convert to ADVERB", s: "He was ____ tall for his age.", r: "exceed", a: "exceedingly", d: ["excess", "excessive", "exceeding"]},
+        {t: "Convert to NOUN", s: "Heat can cause ____.", r: "exhaust", a: "exhaustion", d: ["exhaustive", "exhausted", "exhausting"]},
+        {t: "Convert to NOUN", s: "The ____ for the party was high.", r: "expect", a: "expectation", d: ["expected", "expecting", "expectancy"]},
+        {t: "Convert to NOUN", s: "Give me an ____ for your lateness.", r: "explain", a: "explanation", d: ["explanatory", "explained", "explaining"]},
+        {t: "Convert to NOUN", s: "I admire your ____.", r: "faithful", a: "faithfulness", d: ["faithfully", "faith", "faithed"]},
+        {t: "Convert to NOUN", s: "The ____ of his claim was proven.", r: "false", a: "falsity", d: ["falsely", "falseness", "falsified"]},
+        {s: "He achieved great ____ in music.", r: "famous", a: "fame", d: ["famously", "famed", "fameless"], t: "Convert to NOUN"},
+        {t: "Convert to NOUN", s: "Chocolate is my ____.", r: "favourite", a: "favourite", d: ["favor", "favoritism", "favorably"]},
+        {t: "Convert to NOUN", s: "We need more ____ for the cattle.", r: "feed", a: "feed", d: ["fed", "feeding", "feeder"]},
+        {t: "Convert to NOUN", s: "The ____ of the lion was scary.", r: "fierce", a: "fierceness", d: ["fiercely", "fiercer", "fierced"]},
+        {t: "Convert to NOUN", s: "The ____ was cancelled due to fog.", r: "fly", a: "flight", d: ["flying", "flown", "flyer"]},
+        {t: "Convert to NOUN", s: "The ____ of the flowers was lovely.", r: "fragrant", a: "fragrance", d: ["fragrantly", "fragranced", "fragrantness"]},
+        {t: "Convert to NOUN", s: "They fought for their ____.", r: "free", a: "freedom", d: ["freely", "freed", "freeness"]},
+        {t: "Convert to NOUN", s: "I value our ____.", r: "friend", a: "friendship", d: ["friendly", "friendless", "befriend"]},
+        {t: "Convert to NOUN", s: "The ____ of the palace was amazing.", r: "grand", a: "grandeur", d: ["grandly", "grandness", "grandee"]},
+        {t: "Convert to NOUN", s: "He is a man of great ____.", r: "great", a: "greatness", d: ["greatly", "greater", "greatened"]},
+        {t: "Convert to NOUN", s: "The ____ of the plant was rapid.", r: "grow", a: "growth", d: ["growing", "grown", "grower"]},
+        {t: "Convert to NOUN", s: "Money doesn't buy ____.", r: "happy", a: "happiness", d: ["happily", "happen", "happier"]},
+        {t: "Convert to NOUN", s: "There was no ____ in his heart.", r: "hate", a: "hatred", d: ["hateful", "hated", "hating"]},
+        {t: "Convert to NOUN", s: "The ____ of the soldier was praised.", r: "hero", a: "heroism", d: ["heroic", "heroine", "heron"]},
+        {t: "Convert to NOUN", s: "The plane flew at a great ____.", r: "high", a: "height", d: ["highly", "heighten", "higher"]},
+        {t: "Convert to NOUN", s: "The ____ of the temple was respected.", r: "holy", a: "holiness", d: ["holily", "holiday", "hollow"]},
+        {t: "Convert to NOUN", s: "Use your ____ to write a story.", r: "imagine", a: "imagination", d: ["imaginary", "imaginative", "imagined"]},
+        {t: "Convert to NOUN", s: "His ____ of the bird was perfect.", r: "imitate", a: "imitation", d: ["imitative", "imitated", "imitator"]},
+        {t: "Convert to NOUN", s: "I need more ____ about the trip.", r: "inform", a: "information", d: ["informative", "informed", "informer"]},
+        {t: "Convert to NOUN", s: "He suffered a serious ____.", r: "injure", a: "injury", d: ["injured", "injurious", "injuring"]},
+        {t: "Convert to NOUN", s: "Stop your ____ in my work!", r: "interfere", a: "interference", d: ["interfering", "interfered", "interferer"]},
+        {t: "Convert to NOUN", s: "The ____ was short and polite.", r: "introduce", a: "introduction", d: ["introductory", "introduced", "introducer"]},
+        {t: "Convert to NOUN", s: "The lightbulb was a great ____.", r: "invent", a: "invention", d: ["inventive", "inventor", "invented"]},
+        {t: "Convert to NOUN", s: "Did you receive the ____?", r: "invite", a: "invitation", d: ["invited", "inviting", "inviter"]},
+        {t: "Convert to NOUN", s: "The ____ was fair and wise.", r: "judge", a: "judgment", d: ["judging", "judged", "judicial"]},
+        {t: "Convert to NOUN", s: "We must fight for ____.", r: "just", a: "justice", d: ["justly", "justify", "justness"]},
+        {t: "Convert to NOUN", s: "He has a lot of ____ about history.", r: "know", a: "knowledge", d: ["knowing", "known", "knowable"]},
+        {t: "Convert to NOUN", s: "The room was filled with ____.", r: "laugh", a: "laughter", d: ["laughing", "laughable", "laughed"]},
+        {t: "Convert to NOUN", s: "His ____ will be his downfall.", r: "lazy", a: "laziness", d: ["lazily", "lazied", "lazier"]},
+        {t: "Convert to NOUN", s: "He is a man of great ____.", r: "learn", a: "learning", d: ["learned", "learner", "learnt"]},
+        {t: "Convert to NOUN", s: "He has a strong ____ for pizza.", r: "like", a: "liking", d: ["likely", "likable", "likened"]},
+        {t: "Convert to NOUN", s: "He is a very good ____.", r: "listen", a: "listener", d: ["listening", "listened", "listens"]},
+        {t: "Convert to NOUN", s: "The cat has nine ____.", r: "live", a: "lives", d: ["lively", "living", "lived"]},
+        {t: "Convert to NOUN", s: "What is the ____ of the table?", r: "long", a: "length", d: ["longing", "lengthen", "longer"]},
+        {t: "Convert to NOUN", s: "The ____ of the dog was sad.", r: "lose", a: "loss", d: ["lost", "losing", "loser"]},
+        {t: "Convert to NOUN", s: "I appreciate your ____.", r: "loyal", a: "loyalty", d: ["loyally", "loyalist", "loyalness"]},
+        {t: "Convert to NOUN", s: "The ____ performed a trick.", r: "magic", a: "magician", d: ["magical", "magically", "magics"]},
+        {t: "Convert to NOUN", s: "He acted with ____.", r: "manly", a: "manliness", d: ["manfully", "manned", "manlier"]},
+        {t: "Convert to NOUN", s: "The ____ lasted fifty years.", r: "marry", a: "marriage", d: ["married", "marrying", "marriable"]},
+        {t: "Convert to NOUN", s: "The sound of ____ came from the pub.", r: "merry", a: "merriment", d: ["merrily", "merrier", "merryness"]},
+        {t: "Convert to NOUN", s: "The ____ was a success.", r: "mission", a: "mission", d: ["missionary", "missed", "missing"]},
+        {t: "Convert to NOUN", s: "His ____ was very hurtful.", r: "mock", a: "mockery", d: ["mocking", "mocked", "mocker"]},
+        {t: "Convert to NOUN", s: "The ____ of the story is be kind.", r: "moral", a: "morality", d: ["morally", "moralize", "moralist"]},
+        {t: "Convert to ADJECTIVE", s: "The ____ air was cold.", r: "mountain", a: "mountainous", d: ["mountaineer", "mounted", "mounting"]},
+        {t: "Convert to NOUN", s: "The clock's ____ was silent.", r: "move", a: "movement", d: ["moving", "moved", "movable"]},
+        {t: "Convert to NOUN", s: "He is a gifted ____.", r: "music", a: "musician", d: ["musical", "musically", "musics"]},
+        {t: "Convert to NOUN", s: "What is your ____?", r: "occupy", a: "occupation", d: ["occupant", "occupied", "occupying"]},
+        {t: "Convert to NOUN", s: "The plan met with strong ____.", r: "oppose", a: "opposition", d: ["opposite", "opposed", "opposing"]},
+        {t: "Convert to NOUN", s: "She used ____ to win him over.", r: "persuade", a: "persuasion", d: ["persuasive", "persuaded", "persuader"]},
+        {t: "Convert to NOUN", s: "It was a great ____ to meet you.", r: "please", a: "pleasure", d: ["pleasing", "pleased", "pleasant"]},
+        {t: "Convert to NOUN", s: "The king made a ____.", r: "proclaim", a: "proclamation", d: ["proclaimed", "proclaiming", "proclaimer"]},
+        {t: "Convert to NOUN", s: "He is a ____ of history.", r: "profess", a: "professor", d: ["profession", "professional", "professed"]},
+        {t: "Convert to NOUN", s: "The country's ____ is growing.", r: "prosper", a: "prosperity", d: ["prosperous", "prospering", "prospered"]},
+        {t: "Convert to NOUN", s: "He took great ____ in his work.", r: "proud", a: "pride", d: ["proudly", "proudness", "prided"]},
+        {t: "Convert to NOUN", s: "Do you have ____ of your claim?", r: "prove", a: "proof", d: ["proven", "proving", "provable"]},
+        {t: "Convert to NOUN", s: "The ____ of food was limited.", r: "provide", a: "provision", d: ["provider", "provided", "providing"]},
+        {t: "Convert to NOUN", s: "He is known for his ____.", r: "punctual", a: "punctuality", d: ["punctually", "punctualness", "punctuated"]},
+        {t: "Convert to NOUN", s: "The ____ for theft is severe.", r: "punish", a: "punishment", d: ["punishing", "punished", "punishable"]},
+        {t: "Convert to NOUN", s: "The ____ of happiness is a right.", r: "pursue", a: "pursuit", d: ["pursuing", "pursued", "pursuer"]},
+        {t: "Convert to NOUN", s: "Her ____ saved time.", r: "ready", a: "readiness", d: ["readily", "readying", "readied"]},
+        {t: "Convert to NOUN", s: "In ____, it was a bad idea.", r: "real", a: "reality", d: ["really", "realize", "realism"]},
+        {t: "Convert to NOUN", s: "The ____ was crushed by the army.", r: "rebel", a: "rebellion", d: ["rebellious", "rebelled", "rebelling"]},
+        {t: "Convert to NOUN", s: "Sign for the ____ of the parcel.", r: "receive", a: "receipt", d: ["reception", "receiver", "received"]},
+        {t: "Convert to NOUN", s: "He was given ____ for his work.", r: "recognise", a: "recognition", d: ["recognisable", "recognised", "recognising"]},
+        {t: "Convert to NOUN", s: "The medicine gave him ____.", r: "relieve", a: "relief", d: ["relieved", "relieving", "relievable"]},
+        {t: "Convert to NOUN", s: "I have no ____ of that event.", r: "remember", a: "remembrance", d: ["remembered", "remembering", "remind"]},
+        {t: "Convert to NOUN", s: "The contract is up for ____.", r: "renew", a: "renewal", d: ["renewed", "renewing", "renewable"]},
+        {t: "Convert to NOUN", s: "The ____ of the song was catchy.", r: "repeat", a: "repetition", d: ["repeated", "repeating", "repetitive"]},
+        {t: "Convert to NOUN", s: "He showed no ____ for his sins.", r: "repent", a: "repentance", d: ["repentant", "repented", "repenting"]},
+        {t: "Convert to NOUN", s: "He felt deep ____ toward his boss.", r: "resent", a: "resentment", d: ["resentful", "resented", "resenting"]},
+        {t: "Convert to NOUN", s: "The ____ of the secret was shocking.", r: "reveal", a: "revelation", d: ["revealing", "revealed", "revealer"]},
+        {t: "Convert to NOUN", s: "The ____ of the old play was a hit.", r: "revive", a: "revival", d: ["revived", "reviving", "reviver"]},
+        {t: "Convert to NOUN", s: "The ____ of the film was moving.", r: "sad", a: "sadness", d: ["sadly", "sadden", "saddened"]},
+        {t: "Convert to NOUN", s: "Job ____ is very important.", r: "satisfy", a: "satisfaction", d: ["satisfactory", "satisfied", "satisfying"]},
+        {t: "Convert to ADJECTIVE", s: "The sunset was very ____.", r: "scene", a: "scenic", d: ["scenery", "scened", "scening"]},
+        {t: "Convert to ADJECTIVE", s: "He is a very ____ boy.", r: "school", a: "scholarly", d: ["scholar", "schooled", "schooling"]},
+        {t: "Convert to NOUN", s: "He is a famous ____.", r: "scientific", a: "scientist", d: ["science", "scientifically", "scientism"]},
+        {t: "Convert to NOUN", s: "The airport has tight ____.", r: "secure", a: "security", d: ["securely", "secured", "securing"]},
+        {t: "Convert to NOUN", s: "The ____ was beautiful.", r: "see", a: "sight", d: ["seeing", "seen", "seer"]},
+        {t: "Convert to NOUN", s: "There is a large ____ of books.", r: "select", a: "selection", d: ["selective", "selected", "selecting"]},
+        {t: "Convert to NOUN", s: "The ____ of the lake was calming.", r: "serene", a: "serenity", d: ["serenely", "sereneness", "serened"]},
+        {t: "Convert to NOUN", s: "The ____ in the hotel was excellent.", r: "serve", a: "service", d: ["servant", "serving", "server"]},
+        {t: "Convert to ADJECTIVE", s: "We sat in a ____ spot.", r: "shade", a: "shady", d: ["shaded", "shading", "shadiness"]},
+        {t: "Convert to NOUN", s: "The ____ of the child worried her.", r: "sick", a: "sickness", d: ["sickly", "sicken", "sickened"]},
+        {t: "Convert to NOUN", s: "For the sake of ____, let's go.", r: "simple", a: "simplicity", d: ["simply", "simplify", "simpleness"]},
+        {t: "Convert to NOUN", s: "He gave a long ____.", r: "speak", a: "speech", d: ["speaker", "speaking", "spoken"]},
+        {t: "Convert to NOUN", s: "The ____ was caught by police.", r: "steal", a: "stealth", d: ["stealing", "stolen", "stealer"]},
+        {t: "Convert to VERB", s: "The data began to ____ in.", r: "stream", a: "stream", d: ["streaming", "streamed", "streamer"]},
+        {t: "Convert to NOUN", s: "The workers went on ____.", r: "strike", a: "strike", d: ["striking", "striker", "struck"]},
+        {t: "Convert to NOUN", s: "He has the ____ of a lion.", r: "strong", a: "strength", d: ["strongly", "strengthen", "stronger"]},
+        {t: "Convert to NOUN", s: "Hard work leads to ____.", r: "succeed", a: "success", d: ["successful", "successfully", "succeeding"]},
+        {t: "Convert to NOUN", s: "He has a complex of ____.", r: "superior", a: "superiority", d: ["superiorly", "super", "superness"]},
+        {t: "Convert to NOUN", s: "His ____ was very believable.", r: "tell", a: "telling", d: ["told", "teller", "tells"]},
+        {t: "Convert to NOUN", s: "Deep in ____, he didn't hear me.", r: "think", a: "thought", d: ["thinking", "thoughtful", "thinker"]},
+        {t: "Convert to NOUN", s: "The ____ of the garden was clear.", r: "thrive", a: "thrift", d: ["thriving", "thrived", "thriver"]},
+        {t: "Convert to ADVERB", s: "He ____ wears a hat.", r: "typical", a: "typically", d: ["typed", "typicality", "typing"]},
+        {t: "Convert to NOUN", s: "She was full of ____.", r: "vain", a: "vanity", d: ["vainly", "vainness", "vained"]},
+        {t: "Convert to NOUN", s: "The store has a wide ____.", r: "various", a: "variety", d: ["variously", "varied", "varying"]},
+        {t: "Convert to NOUN", s: "We enjoyed our ____ to the zoo.", r: "visit", a: "visitor", d: ["visiting", "visited", "visits"]},
+        {t: "Convert to ADJECTIVE", s: "The ____ plane was fast.", r: "war", a: "warlike", d: ["warrior", "warring", "warred"]},
+        {t: "Convert to NOUN", s: "I enjoy the ____ of the sun.", r: "warm", a: "warmth", d: ["warmly", "warming", "warmed"]},
+        {t: "Convert to NOUN", s: "He showed a sign of ____.", r: "weak", a: "weakness", d: ["weakly", "weaken", "weakened"]},
+        {t: "Convert to NOUN", s: "The ____ of the journey showed.", r: "weary", a: "weariness", d: ["wearily", "wearying", "wearied"]},
+        {t: "Convert to NOUN", s: "What is the ____ of the box?", r: "weigh", a: "weight", d: ["weighing", "weighted", "weighs"]},
+        {t: "Convert to NOUN", s: "What is the ____ of the river?", r: "wide", a: "width", d: ["widely", "widen", "widened"]},
+        {t: "Convert to NOUN", s: "He is a man of great ____.", r: "wise", a: "wisdom", d: ["wisely", "wiser", "wiseness"]},
+        {t: "Convert to NOUN", s: "He is a man of great ____.", r: "worthy", a: "worthiness", d: ["worthily", "worth", "worthy"]},
+        {t: "Convert to NOUN", s: "The ____ of today are our future.", r: "young", a: "youth", d: ["youngster", "youngish", "younger"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...buildData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--build-blue)">Architect Level Reached! 🏆</h1>
+                <div class="sentence-display">Workshop Complete! Final Score: ${score} / ${deck.length}</div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Rebuild!</button>
+                <a href="index.html" class="back-link">← Back to Workshop</a>
+            `;
+            return; 
+        }
+        const item = deck[current];
+        document.getElementById('task').textContent = item.t;
+        document.getElementById('sentence').innerHTML = item.s.replace("____", `<span class="root-hint">____ (${item.r})</span>`);
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+
+    init();
+</script>
+</body>
+</html>
