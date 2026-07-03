@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
     <meta charset="UTF-8">
     <title>The Word Weaver | The English Workshop</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,7 +80,7 @@
             font-size: 1.6rem;
             line-height: 1.4;
             color: #000000;
-            background: var(--card-yellow);
+            background: var(--bg-color);
             padding: 35px;
             border-radius: 20px;
             margin-bottom: 30px;
@@ -141,7 +149,7 @@
         #next-btn {
             width: 100%;
             padding: 20px;
-            background: var(--card-red);
+            background: var(--card-yellow);
             color: var(--text-dark);
             border: 4px solid var(--text-dark);
             border-radius: 15px;
@@ -156,7 +164,7 @@
         }
 
         #next-btn:hover {
-            background: var(--card-yellow);
+            background: var(--card-red);
             transform: translateY(-3px);
             box-shadow: 8px 8px 0px var(--text-dark);
         }
