@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capital City | The English Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --weaver-blue: #4ecdc4; 
+            --card-yellow: #feca57; /* From Synonyms */
+            --card-red: #ff6b6b;    /* From Synonyms */
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--weaver-blue) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px; /* Matched to Synonyms */
+            box-shadow: 12px 12px 0px var(--text-dark); /* Matched to Synonyms */
+            padding: 35px;
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .stat-item {
+            padding: 5px 0;
+        }
+
+        /* Question display matched to Synonyms .sentence-display */
+        .sentence-display {
+            font-size: 1.6rem;
+            line-height: 1.4;
+            color: #000000;
+            background: var(--card-yellow);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 5px solid var(--text-dark);
+            box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
+            font-weight: 700;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 4px solid var(--text-dark);
+            padding: 18px;
+            border-radius: 15px;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            box-shadow: 6px 6px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--weaver-blue);
+            transform: scale(1.05) translate(-2px, -2px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+
+        .btn.correct { background-color: var(--success) !important; color: white; }
+        .btn.wrong { background-color: var(--error) !important; color: white; }
+
+        .rule-scroll {
+            background: #fff9db;
+            border: 3px solid #f1c40f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+
+        #next-btn {
+            width: 100%;
+            padding: 20px;
+            background-color: var(--card-red) !important;
+            color: var(--text-dark) !important;
+            border: 4px solid var(--text-dark);
+            border-radius: 15px;
+            margin-top: 30px;
+            cursor: pointer;
+            display: none;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 1.4rem;
+            box-shadow: 6px 6px 0px var(--text-dark);
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        #next-btn:hover {
+            background-color: var(--card-yellow) !important;
+            transform: translateY(-3px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <div class="stat-item">Score: <span id="score">0</span> 💎</div>
+        <div class="stat-item"><span id="progress">1/16</span></div>
+    </div>
+    
+    <p style="text-align:center; font-weight:bold; color: #636e72; text-transform: uppercase;">Choose the correctly capitalized sentence:</p>
+
+    <div class="sentence-display" id="display-area">...</div>
+    
+    <div class="options-grid" id="choices"></div>
+    
+    <div class="rule-scroll" id="tip-area"></div>
+    
+    <button id="next-btn">Next Mission →</button>
+</div>
+
+<script>
+    const gameData = [
+        { q: "did you see dr. smith at the hospital on tuesday?", a: "Did you see Dr. Smith at the hospital on Tuesday?", d: ["did you see Dr. smith at the hospital on Tuesday?", "Did you see dr. Smith at the hospital on tuesday?"], r: "Capitalize names (Smith), Titles (Dr.), and Days (Tuesday)!" },
+        { q: "we are going to london for christmas.", a: "We are going to London for Christmas.", d: ["We are going to london for Christmas.", "we are going to London for christmas."], r: "Cities and Holidays are proper nouns!" },
+        { q: "my favorite book is harry potter.", a: "My favorite book is Harry Potter.", d: ["My favorite book is harry potter.", "my favorite book is Harry Potter."], r: "Book titles and characters need capitals!" },
+        { q: "the queen of england lives in buckingham palace.", a: "The Queen of England lives in Buckingham Palace.", d: ["The queen of England lives in Buckingham palace.", "The Queen of england lives in Buckingham Palace."], r: "Famous buildings and specific titles are proper nouns!" },
+        { q: "i enjoy studying french and history.", a: "I enjoy studying French and history.", d: ["I enjoy studying french and history.", "I enjoy studying French and History."], r: "Languages (French) are capitalized, but general subjects aren't!" },
+        { q: "last summer, we visited mount rushmore.", a: "Last summer, we visited Mount Rushmore.", d: ["Last Summer, we visited mount rushmore.", "Last summer, we visited mount Rushmore."], r: "Landmarks get capitals, but seasons (summer) usually don't!" },
+        { q: "mr. jones drove his ford across the brooklyn bridge.", a: "Mr. Jones drove his Ford across the Brooklyn Bridge.", d: ["Mr. jones drove his Ford across the brooklyn bridge.", "Mr. Jones drove his ford across the Brooklyn bridge."], r: "Brands and specific bridge names are proper nouns!" },
+        { q: "is the amazon river in south america?", a: "Is the Amazon River in South America?", d: ["Is the amazon river in South America?", "Is the Amazon river in south america?"], r: "Rivers and Continents are major proper nouns!" },
+        { q: "the sinking of the titanic was a tragedy.", a: "The sinking of the Titanic was a tragedy.", d: ["The sinking of the titanic was a tragedy.", "the sinking of the Titanic was a Tragedy."], r: "Specific ship names like Titanic must be capitalized!" },
+        { q: "dear sir, i am writing to you from india.", a: "Dear Sir, I am writing to you from India.", d: ["Dear sir, I am writing to you from india.", "dear Sir, i am writing to you from India."], r: "Always capitalize 'I' and the names of countries!" },
+        { q: "we watched a movie about the second world war.", a: "We watched a movie about the Second World War.", d: ["We watched a movie about the second world war.", "We watched a movie about the Second world war."], r: "Historical events and wars need capitals!" },
+        { q: "the eiffel tower is in paris, france.", a: "The Eiffel Tower is in Paris, France.", d: ["The eiffel tower is in Paris, France.", "The Eiffel Tower is in paris, france."], r: "Cities, countries, and landmarks get big letters!" },
+        { q: "every monday in january, we go swimming.", a: "Every Monday in January, we go swimming.", d: ["Every monday in January, we go swimming.", "Every Monday in january, we go swimming."], r: "Days and months are always capitalized!" },
+        { q: "the president of the united states lives in the white house.", a: "The President of the United States lives in the White House.", d: ["The president of the United states lives in the white house.", "The President of the united states lives in the White house."], r: "Official residences and country names get capitals!" },
+        { q: "i live on main street in smallville.", a: "I live on Main Street in Smallville.", d: ["I live on main street in Smallville.", "I live on Main street in smallville."], r: "Street names and towns are proper nouns!" },
+        { q: "jupiter is the largest planet in the solar system.", a: "Jupiter is the largest planet in the solar system.", d: ["jupiter is the largest planet in the solar system.", "Jupiter is the largest planet in the Solar System."], r: "Planet names like Jupiter are always capitalized!" }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let deck = [...gameData].sort(() => Math.random() - 0.5);
+
+    function loadQuestion() {
+        const item = deck[current];
+        document.getElementById('display-area').textContent = `"${item.q}"`;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        document.getElementById('tip-area').style.display = "none";
+        document.getElementById('next-btn').style.display = "none";
+        
+        const choicesDiv = document.getElementById('choices');
+        choicesDiv.innerHTML = "";
+        
+        const options = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "btn";
+            btn.textContent = opt;
+            btn.onclick = () => {
+                document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+                if(opt === item.a) {
+                    btn.classList.add('correct');
+                    score++;
+                } else {
+                    btn.classList.add('wrong');
+                    document.querySelectorAll('.btn').forEach(b => {
+                        if(b.textContent === item.a) b.classList.add('correct');
+                    });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('tip-area').innerHTML = "💡 <b>Command Tip:</b> " + item.r;
+                document.getElementById('tip-area').style.display = "block";
+                document.getElementById('next-btn').style.display = "block";
+            };
+            choicesDiv.appendChild(btn);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++;
+        if(current < deck.length) {
+            loadQuestion();
+        } else {
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--weaver-blue)">MISSION COMPLETE! 🏆</h1>
+                <div class="sentence-display">Score: ${score} / ${deck.length}</div>
+                <button onclick="location.reload()" class="btn" style="width:100%; text-align:center;">Play Again!</button>
+            `;
+        }
+    };
+
+    loadQuestion();
+</script>
+</body>
+</html>

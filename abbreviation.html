@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Sub-Editor's Desk | Playful Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --edit-red: #d32f2f;
+            --card-yellow: #feca57;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --sticky-note: #fffde7;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--edit-red) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 25px;
+            padding: 35px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            width: 100%;
+            max-width: 680px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: var(--edit-red);
+        }
+
+        .label { 
+            display: inline-block;
+            background: var(--edit-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 10px;
+            border: 3px solid var(--text-dark);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 900;
+            transform: rotate(-1.5deg);
+        }
+
+        .sentence-display {
+            font-size: 1.4rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+            background: var(--sticky-note);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 3px solid var(--text-dark);
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.1);
+        }
+
+        /* Styling for the full word in the sentence */
+        .highlight {
+            color: var(--edit-red);
+            text-decoration: underline;
+            font-weight: 900;
+        }
+
+        .correct-fill {
+            color: var(--success);
+            text-decoration: underline;
+            font-weight: 900;
+        }
+
+        .wrong-fill {
+            color: var(--error);
+            text-decoration: line-through;
+            margin-right: 5px;
+        }
+
+        .options-list { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+        
+        .btn { 
+            background: white;
+            border: 4px solid var(--text-dark);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 4px 4px 0px var(--text-dark);
+        }
+        
+        .btn:hover:not(:disabled) {
+            background-color: var(--card-yellow);
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+        }
+
+        .btn.correct { background: var(--success) !important; color: white; }
+        .btn.wrong { background: var(--error) !important; color: white; }
+        
+        #next-btn { 
+            width: 100%;
+            padding: 18px;
+            background: var(--card-blue);
+            border: 4px solid var(--text-dark);
+            border-radius: 12px;
+            margin-top: 25px;
+            cursor: pointer;
+            display: none;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 1.2rem;
+            box-shadow: 4px 4px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> ✍️</span>
+        <span id="progress">1/60</span>
+    </div>
+
+    <span class="label">Sub-Editor's Task:</span>
+    <div class="sentence-display" id="sentence-box">...</div>
+
+    <div class="options-list" id="choices"></div>
+
+    <button id="next-btn">Next Headline ➔</button>
+</div>
+
+<script>
+    // 60 original questions showing the full word as requested
+    const abbrevData = [
+        {s: "The meeting is set for next <span class='highlight'>Monday</span>.", a: "Mon.", o: ["Mon.", "Mone.", "Mndy.", "Mo."]},
+        {s: "Please send the file <span class='highlight'>as soon as possible</span>.", a: "ASAP", o: ["ASAP", "ASP", "ASAPP", "AS-AP"]},
+        {s: "He lives on Oak <span class='highlight'>Street</span>.", a: "St.", o: ["St.", "Str.", "Sreet.", "Stt."]},
+        {s: "The package weighs 5 <span class='highlight'>kilograms</span>.", a: "kg", o: ["kg", "kgs", "kilo.", "kg."]},
+        {s: "I need to see the <span class='highlight'>Doctor</span> now.", a: "Dr.", o: ["Dr.", "Doc.", "Dctr.", "Drr."]},
+        {s: "Turn left at the next <span class='highlight'>Avenue</span>.", a: "Ave.", o: ["Ave.", "Av.", "Aven.", "Avn."]},
+        {s: "The movie starts at 8 <span class='highlight'>post meridiem</span>.", a: "p.m.", o: ["p.m.", "pm.", "p-m", "pmm"]},
+        {s: "She works for the <span class='highlight'>Federal Bureau of Investigation</span>.", a: "FBI", o: ["FBI", "F.B.I.", "FbI", "F-B-I"]},
+        {s: "The height is 6 <span class='highlight'>feet</span>.", a: "ft.", o: ["ft.", "f.", "fe.", "ftt."]},
+        {s: "He was born in <span class='highlight'>January</span>.", a: "Jan.", o: ["Jan.", "Jany.", "Jn.", "Ja."]},
+        {s: "The company is a <span class='highlight'>Limited</span>.", a: "Ltd.", o: ["Ltd.", "Lmt.", "Ld.", "Ltd-"]},
+        {s: "She is a <span class='highlight'>Bachelor</span> of Arts.", a: "BA", o: ["BA", "B.A.", "Ba.", "B-A"]},
+        {s: "The speed limit is 60 <span class='highlight'>miles per hour</span>.", a: "mph", o: ["mph", "m.p.h.", "mi/h", "mp-h"]},
+        {s: "Please <span class='highlight'>Répondez s'il vous plaît</span>.", a: "RSVP", o: ["RSVP", "R.S.V.P.", "Rsvp.", "RS-VP"]},
+        {s: "The event is on <span class='highlight'>October</span> 1st.", a: "Oct.", o: ["Oct.", "Oc.", "Octo.", "Ot."]},
+        {s: "He is a <span class='highlight'>Staff</span> Sergeant.", a: "Sgt.", o: ["Sgt.", "St.", "Sg.", "Sgt-"]},
+        {s: "The road is under <span class='highlight'>construction</span>.", a: "const.", o: ["const.", "con.", "cons.", "cnst."]},
+        {s: "I bought a <span class='highlight'>gallon</span> of milk.", a: "gal.", o: ["gal.", "g.", "gl.", "gall."]},
+        {s: "The book was written by <span class='highlight'>Anonymous</span>.", a: "Anon.", o: ["Anon.", "An.", "Ann.", "Anonym."]},
+        {s: "The temperature is 20 <span class='highlight'>degrees</span>.", a: "deg.", o: ["deg.", "d.", "de.", "degr."]},
+        {s: "She lives in the <span class='highlight'>United States of America</span>.", a: "USA", o: ["USA", "U.S.A.", "UsA", "U-S-A"]},
+        {s: "The distance is 10 <span class='highlight'>kilometers</span>.", a: "km", o: ["km", "k.m.", "kms", "km."]},
+        {s: "He is a <span class='highlight'>Bachelor</span> of Science.", a: "BSc", o: ["BSc", "B.Sc.", "Bsc.", "BS-c"]},
+        {s: "The weight is 2 <span class='highlight'>pounds</span>.", a: "lbs.", o: ["lbs.", "lb.", "lbss.", "l."]},
+        {s: "The time is 10 <span class='highlight'>ante meridiem</span>.", a: "a.m.", o: ["a.m.", "am.", "a-m", "amm"]},
+        {s: "The office is on the 2nd <span class='highlight'>Floor</span>.", a: "Fl.", o: ["Fl.", "F.", "Flr.", "Fll."]},
+        {s: "The car is a <span class='highlight'>Sport Utility Vehicle</span>.", a: "SUV", o: ["SUV", "S.U.V.", "Suv.", "S-U-V"]},
+        {s: "The price is $5 <span class='highlight'>each</span>.", a: "ea.", o: ["ea.", "e.", "each.", "eaa."]},
+        {s: "The flight leaves from <span class='highlight'>Los Angeles International</span>.", a: "LAX", o: ["LAX", "L.A.X.", "Lax.", "L-A-X"]},
+        {s: "The report is due in <span class='highlight'>November</span>.", a: "Nov.", o: ["Nov.", "No.", "Novem.", "Nv."]},
+        {s: "He is a <span class='highlight'>Doctor</span> of Philosophy.", a: "PhD", o: ["PhD", "P.h.D.", "Phd.", "P-h-D"]},
+        {s: "The item is <span class='highlight'>Not Applicable</span>.", a: "N/A", o: ["N/A", "NA", "N-A", "N.A."]},
+        {s: "The length is 10 <span class='highlight'>centimeters</span>.", a: "cm", o: ["cm", "c.m.", "cms", "cm."]},
+        {s: "She is the <span class='highlight'>Chief Executive Officer</span>.", a: "CEO", o: ["CEO", "C.E.O.", "Ceo.", "C-E-O"]},
+        {s: "The building is on the <span class='highlight'>Boulevard</span>.", a: "Blvd.", o: ["Blvd.", "Bl.", "Blv.", "Blv-d"]},
+        {s: "The volume is 1 <span class='highlight'>volume</span>.", a: "vol.", o: ["vol.", "v.", "vo.", "voll."]},
+        {s: "The water is 2 <span class='highlight'>pints</span>.", a: "pts.", o: ["pts.", "pt.", "ptss.", "p."]},
+        {s: "The area is 5 <span class='highlight'>square</span>.", a: "sq.", o: ["sq.", "s.", "sqq.", "sq-"]},
+        {s: "The color is <span class='highlight'>miscellaneous</span>.", a: "misc.", o: ["misc.", "mi.", "mis.", "msc."]},
+        {s: "The data is <span class='highlight'>approximate</span>.", a: "approx.", o: ["approx.", "app.", "apx.", "appro."]},
+        {s: "The list includes <span class='highlight'>et cetera</span>.", a: "etc.", o: ["etc.", "et.", "ect.", "et-c"]},
+        {s: "The note says <span class='highlight'>postscript</span>.", a: "P.S.", o: ["P.S.", "PS", "Ps.", "P-S"]},
+        {s: "The address is <span class='highlight'>care of</span>.", a: "c/o", o: ["c/o", "co", "c.o.", "c-o"]},
+        {s: "The page number is <span class='highlight'>page</span>.", a: "p.", o: ["p.", "pg.", "pp.", "p-"]},
+        {s: "The example is <span class='highlight'>exempli gratia</span>.", a: "e.g.", o: ["e.g.", "eg", "ex.", "e-g"]},
+        {s: "The that is to say is <span class='highlight'>id est</span>.", a: "i.e.", o: ["i.e.", "ie", "id.", "i-e"]},
+        {s: "The versus is <span class='highlight'>versus</span>.", a: "vs.", o: ["vs.", "v.", "vss.", "v-s"]},
+        {s: "The weight is 1 <span class='highlight'>ounce</span>.", a: "oz.", o: ["oz.", "o.", "ozz.", "o-z"]},
+        {s: "The number is <span class='highlight'>number</span>.", a: "No.", o: ["No.", "N.", "Num.", "N-o"]},
+        {s: "The mount is <span class='highlight'>mount</span>.", a: "Mt.", o: ["Mt.", "M.", "Mnt.", "M-t"]},
+        {s: "The road is <span class='highlight'>road</span>.", a: "Rd.", o: ["Rd.", "R.", "Roa.", "R-d"]},
+        {s: "The mountain is <span class='highlight'>mountain</span>.", a: "Mtn.", o: ["Mtn.", "Mt.", "Mn.", "M-tn"]},
+        {s: "The square is <span class='highlight'>square</span>.", a: "Sq.", o: ["Sq.", "S.", "Sqr.", "S-q"]},
+        {s: "The court is <span class='highlight'>court</span>.", a: "Ct.", o: ["Ct.", "C.", "Crt.", "C-t"]},
+        {s: "The department is <span class='highlight'>department</span>.", a: "Dept.", o: ["Dept.", "Dep.", "Dp.", "D-ept"]},
+        {s: "The government is <span class='highlight'>government</span>.", a: "Govt.", o: ["Govt.", "Gov.", "Gt.", "G-ovt"]},
+        {s: "The incorporated is <span class='highlight'>incorporated</span>.", a: "Inc.", o: ["Inc.", "In.", "I.", "I-nc"]},
+        {s: "The corporation is <span class='highlight'>corporation</span>.", a: "Corp.", o: ["Corp.", "Cor.", "Cp.", "C-orp"]},
+        {s: "The association is <span class='highlight'>association</span>.", a: "Assoc.", o: ["Assoc.", "Ass.", "As.", "A-ssoc"]},
+        {s: "The maximum is <span class='highlight'>maximum</span>.", a: "max.", o: ["max.", "mx.", "m.", "m-ax"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...abbrevData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            document.getElementById('game-box').innerHTML = `
+                <h2 style="color:var(--edit-red)">Editor-in-Chief Status! 🏆</h2>
+                <div class="sentence-display">Final Score: ${score}/60</div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Polish More News</button>
+            `;
+            return; 
+        }
+        const item = deck[current];
+        document.getElementById('sentence-box').innerHTML = item.s;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        [...item.o].sort(() => Math.random() - 0.5).forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                
+                const originalHtml = item.s;
+                const highlightTag = "<span class='highlight'>";
+                
+                if(opt === item.a) { 
+                    b.classList.add('correct'); 
+                    score++; 
+                    // Replace the red word with the green abbreviation
+                    document.getElementById('sentence-box').innerHTML = originalHtml.replace(/<span class='highlight'>(.*?)<\/span>/, `<span class="correct-fill">${item.a}</span>`);
+                } else { 
+                    b.classList.add('wrong'); 
+                    btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); 
+                    // Show wrong choice crossed out and the correct abbreviation
+                    document.getElementById('sentence-box').innerHTML = originalHtml.replace(/<span class='highlight'>(.*?)<\/span>/, `<span class="wrong-fill">${opt}</span> <span class="correct-fill">${item.a}</span>`);
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+
+    init();
+</script>
+</body>
+</html>

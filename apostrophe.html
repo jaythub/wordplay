@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Possession Point | The English Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --card-purple: #a29bfe;
+            --text-dark: #2d3436;
+            --success: #55efc4;
+            --error: #fab1a0;
+            --parchment: #fef9e7;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-box {
+            background: white;
+            border: 4px solid var(--text-dark);
+            border-radius: 20px;
+            box-shadow: 10px 10px 0px var(--text-dark);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            border-bottom: 3px dashed var(--card-purple);
+            padding-bottom: 10px;
+        }
+
+        .sentence-display {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 4px solid var(--card-purple);
+            font-size: 1.6rem;
+            font-weight: bold;
+            line-height: 1.4;
+            box-shadow: 6px 6px 0px rgba(162, 155, 254, 0.2);
+        }
+
+        .rule-scroll {
+            background: var(--parchment);
+            border: 2px solid #f1c40f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 3px solid var(--text-dark);
+            padding: 18px;
+            border-radius: 15px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 1.1rem;
+            box-shadow: 4px 4px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background-color: #f8f9fa;
+        }
+
+        .btn.correct { background: var(--success) !important; }
+        .btn.wrong { background: var(--error) !important; }
+
+        #next-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--text-dark);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            margin-top: 25px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+            font-family: inherit;
+            font-size: 1.2rem;
+            box-shadow: 6px 6px 0px var(--card-purple);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Anchors: <span id="score">0</span> ⚓</span>
+        <span id="progress">1/10</span>
+    </div>
+    
+    <p style="font-weight:bold; color: #636e72;">Pick the correct form of ownership:</p>
+
+    <div class="sentence-display" id="sentence">...</div>
+    
+    <div class="rule-scroll" id="rule-tip"></div>
+
+    <div class="options-grid" id="choices"></div>
+    
+    <button id="next-btn">Next Challenge →</button>
+</div>
+
+<script>
+    const fullData = [
+        { q: "The ____ barking woke the neighbors.", a: "dog's", d: ["dogs", "dogs'", "doges"], r: "Singular owner? Just add 's!" },
+        { q: "The ____ bathroom is down the hall.", a: "men's", d: ["mens", "mens'", "man's"], r: "Irregular plurals like 'men' always get 's." },
+        { q: "All the ____ lockers were painted blue.", a: "students'", d: ["student's", "students", "studentss"], r: "For plural owners ending in 's', just add the apostrophe at the end!" },
+        { q: "That ____ nest is very high up.", a: "bird's", d: ["birds", "birds'", "birdes"], r: "One bird owns the nest? 's is the way to go." },
+        { q: "The ____ toys were scattered everywhere.", a: "children's", d: ["childrens", "childrens'", "child's"], r: "Even though 'children' is plural, it doesn't end in 's', so add 's!" },
+        { q: "Both ____ cars are in the driveway.", a: "parents'", d: ["parent's", "parents", "parentes"], r: "Two parents? Put the apostrophe after the 's'." },
+        { q: "The ____ keys were left in the lock.", a: "lady's", d: ["ladys", "ladies", "ladies'"], r: "One lady owns the keys? Use 's." },
+        { q: "The ____ pages were torn.", a: "book's", d: ["books", "books'", "bookes"], r: "Singular possession for 'book' requires 's." },
+        { q: "The ____ laughter was very loud.", a: "girls'", d: ["girl's", "girls", "girlses"], r: "A group of girls? The apostrophe goes after the plural 's'." },
+        { q: "The ____ computer is brand new.", a: "boss's", d: ["bosses", "boss'", "boss"], r: "Singular names/nouns ending in 's' usually still take 's to show ownership." }
+    ];
+
+    let current = 0; let score = 0; let deck = [...fullData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('sentence').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        document.getElementById('rule-tip').style.display = "none";
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                
+                if(opt === item.a) { 
+                    b.classList.add('correct'); 
+                    score++; 
+                } else { 
+                    b.classList.add('wrong'); 
+                    btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); });
+                }
+                
+                document.getElementById('rule-tip').innerHTML = "<b>💡 Tip:</b> " + item.r;
+                document.getElementById('rule-tip').style.display = "block";
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h2 style="color:var(--card-purple)">Possession Master!</h2>
+                <p style="font-size:1.5rem;">Final Score: ${score}/10</p>
+                <button onclick="location.reload()" class="btn" style="width:100%">Try Again</button>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

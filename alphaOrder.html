@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Alphabet Alchemist | 80 Magic Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --magic-gold: #ffcc00; 
+            --potion-purple: #9b59b6; 
+            --lab-bg: #2c3e50; 
+            --success: #2ecc71; 
+            --error: #e74c3c; 
+            --ghostly-white: #ecf0f1;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background: var(--lab-bg); 
+            background-image: radial-gradient(var(--potion-purple) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 10px; 
+        }
+
+        #game-box { 
+            background: #34495e; 
+            padding: 2.5rem; 
+            border-radius: 50px; 
+            box-shadow: 0 20px 0px #1a252f, 0 30px 60px rgba(0,0,0,0.4); 
+            width: 100%; 
+            max-width: 900px; 
+            border: 8px solid var(--magic-gold);
+            color: var(--ghostly-white);
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: 900; 
+            margin-bottom: 20px; 
+            color: var(--magic-gold); 
+            font-size: 1.4rem;
+            text-shadow: 2px 2px #000;
+        }
+
+        .title-tag {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .instruction { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: var(--success); 
+            text-transform: uppercase; 
+            font-size: 1.1rem; 
+            text-align: center; 
+        }
+
+        .word-pile { 
+            font-size: 1.4rem; 
+            line-height: 1.6; 
+            color: #2c3e50; 
+            margin-bottom: 30px; 
+            padding: 30px; 
+            background: var(--ghostly-white); 
+            border-radius: 25px; 
+            text-align: center; 
+            border: 5px dashed var(--potion-purple); 
+            font-weight: 800;
+        }
+
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+
+        .btn { 
+            background: #ecf0f1; 
+            border: 4px solid #bdc3c7; 
+            padding: 18px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.1s; 
+            font-size: 1.1rem; 
+            color: #2c3e50; 
+            box-shadow: 0 6px 0 #95a5a6;
+            font-family: inherit;
+        }
+
+        .btn:hover:not(:disabled) { background: #fff; border-color: var(--magic-gold); }
+        .btn.correct { background: var(--success) !important; color: white; border-color: #27ae60; box-shadow: 0 6px 0 #1e8449; }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: #c0392b; box-shadow: 0 6px 0 #922b21; }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--potion-purple); 
+            color: white; 
+            border: 4px solid #8e44ad; 
+            border-radius: 20px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: 900; 
+            font-size: 1.4rem;
+            box-shadow: 0 8px 0 #7d3c98;
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Potions: <span id="score">0</span> 🧪</span>
+        <span id="progress">1/80</span>
+    </div>
+    <div class="title-tag" id="rank">Rank: Potion Washer</div>
+    <div class="instruction">Stir the words into perfect order! ✨</div>
+    <div class="word-pile" id="pile">...</div>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Brew Next Batch! ⚗️</button>
+</div>
+
+<script>
+    // 17 Core Questions from alphaOrder.html
+    const coreData = [
+        {j: "vegetable, official, judgement, colonel, extremely, necessary, language, immediately", a: "colonel; extremely; immediately; judgement; language; necessary; official; vegetable."},
+        {j: "beginning, brooch, biscuit, business, byre, bough, balance, blossom", a: "balance; beginning; biscuit; blossom; bough; brooch; business; byre."},
+        {j: "complaint, cocoa, correct, coffee, condition, coarse, collection, course", a: "coarse; cocoa; coffee; collection; complaint; condition; correct; course."},
+        {j: "dismissed, disguise, displayed, disaster, district, discovery, disobeyed, disease", a: "disaster; discovery; disease; disguise; dismissed; disobeyed; displayed; district."},
+        {j: "science, scissors, scholar, scenery, scatter, sceptic, scanner, scarify", a: "scanner; scarify; scatter; scenery; sceptic; scholar; science; scissors."},
+        {j: "stadium, stable, staff, stage, stagnant, stagger, stairs, stallion", a: "stable; stadium; staff; stage; stagger; stagnant; stairs; stallion."},
+        {j: "pavement, palace, package, pageant, padding, pancake, partial, passive", a: "package; padding; pageant; palace; pancake; partial; passive; pavement."},
+        {j: "phone, photo, phrase, physical, physics, phantom, pheasant, phobia", a: "phantom; pheasant; phobia; phone; photo; phrase; physical; physics."},
+        {j: "manage, magnet, magnify, machine, magic, macro, magical, maiden", a: "machine; macro; magic; magical; magnet; magnify; maiden; manage."},
+        {j: "morning, mortal, mortar, mortgage, morbid, morph, morsel, mountain", a: "morbid; morph; morsel; mortal; mortar; mortgage; mountain; mourning."},
+        {j: "thunder, thirsty, thicken, thought, through, thievish, therapy, theater", a: "theater; therapy; thicken; thievish; thirsty; thought; through; thunder."},
+        {j: "travel, transit, training, traffic, tragic, tractor, tracing, tracker", a: "tracker; tracing; tractor; traffic; tragic; training; transit; travel."},
+        {j: "weather, weapon, wealth, weary, weave, wedding, wedge, weigh", a: "wealth; weapon; weary; weather; weave; wedding; wedge; weigh."},
+        {j: "quality, qualify, quantum, quarrel, quarter, quartet, quartz, quench", a: "qualify; quality; quantum; quarrel; quarter; quartet; quartz; quench."},
+        {j: "glacier, glasses, glamour, glaring, gladden, glazier, glimpse, glitter", a: "gladden; glacier; glamour; glaring; glasses; glazier; glimpse; glitter."},
+        {j: "obey, object, oblige, oblique, oblong, obscure, observe, obsess", a: "obey; object; oblige; oblique; oblong; obscure; observe; obsess."},
+        {j: "nature, native, nation, nasal, narrow, narrate, napkin, namely", a: "namely; napkin; narrate; narrow; nasal; nation; native; nature."}
+    ];
+
+    // Expanded Word Bank to generate up to 80 total rounds
+    const extendedBank = [
+        ["abandon", "ability", "aboard", "about", "above", "absent", "absorb", "accent"],
+        ["camera", "camp", "canal", "canary", "cancel", "candle", "candy", "cannon"],
+        ["danger", "daring", "darken", "darling", "daughter", "dawn", "day", "dazzle"],
+        ["eagle", "early", "earn", "earth", "ease", "east", "easy", "eat"],
+        ["fabric", "face", "fact", "fade", "fail", "faint", "fair", "faith"],
+        ["gallery", "game", "garage", "garden", "garlic", "gas", "gate", "gather"],
+        ["habit", "hair", "half", "hall", "halt", "hammer", "hand", "hang"],
+        ["jacket", "jail", "jam", "jar", "jaw", "jazz", "jealous", "jelly"],
+        ["keep", "key", "kick", "kid", "kill", "kind", "king", "kiss"],
+        ["label", "labor", "lace", "lack", "ladder", "lady", "lake", "lamp"],
+        ["machine", "mad", "magic", "mail", "main", "make", "male", "map"],
+        ["oak", "oar", "oath", "ocean", "odd", "off", "offer", "office"],
+        ["package", "page", "pain", "paint", "pair", "palace", "pale", "palm"],
+        ["rabbit", "race", "rack", "radio", "raft", "rage", "rail", "rain"],
+        ["sail", "salt", "same", "sand", "save", "say", "scale", "scan"],
+        ["table", "tail", "take", "talk", "tall", "tame", "tank", "tape"],
+        ["ugly", "uncle", "under", "unit", "up", "urban", "urge", "use"],
+        ["vacant", "vain", "valley", "value", "valve", "van", "vapor", "vast"],
+        ["wait", "wake", "walk", "wall", "want", "war", "warm", "wash"],
+        ["yard", "yarn", "yawn", "year", "yell", "yellow", "yes", "yet"],
+        ["zebra", "zero", "zest", "zinc", "zip", "zone", "zoo", "zoom"],
+        ["balloon", "banish", "banjo", "bank", "banner", "banquet", "barber", "barely"],
+        ["cactus", "cadet", "cage", "cake", "calm", "camel", "camera", "camp"],
+        ["dairy", "damage", "dance", "danger", "daring", "dark", "dash", "date"],
+        ["eager", "eagle", "earl", "early", "earth", "echo", "edge", "edit"],
+        ["fable", "face", "fact", "fair", "faith", "fake", "fall", "fame"],
+        ["galaxy", "gale", "game", "gap", "garage", "garden", "gas", "gate"],
+        ["habit", "hail", "hair", "half", "hall", "halt", "ham", "hand"],
+        ["ice", "idea", "ideal", "idle", "idol", "igloo", "image", "iron"],
+        ["jail", "jam", "jar", "jaw", "jazz", "jeans", "jelly", "jest"],
+        ["kangaroo", "keep", "kettle", "key", "kick", "kid", "kind", "king"],
+        ["ladder", "lady", "lake", "lamp", "land", "lane", "large", "last"],
+        ["magic", "magnet", "maid", "mail", "main", "make", "male", "map"],
+        ["name", "nap", "narrow", "nation", "native", "nature", "near", "neat"],
+        ["ocean", "odd", "offer", "office", "oil", "old", "open", "orbit"],
+        ["page", "pain", "paint", "pair", "palace", "pale", "palm", "pan"],
+        ["quack", "quake", "quart", "queen", "quest", "quick", "quiet", "quill"],
+        ["race", "radio", "raft", "rail", "rain", "raise", "rake", "ramp"],
+        ["safe", "sail", "salt", "same", "sand", "save", "saw", "say"],
+        ["tag", "tail", "take", "talk", "tall", "tame", "tank", "tape"],
+        ["umbrella", "umpire", "uncle", "under", "unit", "up", "upper", "urge"],
+        ["vacant", "vain", "valley", "value", "valve", "van", "vapor", "vast"],
+        ["waffle", "wagon", "wait", "wake", "walk", "wall", "walnut", "want"],
+        ["yacht", "yard", "yarn", "yawn", "year", "yell", "yellow", "yes"],
+        ["zap", "zebra", "zero", "zest", "zinc", "zip", "zone", "zoo"],
+        ["actor", "adult", "advice", "afar", "age", "agent", "agree", "ahead"],
+        ["bacon", "badge", "bagel", "bake", "ball", "band", "bank", "base"],
+        ["cabin", "cable", "cafe", "cage", "cake", "call", "camel", "camp"],
+        ["daily", "dairy", "daisy", "dance", "danger", "dare", "dark", "dash"],
+        ["each", "eager", "eagle", "ear", "early", "earn", "earth", "ease"],
+        ["fable", "fabric", "face", "fact", "fade", "fail", "fair", "faith"],
+        ["gain", "gale", "gall", "game", "gang", "gap", "garage", "garden"],
+        ["habit", "hair", "half", "hall", "halt", "ham", "hand", "hang"],
+        ["ice", "icon", "idea", "idle", "idol", "igloo", "image", "inch"],
+        ["jacket", "jade", "jail", "jam", "jar", "jaw", "jazz", "jeans"],
+        ["kale", "keep", "key", "kick", "kid", "kill", "kind", "king"],
+        ["label", "lace", "lack", "lad", "lady", "lake", "lamp", "land"],
+        ["magic", "mail", "main", "make", "male", "map", "march", "mark"],
+        ["nail", "name", "nap", "narrow", "near", "neat", "neck", "need"],
+        ["oar", "oath", "oats", "ocean", "odd", "off", "offer", "office"],
+        ["pace", "pack", "page", "paid", "pain", "paint", "pair", "pale"],
+        ["quail", "quake", "quartz", "queen", "quick", "quiet", "quill", "quilt"],
+        ["race", "raft", "rage", "rail", "rain", "rake", "ram", "ramp"]
+    ];
+
+    let alphaData = [...coreData];
+    
+    // Fill until we hit exactly 80 questions
+    for (let i = 0; i < extendedBank.length && alphaData.length < 80; i++) {
+        let set = extendedBank[i];
+        alphaData.push({
+            j: [...set].sort(() => Math.random() - 0.5).join(", "),
+            a: [...set].sort().join("; ") + "."
+        });
+    }
+
+    function createDistractors(correctString) {
+        let arr = correctString.replace(".", "").split("; ");
+        let distractors = [];
+        for (let i = 0; i < 3; i++) {
+            let d = [...arr];
+            let idx = Math.floor(Math.random() * (d.length - 1));
+            [d[idx], d[idx+1]] = [d[idx+1], d[idx]]; 
+            distractors.push(d.join("; ") + ".");
+        }
+        return distractors;
+    }
+
+    let current = 0; let score = 0; let deck = alphaData.sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('pile').textContent = item.j;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        const choices = [item.a, ...createDistractors(item.a)].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); document.querySelectorAll('.btn').forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="text-align:center">✨ Alchemy Master! ✨</h1>
+                <p style="text-align:center">You brewed all 80 potions!</p>
+                <p style="text-align:center">Final Score: ${score}/80</p>
+                <button onclick="location.reload()" class="btn" style="width:100%">Restart Lab</button>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

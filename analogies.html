@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analogy Ace | The English Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --card-pink: #ff6b6b;
+            --text-dark: #2d3436;
+            --success: #55efc4;
+            --error: #fab1a0;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #game-box {
+            background: white;
+            border: 4px solid var(--text-dark);
+            border-radius: 20px;
+            box-shadow: 10px 10px 0px var(--text-dark);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            border-bottom: 3px dashed var(--card-pink);
+            padding-bottom: 10px;
+        }
+
+        .analogy-container {
+            background: #fff;
+            padding: 35px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 4px solid var(--card-pink);
+            box-shadow: 6px 6px 0px rgba(255, 107, 107, 0.2);
+        }
+
+        .active-analogy {
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            border: 3px solid var(--text-dark);
+            padding: 18px;
+            border-radius: 15px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 1.1rem;
+            box-shadow: 4px 4px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background-color: #fff9f0;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--text-dark);
+        }
+
+        .btn.correct {
+            background: var(--success) !important;
+            border-color: var(--text-dark);
+        }
+
+        .btn.wrong {
+            background: var(--error) !important;
+            border-color: var(--text-dark);
+        }
+
+        #next-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--text-dark);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            margin-top: 30px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+            font-family: inherit;
+            font-size: 1.3rem;
+            box-shadow: 6px 6px 0px var(--card-pink);
+        }
+
+        #next-btn:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Gems: <span id="score">0</span> 🤝</span>
+        <span id="progress">0/0</span>
+    </div>
+    
+    <div class="analogy-container">
+        <div id="display-text" class="active-analogy">Loading Challenge...</div>
+    </div>
+
+    <div class="options-grid" id="choices"></div>
+    
+    <button id="next-btn">Next Challenge →</button>
+</div>
+
+<script>
+    // Data imported from analogies.html
+    const fullData = [
+        { q: "Little is to Big as Dwarf is to...", a: "Giant", o: ["Giant", "Tiny", "Small", "Mountain"] },
+        { q: "High is to Low as Mountain is to...", a: "Valley", o: ["Valley", "Peak", "Cloud", "River"] },
+        { q: "Hot is to Cold as Summer is to...", a: "Winter", o: ["Winter", "Spring", "Autumn", "Ice"] },
+        { q: "Success is to Failure as Victory is to...", a: "Defeat", o: ["Defeat", "Winner", "Trophy", "Game"] },
+        { q: "Pen is to Write as Knife is to...", a: "Cut", o: ["Cut", "Eat", "Sharp", "Spoon"] },
+        { q: "Bird is to Fly as Fish is to...", a: "Swim", o: ["Swim", "Water", "Scale", "Drown"] },
+        { q: "Teacher is to School as Doctor is to...", a: "Hospital", o: ["Hospital", "Patient", "Medicine", "Nurse"] },
+        { q: "Wheel is to Car as Wing is to...", a: "Aeroplane", o: ["Aeroplane", "Bird", "Sky", "Engine"] },
+        { q: "Page is to Book as Brick is to...", a: "Wall", o: ["Wall", "House", "Mud", "Chimney"] },
+        { q: "Finger is to Hand as Toe is to...", a: "Foot", o: ["Foot", "Shoe", "Leg", "Walking"] },
+        { q: "Ice is to Cold as Fire is to...", a: "Hot", o: ["Hot", "Smoke", "Red", "Burn"] },
+        { q: "Lion is to Brave as Sheep is to...", a: "Gentle", o: ["Gentle", "Wool", "Timid", "Grass"] },
+        { q: "Spider is to Fly as Cat is to...", a: "Mouse", o: ["Mouse", "Dog", "Bird", "Kitten"] },
+        { q: "Sheep is to Mutton as Pig is to...", a: "Pork", o: ["Pork", "Bacon", "Ham", "Piglet"] },
+        { q: "Steamer is to Pier as Train is to...", a: "Platform", o: ["Platform", "Station", "Track", "Engine"] },
+        { q: "Boy is to Girl as MAN is to...", a: "Woman", o: ["Woman", "Lady", "Sister", "Aunt"] },
+        { q: "June is to July as APRIL is to...", a: "May", o: ["May", "March", "June", "August"] },
+        { q: "High is to Low as UP is to...", a: "Down", o: ["Down", "Below", "Deep", "Floor"] },
+        { q: "North is to SOUTH as East is to...", a: "West", o: ["West", "North", "Right", "Compass"] },
+        { q: "Uncle is to NEPHEW as Aunt is to...", a: "Niece", o: ["Niece", "Cousin", "Daughter", "Uncle"] },
+        { q: "Soldier is to ARMY as Sailor is to...", a: "Navy", o: ["Navy", "Ship", "Ocean", "Pilot"] },
+        { q: "BRAY is to Donkey as Neigh is to...", a: "Horse", o: ["Horse", "Mule", "Zebra", "Cow"] },
+        { q: "FINGER is to Hand as Toe is to...", a: "Foot", o: ["Foot", "Leg", "Shoe", "Nail"] },
+        { q: "FEATHERS are to Birds as Scales are to...", a: "Fish", o: ["Fish", "Snake", "Lizard", "Water"] },
+        { q: "Tear is to Sorrow as Smile is to...", a: "Pleasure", o: ["Pleasure", "Happiness", "Joy", "Face"] },
+        { q: "Wrist is to Arm as Ankle is to...", a: "Leg", o: ["Leg", "Foot", "Sock", "Knee"] },
+        { q: "One is to Ten as Ten is to...", a: "Hundred", o: ["Hundred", "Eleven", "Twenty", "Million"] },
+        { q: "Arrow is to Bow as BULLET is to...", a: "Rifle", o: ["Rifle", "Gun", "Target", "Trigger"] },
+        { q: "Cat is to Kitten as DOG is to...", a: "Pup", o: ["Pup", "Hound", "Bark", "Bitch"] },
+        { q: "Foot is to Man as HOOF is to...", a: "Horse", o: ["Horse", "Cow", "Shoe", "Donkey"] },
+        { q: "Father is to SON as Mother is to...", a: "Daughter", o: ["Daughter", "Child", "Sister", "Aunt"] },
+        { q: "Artist is to PICTURE as Author is to...", a: "Book", o: ["Book", "Pen", "Library", "Story"] },
+        { q: "Water is to ICE as Liquid is to...", a: "Solid", o: ["Solid", "Gas", "Cold", "Hard"] },
+        { q: "SWAN is to Cygnet as Pig is to...", a: "Piglet", o: ["Piglet", "Sow", "Boar", "Swan"] },
+        { q: "SHOAL is to Herring as School is to...", a: "Whales", o: ["Whales", "Fish", "Dolphins", "Ocean"] },
+        { q: "BEE is to Hive as Cow is to...", a: "Cowshed", o: ["Cowshed", "Stable", "Field", "Barn"] },
+        { q: "Wing is to Bird as Fin is to...", a: "Fish", o: ["Fish", "Water", "Shark", "Swim"] },
+        { q: "Rich is to Poor as Ancient is to...", a: "Modern", o: ["Modern", "Old", "New", "Future"] },
+        { q: "One is to Single as Two is to...", a: "Double", o: ["Double", "Triple", "Pair", "Couple"] },
+        { q: "Flock is to Sheep as HERD is to...", a: "Cattle", o: ["Cattle", "Cows", "Goats", "Elephants"] },
+        { q: "Here is to There as THIS is to...", a: "That", o: ["That", "Then", "Those", "Them"] },
+        { q: "Day is to Week as MONTH is to...", a: "Year", o: ["Year", "Season", "Hour", "Date"] },
+        { q: "Eat is to ATE as Go is to...", a: "Went", o: ["Went", "Gone", "Going", "Goes"] },
+        { q: "Oil is to CAN as Tea is to...", a: "Caddy", o: ["Caddy", "Cup", "Pot", "Box"] },
+        { q: "Steam is to HOT WATER as Smoke is to...", a: "Fire", o: ["Fire", "Chimney", "Burn", "Ash"] },
+        { q: "PIG is to Sty as Horse is to...", a: "Stable", o: ["Stable", "Field", "Barn", "Sty"] },
+        { q: "HOT is to Cold as Seldom is to...", a: "Often", o: ["Often", "Always", "Rarely", "Never"] },
+        { q: "WATER is to Fish as Air is to...", a: "Bird", o: ["Bird", "Sky", "Plane", "Wind"] },
+        { q: "Table is to Wood as Window is to...", a: "Glass", o: ["Glass", "Frame", "Wall", "House"] },
+        { q: "Food is to Hungry as Drink is to...", a: "Thirsty", o: ["Thirsty", "Water", "Dry", "Hunger"] },
+        { q: "Statue is to Sculptor as Book is to...", a: "Author", o: ["Author", "Reader", "Writer", "Library"] },
+        { q: "Wheel is to Spoke as Flower is to...", a: "Petal", o: ["Petal", "Stem", "Seed", "Root"] },
+        { q: "Nose is to Smell as TONGUE is to...", a: "Taste", o: ["Taste", "Eat", "Mouth", "Lick"] },
+        { q: "Wrist is to Cuff as NECK is to...", a: "Collar", o: ["Collar", "Tie", "Shirt", "Scarf"] },
+        { q: "Walk is to Legs as FLY is to...", a: "Wings", o: ["Wings", "Bird", "Sky", "Air"] },
+        { q: "Island is to Sea as LAKE is to...", a: "Land", o: ["Land", "Water", "River", "Shore"] },
+        { q: "Knife is to CUT as Gun is to...", a: "Shoot", o: ["Shoot", "Kill", "Bullet", "Fight"] },
+        { q: "Picture is to WALL as Carpet is to...", a: "Floor", o: ["Floor", "Ground", "House", "Room"] },
+        { q: "Graceful is to CLUMSY as Polite is to...", a: "Rude", o: ["Rude", "Mean", "Kind", "Nasty"] },
+        { q: "Descend is to DEPTH as Ascend is to...", a: "Height", o: ["Height", "Top", "Up", "Peak"] },
+        { q: "WATER is to Pipes as Electricity is to...", a: "Wires", o: ["Wires", "Power", "Lights", "Current"] },
+        { q: "STEEPLE is to Church as Tower is to...", a: "Castle", o: ["Castle", "Dungeon", "Knight", "Wall"] },
+        { q: "TREE is to Forest as Sheep is to...", a: "Flock", o: ["Flock", "Herd", "Farm", "Lamb"] },
+        { q: "SHELL is to Egg as Rind is to...", a: "Orange", o: ["Orange", "Fruit", "Peel", "Tree"] },
+        { q: "Constable is to Thief as Gamekeeper is to...", a: "Poacher", o: ["Poacher", "Hunter", "Forest", "Deer"] },
+        { q: "Whisper is to Shout as Walk is to...", a: "Run", o: ["Run", "Race", "Legs", "Fast"] },
+        { q: "Hearing is to Ear as Sight is to...", a: "Eye", o: ["Eye", "Vision", "Glass", "Light"] }
+    ];
+
+    let score = 0, currentIdx = 0, deck = [];
+
+    function init() {
+        deck = [...fullData].sort(() => Math.random() - 0.5);
+        currentIdx = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        loadNext();
+    }
+
+    function loadNext() {
+        if (currentIdx >= deck.length) {
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--card-pink)">Quest Complete!</h1>
+                <p style="font-size:1.5rem;">You earned ${score} Knowledge Gems!</p>
+                <button onclick="location.reload()" class="btn" style="width:100%">Play Again</button>
+            `;
+            return;
+        }
+        
+        const item = deck[currentIdx];
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('progress').textContent = `${currentIdx + 1} / ${deck.length}`;
+        document.getElementById('display-text').textContent = item.q;
+
+        const container = document.getElementById('choices');
+        container.innerHTML = "";
+        
+        // Shuffle choices
+        const shuffledOptions = [...item.o].sort(() => Math.random() - 0.5);
+        
+        shuffledOptions.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; 
+            b.textContent = opt;
+            b.onclick = () => {
+                const buttons = document.querySelectorAll('.btn');
+                buttons.forEach(btn => btn.disabled = true);
+                
+                if (opt === item.a) { 
+                    b.classList.add('correct'); 
+                    score++; 
+                } else { 
+                    b.classList.add('wrong'); 
+                    buttons.forEach(btn => {
+                        if(btn.textContent === item.a) btn.classList.add('correct');
+                    });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            container.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => { 
+        currentIdx++; 
+        loadNext(); 
+    };
+
+    init();
+</script>
+</body>
+</html>

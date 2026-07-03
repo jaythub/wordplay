@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Sentence Sorcerer | 100 Magic Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --magic-purple: #8e44ad; 
+            --story-bg: #fdf0d5; 
+            --success-green: #27ae60; 
+            --oops-red: #e74c3c; 
+            --sky-blue: #3498db;
+            --ink-black: #2c3e50;
+            --paper-white: #ffffff;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background: var(--story-bg); 
+            background-image: radial-gradient(#666 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+        }
+
+        #game-box { 
+            background: var(--paper-white); 
+            padding: 2.5rem; 
+            border-radius: 40px; 
+            box-shadow: 0 15px 0px #d5bdaf, 0 25px 50px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 800px; 
+            border: 6px solid var(--ink-black);
+            position: relative;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: 900; 
+            margin-bottom: 25px; 
+            color: var(--magic-purple);
+            font-size: 1.2rem;
+        }
+
+        .instruction-tag { 
+            background: var(--sky-blue); 
+            padding: 5px 20px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            color: white; 
+            display: inline-block; 
+            font-size: 0.8rem;
+            border: 3px solid var(--ink-black);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .clause-goal { 
+            font-size: 1.2rem; 
+            color: var(--ink-black); 
+            background: #fff9c4;
+            padding: 12px;
+            border-radius: 15px;
+            margin-bottom: 25px; 
+            font-weight: bold;
+            border: 3px dashed var(--ink-black);
+            text-align: center;
+        }
+
+        .sentence-display { 
+            font-size: 1.8rem; 
+            line-height: 1.5; 
+            color: var(--ink-black); 
+            margin-bottom: 30px; 
+            padding: 40px; 
+            background: #fafafa; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 4px solid var(--ink-black);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .connector { 
+            color: var(--magic-purple); 
+            font-weight: bold;
+            text-decoration: underline wavy;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: white; 
+            border: 4px solid var(--ink-black); 
+            padding: 18px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.1s ease-out; 
+            font-size: 1.2rem; 
+            color: var(--ink-black);
+            box-shadow: 0 6px 0 var(--ink-black);
+            font-family: inherit;
+            text-align: left;
+        }
+
+        .btn:hover:not(:disabled) { 
+            background: #fff3e0; 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 var(--ink-black);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--ink-black);
+        }
+
+        .btn.correct { background: var(--success-green) !important; color: white; }
+        .btn.wrong { background: var(--oops-red) !important; color: white; }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--magic-purple); 
+            color: white; 
+            border: 4px solid var(--ink-black); 
+            border-radius: 20px; 
+            margin-top: 30px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: 900; 
+            font-size: 1.3rem;
+            box-shadow: 0 6px 0 var(--ink-black);
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Stars: <span id="score">0</span> ⭐</span>
+        <span id="progress">1/100</span>
+    </div>
+    
+    <div style="text-align: center;">
+        <div class="instruction-tag">Magic Goal:</div>
+        <div class="clause-goal" id="goal">...</div>
+    </div>
+
+    <div class="sentence-display" id="sentence">...</div>
+
+    <div class="options-grid" id="choices"></div>
+
+    <button id="next-btn">Next Adventure ➔</button>
+</div>
+
+<script>
+    const clauseData = [
+        // ADJECTIVAL CLAUSES
+        {base: "The cake ", goal: "Adjectival (Which cake?)", a: "that my mother baked", d: ["because it was sweet", "if you like chocolate", "since it was a birthday"], end: " was delicious."},
+        {base: "He visited the hospital ", goal: "Adjectival (Which hospital?)", a: "where his brother works.", d: ["so he could heal.", "although he was fine.", "that the doctor is there."]},
+        {base: "The student ", goal: "Adjectival (Which student?)", a: "whose grades improved", d: ["that he studied", "because he was smart", "if he tries"], end: " received an award."},
+        {base: "I remember the day ", goal: "Adjectival (When?)", a: "when we first met.", d: ["that it was sunny.", "because we were happy.", "if it was Monday."]},
+        {base: "The umbrella ", goal: "Adjectival (Which one?)", a: "which I left on the bus", d: ["so I stayed dry", "because it rained", "that it is blue"], end: " was brand new."},
+        {base: "The musician ", goal: "Adjectival", a: "to whom you were listening", d: ["who played the guitar", "because he is famous", "that he sang well"], end: " is my cousin."},
+        {base: "The reason ", goal: "Adjectival", a: "why she left early", d: ["because she was tired", "since it was late", "that she went"], end: " is still a mystery."},
+        {base: "The neighborhood ", goal: "Adjectival", a: "where they live", d: ["because it is quiet", "that it is far", "if they like it"], end: " is very safe."},
+        {base: "The employees ", goal: "Adjectival", a: "who met the deadline", d: ["that they worked hard", "because they are fast", "if they finish"], end: " got a bonus."},
+        {base: "The mountain ", goal: "Adjectival", a: "which we climbed last summer", d: ["where it is high", "because it was hard", "that we saw it"], end: " was covered in snow."},
+        {base: "The car ", goal: "Adjectival", a: "that he bought yesterday", d: ["because it is red", "so he can drive", "if it works"], end: " is a hybrid."},
+        {base: "The woman ", goal: "Adjectival", a: "whose purse was stolen", d: ["who was at the park", "that she was crying", "because she lost it"], end: " called the police."},
+        {base: "The book ", goal: "Adjectival", a: "I was reading", d: ["because it is long", "that I like it", "if it is good"], end: " is on the table."},
+        {base: "The town ", goal: "Adjectival", a: "where the festival is held", d: ["because it is famous", "that people go there", "since it is annual"], end: " is very small."},
+        {base: "The story ", goal: "Adjectival", a: "that he told us", d: ["because it was funny", "so we laughed", "if it is true"], end: " was hard to believe."},
+        {base: "The doctor ", goal: "Adjectival", a: "who performed the surgery", d: ["that he is skilled", "because he was tired", "if he helps"], end: " is very experienced."},
+        {base: "The park ", goal: "Adjectival", a: "where we used to play", d: ["because it is green", "that it is big", "after we grew up"], end: " has been renovated."},
+        {base: "The present ", goal: "Adjectival", a: "which you gave me", d: ["so I liked it", "because it is my birthday", "that it is small"], end: " was perfect."},
+        {base: "The man ", goal: "Adjectival", a: "you see over there", d: ["because he is tall", "that he is a teacher", "if you look"], end: " is my boss."},
+        {base: "The moment ", goal: "Adjectival", a: "when the timer beeps", d: ["that it is done", "because the cake is hot", "so you know"], end: " take the tray out."},
+        {base: "The athlete ", goal: "Adjectival", a: "who won the gold medal", d: ["because he ran fast", "that he is a champion", "after the race finished"], end: " broke the record."},
+        {base: "The forest ", goal: "Adjectival", a: "through which we walked", d: ["because it was spooky", "where the trees grow", "that it was green"], end: " was very thick."},
+        {base: "The keys ", goal: "Adjectival", a: "that were on the hook", d: ["because I found them", "if you need them", "where are they"], end: " belong to the truck."},
+        {base: "The singer ", goal: "Adjectival", a: "whose voice is angelic", d: ["that she sings", "because she is talented", "if she performs"], end: " signed a contract."},
+        {base: "The restaurant ", goal: "Adjectival", a: "where we ate lunch", d: ["because it was cheap", "that it has pizza", "after we were hungry"], end: " has closed."},
+        {base: "The painting ", goal: "Adjectival", a: "which hangs in the hall", d: ["because it is art", "that it is old", "if you like it"], end: " is a masterpiece."},
+        {base: "The friend ", goal: "Adjectival", a: "to whom I sent the letter", d: ["who lives in Paris", "that I wrote to him", "because I missed him"], end: " finally replied."},
+        {base: "The dog ", goal: "Adjectival", a: "that was barking all night", d: ["because it was scared", "where the fence is", "if it stays quiet"], end: " belongs to Sam."},
+        {base: "The computer ", goal: "Adjectival", a: "which I use for work", d: ["so I am productive", "that it is fast", "because it is new"], end: " is broken."},
+        {base: "The teacher ", goal: "Adjectival", a: "who taught us history", d: ["that he was kind", "because he knew a lot", "if he explains"], end: " has retired."},
+        {base: "The phone ", goal: "Adjectival", a: "that is ringing", d: ["because someone calls", "if you answer", "which is loud"], end: " is in my bag."},
+        {base: "The island ", goal: "Adjectival", a: "where we spent the summer", d: ["because it was hot", "that it is tropical", "after we arrived"], end: " was beautiful."},
+        {base: "The laptop ", goal: "Adjectival", a: "whose battery is dead", d: ["that it won't start", "because I forgot to charge", "if it works"], end: " is on the desk."},
+        {base: "The officer ", goal: "Adjectival", a: "to whom you spoke", d: ["who was at the gate", "because he was helpful", "that he is kind"], end: " gave us directions."},
+
+        // NOUN CLAUSES
+        {base: "I believe ", goal: "Noun (What do you believe?)", a: "that honesty is the best policy.", d: ["who tells the truth.", "because it is right.", "which is important."]},
+        {base: "The teacher explained ", goal: "Noun", a: "how the experiment works.", d: ["who was in the lab.", "because it was science.", "that it was complex."]},
+        {base: "I don't know ", goal: "Noun", a: "where I put my glasses.", d: ["which are on the desk.", "because I am blind.", "that I lost them."]},
+        {base: "He asked ", goal: "Noun", a: "whether the shop was open.", d: ["if it is a big shop.", "because he needed bread.", "which sold milk."]},
+        {base: "What you decide ", goal: "Noun (Subject)", a: "is entirely up to you.", d: ["that you are right", "because you chose it", "which is a choice"]},
+        {base: "I can't imagine ", goal: "Noun", a: "how they finished so quickly.", d: ["who was helping them.", "because they are fast.", "that they are done."]},
+        {base: "She admitted ", goal: "Noun", a: "that she had made a mistake.", d: ["which was her fault.", "because she was sorry.", "who was responsible."]},
+        {base: "Do you understand ", goal: "Noun", a: "why the rules were changed?", d: ["which are new?", "because it is fair?", "that they are different?"]},
+        {base: "I'll eat ", goal: "Noun", a: "whatever you are cooking.", d: ["which smells good.", "because I am hungry.", "that it is dinner."]},
+        {base: "It is lucky ", goal: "Noun", a: "that nobody was injured.", d: ["who was at the scene.", "because the crash was bad.", "which is a miracle."]},
+        {base: "Tell me ", goal: "Noun", a: "who told you the secret.", d: ["that it is private.", "because I want to know.", "which is a surprise."]},
+        {base: "He realized ", goal: "Noun", a: "that he had left his phone at home.", d: ["which was on the table.", "because he was late.", "who was calling him."]},
+        {base: "I wonder ", goal: "Noun", a: "whose car is parked outside.", d: ["that it is red.", "because it is blocking me.", "which is a Ford."]},
+        {base: "Can you see ", goal: "Noun", a: "where the path leads?", d: ["which is through the woods?", "because it is dark?", "that it is long?"]},
+        {base: "The problem is ", goal: "Noun", a: "that we don't have enough time.", d: ["which is ticking away.", "because we are slow.", "who is responsible."]},
+        {base: "You must choose ", goal: "Noun", a: "whichever option you prefer.", d: ["that it is best.", "because you have two.", "which are on the list."]},
+        {base: "I forgot ", goal: "Noun", a: "what time the movie starts.", d: ["which is at the cinema.", "because I didn't write it down.", "that it is a comedy."]},
+        {base: "It matters ", goal: "Noun", a: "how much effort you put in.", d: ["which is a lot.", "because you want to win.", "that you try."]},
+        {base: "He decided ", goal: "Noun", a: "that he would quit his job.", d: ["which was stressful.", "because he was unhappy.", "who was his boss."]},
+        {base: "I am sure ", goal: "Noun", a: "that we have met before.", d: ["who you are.", "because you look familiar.", "which was last year."]},
+        {base: "Please show me ", goal: "Noun", a: "how to use this machine.", d: ["which is new.", "because I am stuck.", "that it works."]},
+        {base: "They discovered ", goal: "Noun", a: "that the island was uninhabited.", d: ["which was far away.", "because they saw no one.", "who lived there."]},
+        {base: "The report shows ", goal: "Noun", a: "why the project failed.", d: ["which was a disaster.", "because of the budget.", "that it is over."]},
+        {base: "I hope ", goal: "Noun", a: "that you have a great time.", d: ["which is at the party.", "because you deserve it.", "who is coming."]},
+        {base: "The question is ", goal: "Noun", a: "whether we can afford it.", d: ["which is expensive.", "because we are poor.", "that it costs a lot."]},
+        {base: "I didn't hear ", goal: "Noun", a: "what the announcer said.", d: ["who was speaking.", "because it was loud.", "that the race started."]},
+        {base: "It is obvious ", goal: "Noun", a: "that she is talented.", d: ["who is the pianist.", "because she plays well.", "which is true."]},
+        {base: "We are deciding ", goal: "Noun", a: "where we should go on vacation.", d: ["which is a beach.", "because we need a break.", "that we are tired."]},
+        {base: "He asked me ", goal: "Noun", a: "why I was so happy.", d: ["that I was smiling.", "because I won.", "which was great."]},
+
+        // ADVERBIAL CLAUSES
+        {base: "I'll call you ", goal: "Adverbial (Time)", a: "as soon as I arrive.", d: ["which is at the station.", "that I am there.", "who is waiting."]},
+        {base: "He stayed at home ", goal: "Adverbial (Reason)", a: "because he was feeling unwell.", d: ["which was a quiet day.", "that he was sick.", "where it was warm."]},
+        {base: "You can go out ", goal: "Adverbial (Condition)", a: "provided that you finish your work.", d: ["which is a lot.", "that you are done.", "who is your friend."]},
+        {base: "She practiced every day ", goal: "Adverbial (Purpose)", a: "so that she could win the competition.", d: ["which was very hard.", "that she is a pianist.", "who is the best."]},
+        {base: "He is very friendly ", goal: "Adverbial (Contrast)", a: "although he is quite shy.", d: ["which is surprising.", "that he likes people.", "who is a student."]},
+        {base: "I will wait here ", goal: "Adverbial (Time)", a: "until you come back.", d: ["which is near the door.", "that you are coming.", "where it is safe."]},
+        {base: "Since it is raining ", goal: "Adverbial (Reason)", a: "we should take an umbrella.", d: ["which is wet", "that the sky is grey", "who is outside"]},
+        {base: "She spoke quietly ", goal: "Adverbial (Purpose)", a: "lest she should wake the baby.", d: ["who was sleeping.", "which was a good idea.", "that she was calm."]},
+        {base: "If it snows tomorrow ", goal: "Adverbial (Condition)", a: "the schools will be closed.", d: ["which is cold", "that it is winter", "where we live"]},
+        {base: "He acted ", goal: "Adverbial (Manner)", a: "as if he were the boss.", d: ["who is in charge.", "that he was important.", "which was annoying."]},
+        {base: "Wherever you go ", goal: "Adverbial (Place)", a: "I will follow you.", d: ["which is far away.", "that you are leaving.", "who is with you."]},
+        {base: "While the music played ", goal: "Adverbial (Time)", a: "everyone started to dance.", d: ["which was loud", "that it was a party", "who was the DJ"]},
+        {base: "He worked hard ", goal: "Adverbial (Concession)", a: "even though he was tired.", d: ["which was impressive.", "that he finished.", "who is a builder."]},
+        {base: "Put it back ", goal: "Adverbial (Place)", a: "where you found it.", d: ["which is on the shelf.", "that it is mine.", "because I need it."]},
+        {base: "She was so tired ", goal: "Adverbial (Result)", a: "that she fell asleep instantly.", d: ["because she worked hard.", "which was unusual.", "who had no energy."]},
+        {base: "I am taller ", goal: "Adverbial (Comparison)", a: "than my brother is.", d: ["who is short.", "that he is young.", "which is true."]},
+        {base: "Unless you hurry ", goal: "Adverbial (Condition)", a: "you will miss the bus.", d: ["which is at the stop.", "that you are late.", "who is the driver."]},
+        {base: "The game was cancelled ", goal: "Adverbial (Reason)", a: "since the field was flooded.", d: ["which was a shame.", "that it rained.", "who was playing."]},
+        {base: "Speak clearly ", goal: "Adverbial (Purpose)", a: "so that everyone can hear you.", d: ["who is in the room.", "that you are loud.", "which is helpful."]},
+        {base: "After the movie ended ", goal: "Adverbial (Time)", a: "we went for pizza.", d: ["which was long", "that we liked it", "who was the star"]},
+        {base: "Because he was late ", goal: "Adverbial (Reason)", a: "he missed the first half.", d: ["which was his fault", "that he overslept", "who was waiting"]},
+        {base: "Whether you like it or not ", goal: "Adverbial (Condition)", a: "we are going to the dentist.", d: ["who is very nice.", "that it is time.", "which is important."]},
+        {base: "He eats ", goal: "Adverbial (Manner)", a: "as though he hasn't seen food in days.", d: ["which is a lot.", "that he is hungry.", "who is at the table."]},
+        {base: "I'll do it ", goal: "Adverbial (Time)", a: "whenever I have a spare moment.", d: ["which is rare.", "that I am busy.", "who is helping."]},
+        {base: "The dog barked ", goal: "Adverbial (Time)", a: "whenever the doorbell rang.", d: ["which was loud.", "that someone was there.", "who was at the door."]},
+        {base: "She sang ", goal: "Adverbial (Manner)", a: "as if she were a professional.", d: ["who is famous.", "that she had a great voice.", "which was lovely."]},
+        {base: "I am happy ", goal: "Adverbial (Reason)", a: "because you came to visit.", d: ["who is my friend.", "that it is sunny.", "which is good news."]},
+        {base: "He behaves ", goal: "Adverbial (Comparison)", a: "better than he used to.", d: ["who was naughty.", "that he is older.", "which is a relief."]},
+        {base: "They arrived ", goal: "Adverbial (Time)", a: "before the party started.", d: ["which was at eight.", "that they were early.", "who was the host."]},
+        {base: "She went to bed ", goal: "Adverbial (Time)", a: "once she had finished her book.", d: ["which was exciting.", "that she was tired.", "who was the author."]},
+        {base: "I'll help you ", goal: "Adverbial (Condition)", a: "if you help me.", d: ["which is fair.", "that we are a team.", "who is working."]},
+        {base: "He ran ", goal: "Adverbial (Comparison)", a: "as fast as he could.", d: ["who was in a race.", "that he was winning.", "which was impressive."]},
+        {base: "Wait here ", goal: "Adverbial (Time)", a: "until I return.", d: ["which is by the gate.", "that I am coming back.", "where it is warm."]},
+        {base: "She works hard ", goal: "Adverbial (Reason)", a: "so that her family can have a better life.", d: ["who she loves.", "that she is successful.", "which is noble."]},
+        {base: "Though he is poor ", goal: "Adverbial (Concession)", a: "he is very generous.", d: ["who has no money.", "that he helps others.", "which is kind."]},
+        {base: "We walked ", goal: "Adverbial (Place)", a: "wherever the path led us.", d: ["which was through the forest.", "that we were lost.", "who was with us."]}
+    ];
+
+    let current = 0; let score = 0; 
+    let deck = [...clauseData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('sentence').innerHTML = `${item.base} <span class="connector">...</span> ${item.end || ""}`;
+        document.getElementById('goal').textContent = item.goal;
+        document.getElementById('progress').textContent = `${current + 1}/100`;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { 
+                    b.classList.add('correct'); 
+                    score++; 
+                } else { 
+                    b.classList.add('wrong'); 
+                    btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); 
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 100) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <div style="text-align:center">
+                    <h1 style="color:var(--magic-purple)">Quest Complete! 🌈</h1>
+                    <p style="font-size: 1.5rem;">You earned ${score} stars!</p>
+                    <button onclick="location.reload()" class="btn">Play Again</button>
+                </div>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>
