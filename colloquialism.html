@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Slang Slalom | The English Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --weaver-purple: #512da8;
+            --card-yellow: #feca57;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --btn-wine: #722f37;
+            --btn-brown: #5d4037;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--card-red) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            padding: 35px;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex; justify-content: space-between;
+            font-weight: 900; margin-bottom: 20px;
+            font-size: 1.2rem; text-transform: uppercase;
+        }
+
+        .header-label {
+            text-align: center; 
+            font-weight: 900;
+            color: #636e72; 
+            text-transform: uppercase;
+            margin-bottom: 10px; 
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        .explanation-display {
+            background: var(--card-yellow);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 25px; text-align: center;
+            border: 5px solid var(--text-dark);
+            box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
+            font-size: 1.4rem; line-height: 1.5;
+            font-weight: 700; color: #000;
+        }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .btn {
+            background: white; border: 4px solid var(--text-dark);
+            padding: 15px; border-radius: 15px;
+            font-family: inherit; font-weight: 900; cursor: pointer;
+            transition: all 0.1s ease; color: var(--text-dark);
+            font-size: 1.1rem; box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--card-blue);
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        .btn.correct { background-color: var(--success) !important; color: white; }
+        .btn.wrong { background-color: var(--error) !important; color: white; }
+
+        #next-btn {
+            width: 100%; padding: 20px;
+            background-color: var(--btn-wine) !important;
+            color: white !important; border: 4px solid var(--text-dark);
+            border-radius: 15px; margin-top: 25px; cursor: pointer;
+            display: none; font-weight: 900; font-family: inherit;
+            font-size: 1.4rem; box-shadow: 6px 6px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        #next-btn:hover {
+            background-color: var(--btn-brown) !important;
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🎿</span>
+        <span id="progress">1/80</span>
+    </div>
+
+    <div class="header-label">The Meaning</div>
+    <div class="explanation-display" id="display-area">...</div>
+
+    <div class="header-label" style="margin-top: 20px;">Select the Matching Expression</div>
+    <div class="options-grid" id="choices"></div>
+
+    <button id="next-btn">Next Slalom Gate →</button>
+</div>
+
+<script>
+    // Logic remains the same with all 80 questions
+    const slalomData = [
+        { e: "To pass away; to die.", c: "To kick the bucket", o: ["To spill the beans", "To bite the bullet", "To hit the hay"] },
+        { e: "To reveal a secret.", c: "To spill the beans", o: ["To kick the bucket", "To break the ice", "To let the cat out"] },
+        { e: "To be extremely happy.", c: "To be over the moon", o: ["To feel blue", "To be under the weather", "To see red"] },
+        { e: "Something very easy to do.", c: "A piece of cake", o: ["A hard nut to crack", "A long shot", "A bitter pill"] },
+        { e: "To feel unwell.", c: "Under the weather", o: ["On cloud nine", "Over the moon", "Fit as a fiddle"] },
+        { e: "To start a conversation in a social setting.", c: "To break the ice", o: ["To burn bridges", "To cut corners", "To hit the road"] },
+        { e: "To avoid the main topic.", c: "To beat around the bush", o: ["To get to the point", "To hit the nail on the head", "To face the music"] },
+        { e: "To be very expensive.", c: "Cost an arm and a leg", o: ["Cheap as chips", "Break the bank", "Worth its weight in gold"] },
+        { e: "Very rarely.", c: "Once in a blue moon", o: ["Day in, day out", "Every now and then", "Time after time"] },
+        { e: "To tell someone a secret.", c: "To let the cat out of the bag", o: ["To bark up the wrong tree", "To fish for compliments", "To pull someone’s leg"] },
+        { e: "To accept something difficult or unpleasant.", c: "To bite the bullet", o: ["To throw in the towel", "To kick the bucket", "To let it slide"] },
+        { e: "To complete a task in the fastest or cheapest way, often sacrificing quality.", c: "To cut corners", o: ["To go the extra mile", "To pull out all the stops", "To do it by the book"] },
+        { e: "To joke with someone by saying something that isn't true.", c: "To pull someone’s leg", o: ["To pull your weight", "To pull yourself together", "To pull strings"] },
+        { e: "To go to bed.", c: "To hit the hay", o: ["To hit the road", "To hit the books", "To hit the deck"] },
+        { e: "To do exactly the right thing or find the exact answer.", c: "To hit the nail on the head", o: ["To miss the boat", "To bark up the wrong tree", "To jump the gun"] },
+        { e: "To miss an opportunity.", c: "To miss the boat", o: ["To rock the boat", "To be in the same boat", "To burn your bridges"] },
+        { e: "To stay awake late at night working or studying.", c: "To burn the midnight oil", o: ["To burn the candle at both ends", "To burn bridges", "To crash out"] },
+        { e: "To be in a very good health.", c: "Fit as a fiddle", o: ["Under the weather", "At death's door", "Out of sorts"] },
+        { e: "To deal with the consequences of one's actions.", c: "To face the music", o: ["To play second fiddle", "To change your tune", "To blow your own trumpet"] },
+        { e: "To make a long story short.", c: "In a nutshell", o: ["By and large", "Off the record", "Through thick and thin"] },
+        { e: "To agree completely.", c: "To see eye to eye", o: ["To look the other way", "To turn a blind eye", "To keep an eye out"] },
+        { e: "To stop working on something.", c: "To call it a day", o: ["To start from scratch", "To work against the clock", "To keep the ball rolling"] },
+        { e: "To decide to do something difficult after doubting it.", c: "To take the plunge", o: ["To hold your horses", "To sit on the fence", "To walk on eggshells"] },
+        { e: "To be exactly what is needed.", c: "Just what the doctor ordered", o: ["A bitter pill to swallow", "Under the knife", "Out of the woods"] },
+        { e: "To perform very well.", c: "To pass with flying colors", o: ["To scrape through", "To drop out", "To make the grade"] },
+        { e: "To become very angry.", c: "To see red", o: ["To feel blue", "To be green with envy", "To be in the black"] },
+        { e: "To be very busy.", c: "To have your hands full", o: ["To be at a loose end", "To sit on your hands", "To wash your hands of"] },
+        { e: "To get something started.", c: "To get the ball rolling", o: ["To drop the ball", "To keep your eye on the ball", "To be on the ball"] },
+        { e: "To have a hidden advantage.", c: "To have an ace up your sleeve", o: ["To wear your heart on your sleeve", "To have a card up your sleeve", "To play your cards right"] },
+        { e: "To listen carefully.", c: "To be all ears", o: ["To be all thumbs", "To be all at sea", "To be all in"] },
+        { e: "To work together.", c: "To join forces", o: ["To pull apart", "To go solo", "To break up"] },
+        { e: "To remain calm in a difficult situation.", c: "To keep your cool", o: ["To lose your head", "To blow your top", "To fly off the handle"] },
+        { e: "To be very surprised.", c: "To be taken aback", o: ["To be in the know", "To be on top of the world", "To be down in the dumps"] },
+        { e: "To be in the same difficult situation.", c: "To be in the same boat", o: ["To miss the boat", "To rock the boat", "To burn your bridges"] },
+        { e: "To say something that is already known.", c: "To preach to the choir", o: ["To talk in circles", "To break the silence", "To keep it under wraps"] },
+        { e: "To be successful.", c: "To make it big", o: ["To fall short", "To miss the mark", "To lose out"] },
+        { e: "To do something without planning.", c: "To play it by ear", o: ["To follow the rules", "To go by the book", "To stick to the plan"] },
+        { e: "To be very tired.", c: "To be dead on your feet", o: ["To be full of beans", "To be on fire", "To be wide awake"] },
+        { e: "To get to the most important part.", c: "To cut to the chase", o: ["To beat around the bush", "To take the long way", "To stall for time"] },
+        { e: "To have a lot of energy.", c: "To be full of beans", o: ["To be out of breath", "To be down and out", "To be a couch potato"] },
+        { e: "To make someone feel better.", c: "To cheer someone up", o: ["To let someone down", "To put someone off", "To pick on someone"] },
+        { e: "To be very similar to a parent.", c: "A chip off the old block", o: ["The black sheep of the family", "A breath of fresh air", "A fair-weather friend"] },
+        { e: "To be very different from someone else.", c: "To be poles apart", o: ["To be like two peas in a pod", "To see eye to eye", "To be on the same page"] },
+        { e: "To decide not to do something at the last minute.", c: "To get cold feet", o: ["To jump in with both feet", "To put your best foot forward", "To stand on your own two feet"] },
+        { e: "To be honest and direct.", c: "To call a spade a spade", o: ["To sugarcoat something", "To talk through your hat", "To lie through your teeth"] },
+        { e: "To be very easy to see.", c: "To stand out like a sore thumb", o: ["To blend into the background", "To keep a low profile", "To be out of sight"] },
+        { e: "To be very happy.", c: "On cloud nine", o: ["In the doldrums", "Down in the mouth", "Beside yourself"] },
+        { e: "To be in a situation where you can't win.", c: "Between a rock and a hard place", o: ["In the driver's seat", "On top of the world", "In the clear"] },
+        { e: "To be very common.", c: "A dime a dozen", o: ["One in a million", "Few and far between", "Rare as hen's teeth"] },
+        { e: "To be very quick.", c: "In the blink of an eye", o: ["Slowly but surely", "In the long run", "Behind the times"] },
+        { e: "To be completely wrong.", c: "To bark up the wrong tree", o: ["To hit the mark", "To be on the right track", "To hit the jackpot"] },
+        { e: "To be very careful.", c: "To walk on eggshells", o: ["To jump the gun", "To throw caution to the wind", "To go for broke"] },
+        { e: "To make a situation worse.", c: "To add fuel to the fire", o: ["To pour oil on troubled waters", "To clear the air", "To break the ice"] },
+        { e: "To be very old.", c: "As old as the hills", o: ["Fresh as a daisy", "New kid on the block", "Up to date"] },
+        { e: "To be very quiet.", c: "As quiet as a mouse", o: ["Loud as a siren", "Full of life", "Making a scene"] },
+        { e: "To be very brave.", c: "As brave as a lion", o: ["Chicken-hearted", "Scared of your own shadow", "Weak as a kitten"] },
+        { e: "To be very busy.", c: "As busy as a bee", o: ["Lazy as a sloth", "At a loose end", "Twiddling your thumbs"] },
+        { e: "To be very clear.", c: "As clear as crystal", o: ["Clear as mud", "Vague as a cloud", "In the dark"] },
+        { e: "To be very strong.", c: "As strong as an ox", o: ["Weak as a reed", "Thin as a rake", "Fragile as glass"] },
+        { e: "To be very light.", c: "As light as a feather", o: ["Heavy as lead", "Solid as a rock", "Hard as nails"] },
+        { e: "To be very fast.", c: "As fast as lightning", o: ["Slow as a snail", "At a snail's pace", "Crawl along"] },
+        { e: "To be very happy.", c: "As happy as a lark", o: ["Miserable as sin", "Down in the dumps", "Sick at heart"] },
+        { e: "To be very cold.", c: "As cold as ice", o: ["Hot as an oven", "Warm as toast", "Burning up"] },
+        { e: "To be very white.", c: "As white as a sheet", o: ["Black as coal", "Red as a beetroot", "Green with envy"] },
+        { e: "To be very tall.", c: "As tall as a giant", o: ["Short as a stump", "Knee-high to a grasshopper", "Small as a mouse"] },
+        { e: "To be very poor.", c: "As poor as a church mouse", o: ["Rich as Croesus", "Well-off", "In the money"] },
+        { e: "To be very hungry.", c: "As hungry as a wolf", o: ["Full as a tick", "Not a bite", "Stuffed"] },
+        { e: "To be very blind.", c: "As blind as a bat", o: ["Eagle-eyed", "Sharp-sighted", "Keen-eyed"] },
+        { e: "To be very cunning.", c: "As cunning as a fox", o: ["Simple as a lamb", "Innocent as a babe", "Green as grass"] },
+        { e: "To be very gentle.", c: "As gentle as a lamb", o: ["Rough as a bear", "Fierce as a tiger", "Wild as a hawk"] },
+        { e: "To be very obstinate.", c: "As obstinate as a mule", o: ["Pliable as a reed", "Easy-going", "Flexible"] },
+        { e: "To be very fat.", c: "As fat as a pig", o: ["Thin as a lath", "Skin and bone", "Slight"] },
+        { e: "To be very thin.", c: "As thin as a lath", o: ["Fat as a pig", "Broad as a barn door", "Plump"] },
+        { e: "To be very hard.", c: "As hard as nails", o: ["Soft as butter", "Tender as a chicken", "Pliable"] },
+        { e: "To be very proud.", c: "As proud as a peacock", o: ["Humble as a servant", "Modest", "Lowly"] },
+        { e: "To be very wise.", c: "As wise as Solomon", o: ["Silly as a goose", "Dumb as a post", "Foolish"] },
+        { e: "To be very playful.", c: "As playful as a kitten", o: ["Serious as a judge", "Dull as ditchwater", "Solemn"] },
+        { e: "To be very steady.", c: "As steady as a rock", o: ["Shaky as a leaf", "Unstable", "Fickle"] },
+        { e: "To be very bitter.", c: "As bitter as gall", o: ["Sweet as honey", "Mild as milk", "Bland"] },
+        { e: "To be very red.", c: "As red as a beetroot", o: ["White as a sheet", "Pale as death", "Green as grass"] }
+    ];
+
+    let current = 0; let score = 0;
+    let deck = [...slalomData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        document.getElementById('display-area').textContent = item.e;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let options = [item.c, ...item.o].sort(() => Math.random() - 0.5);
+        
+        options.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+                if(opt === item.c) { b.classList.add('correct'); score++; }
+                else { 
+                    b.classList.add('wrong'); 
+                    document.querySelectorAll('.btn').forEach(btn => { if(btn.textContent === item.c) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        current++;
+        if(current < deck.length) load();
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--weaver-purple); text-align:center;">Course Completed! 🏁</h1>
+                <div class="explanation-display">
+                    Final Score: ${score} / ${deck.length}<br>
+                </div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Re-run the Slalom</button>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

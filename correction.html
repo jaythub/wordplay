@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Surgeon | 70 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --surgeon-teal: #4ecdc4; 
+            --surgeon-bg: #fff9f0; 
+            --success: #55efc4; 
+            --error: #ff7675; 
+            --text-dark: #2d3436;
+        }
+        
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--surgeon-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--text-dark);
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%; 
+            max-width: 800px; 
+            position: relative;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            font-size: 1.2rem;
+        }
+
+        .instruction { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            letter-spacing: 1px; 
+            text-align: center;
+        }
+
+        .sentence-display { 
+            font-size: 1.6rem; 
+            line-height: 1.5; 
+            color: var(--text-dark); 
+            margin-bottom: 30px; 
+            padding: 30px; 
+            background: #fdfdfd; 
+            border-radius: 15px; 
+            text-align: center; 
+            border: 3px dashed var(--surgeon-teal); 
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--text-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-size: 1.1rem; 
+            color: var(--text-dark);
+            box-shadow: 4px 4px 0px var(--text-dark);
+            font-family: inherit;
+            text-align: left;
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background: #f0fffe;
+        }
+
+        .btn.correct { background: var(--success) !important; }
+        .btn.wrong { background: var(--error) !important; color: white; }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--surgeon-teal); 
+            color: var(--text-dark); 
+            border: 3px solid var(--text-dark);
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        #next-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px var(--text-dark); }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/70</span>
+    </div>
+    <div class="instruction">Select the grammatically correct version:</div>
+    <div class="sentence-display" id="sentence">...</div>
+    <div id="choices" class="options-grid"></div>
+    <button id="next-btn">Perform Next Surgery →</button>
+</div>
+
+<script>
+    const correctionData = [
+        // Original 10
+        {f: "The reason why he failed is because he didn't study.", a: "The reason he failed is that he didn't study.", d: ["The reason why he failed is that he didn't study.", "The reason he failed is because he didn't study.", "He failed because the reason was he didn't study."]},
+        {f: "Between you and I, I think he is lying.", a: "Between you and me, I think he is lying.", d: ["Between you and I, I think he is lying.", "Between us both, I think he is lying.", "Between you and myself, I think he is lying."]},
+        {f: "She is one of those people who is always late.", a: "She is one of those people who are always late.", d: ["She is one of those people who is always late.", "She is one of those people whom are always late.", "She is one of those person who are always late."]},
+        {f: "I could of gone to the party if I had known.", a: "I could have gone to the party if I had known.", d: ["I could of gone to the party if I had known.", "I could had gone to the party if I had known.", "I could of went to the party if I had known."]},
+        {f: "Every one of the students have finished their work.", a: "Every one of the students has finished their work.", d: ["Every one of the students have finished their work.", "Every one of the students has finished his work.", "Each students has finished their work."]},
+        {f: "Whom do you think will win the race?", a: "Who do you think will win the race?", d: ["Whom do you think will win the race?", "Whom do you think is winning the race?", "Who do you think shall win the race?"]},
+        {f: "I feel badly about the mistake.", a: "I feel bad about the mistake.", d: ["I feel badly about the mistake.", "I feel bad regarding the mistake.", "I feel badly regarding the mistake."]},
+        {f: "The data is being analyzed by the researchers.", a: "The data are being analyzed by the researchers.", d: ["The data is being analyzed by the researchers.", "The datas are being analyzed by the researchers.", "The data was being analyzed by the researchers."]},
+        {f: "He is more taller than his brother.", a: "He is taller than his brother.", d: ["He is more taller than his brother.", "He is much taller than his brother.", "He is more tall than his brother."]},
+        {f: "If I was you, I would take the offer.", a: "If I were you, I would take the offer.", d: ["If I was you, I would take the offer.", "If I were you, I will take the offer.", "Were I you, I will take the offer."]},
+
+        // 60 New Questions
+        {f: "Each of the players were given a trophy.", a: "Each of the players was given a trophy.", d: ["Each of the players were given a trophy.", "Every players was given a trophy.", "Each players were given a trophy."]},
+        {f: "He is the man whom I think stole the car.", a: "He is the man who I think stole the car.", d: ["He is the man whom I think stole the car.", "He is the man which I think stole the car.", "He is the man whose I think stole the car."]},
+        {f: "Neither of the options look good to me.", a: "Neither of the options looks good to me.", d: ["Neither of the options look good to me.", "Neither of the option looks good to me.", "Neither of the options are looking good to me."]},
+        {f: "I prefer tea than coffee.", a: "I prefer tea to coffee.", d: ["I prefer tea than coffee.", "I prefer tea more then coffee.", "I prefer tea over to coffee."]},
+        {f: "She sang the song beautiful.", a: "She sang the song beautifully.", d: ["She sang the song beautiful.", "She sang the song more beautiful.", "She singed the song beautifully."]},
+        {f: "The cake was divided between the four children.", a: "The cake was divided among the four children.", d: ["The cake was divided between the four children.", "The cake was divided in-between the four children.", "The cake was divided into the four children."]},
+        {f: "The city has less people than it used to.", a: "The city has fewer people than it used to.", d: ["The city has less people than it used to.", "The city has lesser people than it used to.", "The city has few people than it used to."]},
+        {f: "I have been waiting here since two hours.", a: "I have been waiting here for two hours.", d: ["I have been waiting here since two hours.", "I am waiting here for two hours.", "I have waited here since two hours."]},
+        {f: "He did not know nothing about it.", a: "He did not know anything about it.", d: ["He did not know nothing about it.", "He knew not anything about it.", "He didn't knew anything about it."]},
+        {f: "One of my friend is coming over.", a: "One of my friends is coming over.", d: ["One of my friend is coming over.", "One of my friends are coming over.", "A friend of mine are coming over."]},
+        {f: "The scenerys here are beautiful.", a: "The scenery here is beautiful.", d: ["The scenerys here are beautiful.", "The sceneries here are beautiful.", "The scenery here are beautiful."]},
+        {f: "He is more cleverer than his sister.", a: "He is cleverer than his sister.", d: ["He is more cleverer than his sister.", "He is much cleverer than his sister.", "He is more clever than his sister."]},
+        {f: "The teacher told the students to not talk.", a: "The teacher told the students not to talk.", d: ["The teacher told the students to not talk.", "The teacher told the students they don't talk.", "The teacher said the students not to talk."]},
+        {f: "He enjoys to play tennis on Sundays.", a: "He enjoys playing tennis on Sundays.", d: ["He enjoys to play tennis on Sundays.", "He enjoys for playing tennis on Sundays.", "He enjoy playing tennis on Sundays."]},
+        {f: "They had already went to the market.", a: "They had already gone to the market.", d: ["They had already went to the market.", "They have already went to the market.", "They already gone to the market."]},
+        {f: "I look forward to meet you soon.", a: "I look forward to meeting you soon.", d: ["I look forward to meet you soon.", "I look forward meeting you soon.", "I am looking forward to meet you soon."]},
+        {f: "The news are very depressing today.", a: "The news is very depressing today.", d: ["The news are very depressing today.", "The news were very depressing today.", "The news is being very depressing today."]},
+        {f: "Neither he nor I are going.", a: "Neither he nor I am going.", d: ["Neither he nor I are going.", "Neither he nor I is going.", "Neither him nor me are going."]},
+        {f: "He didn't study hard, so he failed the exam.", a: "He didn't study hard; therefore, he failed.", d: ["He didn't study hard, so he failed the exam.", "He didn't study hard, so that he failed.", "He didn't study hard because he failed."]},
+        {f: "She can play the violin very good.", a: "She can play the violin very well.", d: ["She can play the violin very good.", "She can play the violin much good.", "She plays the violin goodly."]},
+        {f: "Where is my luggages?", a: "Where is my luggage?", d: ["Where is my luggages?", "Where are my luggages?", "Where are my luggage?"]},
+        {f: "I am having many works to do.", a: "I have a lot of work to do.", d: ["I am having many works to do.", "I have many works to do.", "I am having much work to do."]},
+        {f: "The boy which won the prize is my cousin.", a: "The boy who won the prize is my cousin.", d: ["The boy which won the prize is my cousin.", "The boy whom won the prize is my cousin.", "The boy that won the prize is my cousin."]},
+        {f: "He is suffering from fever since Monday.", a: "He has been suffering from fever since Monday.", d: ["He is suffering from fever since Monday.", "He has suffered from fever for Monday.", "He was suffering from fever since Monday."]},
+        {f: "If it will rain, we shall stay at home.", a: "If it rains, we shall stay at home.", d: ["If it will rain, we shall stay at home.", "If it would rain, we shall stay at home.", "If it rain, we shall stay at home."]},
+        {f: "The students are sitting in the desks.", a: "The students are sitting at the desks.", d: ["The students are sitting in the desks.", "The students are sitting on the desks.", "The students are sitting beside of the desks."]},
+        {f: "He works hardly for the company.", a: "He works hard for the company.", d: ["He works hardly for the company.", "He is working hardly for the company.", "He works more hard for the company."]},
+        {f: "I have no money to buy a new car.", a: "I don't have enough money to buy a car.", d: ["I have no money to buy a new car.", "I haven't money to buy a new car.", "I don't have money for buy a car."]},
+        {f: "You must to finish your homework.", a: "You must finish your homework.", d: ["You must to finish your homework.", "You must finishing your homework.", "You have to must finish your homework."]},
+        {f: "He is the most cleverest boy in class.", a: "He is the cleverest boy in the class.", d: ["He is the most cleverest boy in class.", "He is the most clever boy in class.", "He is more cleverest than the boys."]},
+        {f: "She is married with a doctor.", a: "She is married to a doctor.", d: ["She is married with a doctor.", "She is married by a doctor.", "She is married for a doctor."]},
+        {f: "I told him that I will come.", a: "I told him that I would come.", d: ["I told him that I will come.", "I tell him that I would come.", "I told to him I would come."]},
+        {f: "The clock has striked twelve.", a: "The clock has struck twelve.", d: ["The clock has striked twelve.", "The clock has stroke twelve.", "The clock has been striking twelve."]},
+        {f: "He died from cancer.", a: "He died of cancer.", d: ["He died from cancer.", "He died by cancer.", "He died with cancer."]},
+        {f: "Wait here until I do not return.", a: "Wait here until I return.", d: ["Wait here until I do not return.", "Wait here till I don't return.", "Wait here unless I return."]},
+        {f: "He is more stronger than me.", a: "He is stronger than I am.", d: ["He is more stronger than me.", "He is stronger than me.", "He is much stronger than me."]},
+        {f: "Ten miles are a long distance.", a: "Ten miles is a long distance.", d: ["Ten miles are a long distance.", "Ten miles were a long distance.", "Ten mile is a long distance."]},
+        {f: "He and myself are going to the park.", a: "He and I are going to the park.", d: ["He and myself are going to the park.", "Him and I are going to the park.", "He and me are going to the park."]},
+        {f: "It is me who did it.", a: "It is I who did it.", d: ["It is me who did it.", "It is myself who did it.", "It's me whom did it."]},
+        {f: "Who are you talking to?", a: "To whom are you talking?", d: ["Who are you talking to?", "Whom you are talking to?", "To who are you talking?"]},
+        {f: "He has no place to live in.", a: "He has no place to live.", d: ["He has no place to live in.", "He has no place for living.", "He has no place in which to live."]},
+        {f: "Did you saw the movie?", a: "Did you see the movie?", d: ["Did you saw the movie.", "Have you saw the movie?", "Did you seen the movie?"]},
+        {f: "She is more better than her friend.", a: "She is better than her friend.", d: ["She is more better than her friend.", "She is much better than her friend.", "She is better then her friend."]},
+        {f: "I am going to office.", a: "I am going to the office.", d: ["I am going to office.", "I am going to an office.", "I go to office."]},
+        {f: "He gave me an advice.", a: "He gave me some advice.", d: ["He gave me an advice.", "He gave me advices.", "He gave me an piece of advice."]},
+        {f: "I was born on 1990.", a: "I was born in 1990.", d: ["I was born on 1990.", "I was born at 1990.", "I am born in 1990."]},
+        {f: "He is fond for sweets.", a: "He is fond of sweets.", d: ["He is fond for sweets.", "He is fond to sweets.", "He is fond with sweets."]},
+        {f: "The gold is a precious metal.", a: "Gold is a precious metal.", d: ["The gold is a precious metal.", "Gold are a precious metal.", "A gold is a precious metal."]},
+        {f: "He is elder than me.", a: "He is older than I am.", d: ["He is elder than me.", "He is elder to me.", "He is elder then me."]},
+        {f: "Listen what I say.", a: "Listen to what I say.", d: ["Listen what I say.", "Listen at what I say.", "Listening what I say."]},
+        {f: "I am tired with this work.", a: "I am tired of this work.", d: ["I am tired with this work.", "I am tired by this work.", "I tired of this work."]},
+        {f: "He is known for me.", a: "He is known to me.", d: ["He is known for me.", "He is known by me.", "He is known with me."]},
+        {f: "He is in the committee.", a: "He is on the committee.", d: ["He is in the committee.", "He is for the committee.", "He is at the committee."]},
+        {f: "What is the time in your watch?", a: "What is the time by your watch?", d: ["What is the time in your watch?", "What is the time on your watch?", "What is time at your watch?"]},
+        {f: "He congratulated him for his success.", a: "He congratulated him on his success.", d: ["He congratulated him for his success.", "He congratulated him at his success.", "He congratulated him in his success."]},
+        {f: "He walked as if he was drunk.", a: "He walked as if he were drunk.", d: ["He walked as if he was drunk.", "He walked as though he was drunk.", "He walks as if he was drunk."]},
+        {f: "Neither of them were present.", a: "Neither of them was present.", d: ["Neither of them were present.", "Neither of them are present.", "Neither of they were present."]},
+        {f: "Either he or I is wrong.", a: "Either he or I am wrong.", d: ["Either he or I is wrong.", "Either he or I are wrong.", "Either him or me is wrong."]},
+        {f: "Each of the children have an apple.", a: "Each of the children has an apple.", d: ["Each of the children have an apple.", "Each children has an apple.", "Every children has an apple."]},
+        {f: "None of the two boys is here.", a: "Neither of the two boys is here.", d: ["None of the two boys is here.", "None of the two boys are here.", "Neither of the two boys are here."]}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...correctionData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            alert("Elite Surgeon Status Achieved! All 70 Cases Solved. Final Score: " + score + "/70"); 
+            init(); return; 
+        }
+        const item = deck[current];
+        document.getElementById('sentence').textContent = item.f;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Sorting Safari | The English Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --weaver-purple: #512da8;
+            --card-yellow: #feca57;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            /* Safari Theme Colors */
+            --btn-wine: #722f37;
+            --btn-brown: #5d4037;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--card-blue) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            padding: 35px;
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex; justify-content: space-between;
+            font-weight: 900; margin-bottom: 20px;
+            font-size: 1.2rem; text-transform: uppercase;
+        }
+
+        .mode-banner {
+            display: inline-block; padding: 8px 25px; border-radius: 50px;
+            color: white; font-weight: 900; font-size: 0.9rem;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 15px; border: 3px solid var(--text-dark);
+        }
+
+        .question-area {
+            background: var(--card-yellow);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 25px; text-align: center;
+            border: 5px solid var(--text-dark);
+            box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        #target-list {
+            font-size: 1.8rem; font-weight: 900;
+            display: block; margin-bottom: 10px; color: #000;
+        }
+
+        #prompt { font-size: 1.1rem; font-weight: bold; color: var(--text-dark); opacity: 0.8; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .btn {
+            background: white; border: 4px solid var(--text-dark);
+            padding: 15px; border-radius: 15px;
+            font-family: inherit; font-weight: 900; cursor: pointer;
+            transition: all 0.1s ease; color: var(--text-dark);
+            font-size: 1.1rem; box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--card-blue);
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        .btn.correct { background-color: var(--success) !important; color: white; }
+        .btn.wrong { background-color: var(--error) !important; color: white; }
+
+        #next-btn {
+            width: 100%; padding: 20px;
+            background-color: var(--btn-wine) !important;
+            color: white !important; border: 4px solid var(--text-dark);
+            border-radius: 15px; margin-top: 25px; cursor: pointer;
+            display: none; font-weight: 900; font-family: inherit;
+            font-size: 1.4rem; box-shadow: 6px 6px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        #next-btn:hover {
+            background-color: var(--btn-brown) !important;
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🐾</span>
+        <span id="progress">1/45</span>
+    </div>
+
+    <center><div id="banner" class="mode-banner">Safari Search</div></center>
+
+    <div class="question-area">
+        <span id="target-list">...</span>
+        <span id="prompt">...</span>
+    </div>
+
+    <div class="options-grid" id="choices"></div>
+
+    <button id="next-btn">Track Next Animal →</button>
+</div>
+
+<script>
+    const safariData = [
+        { m: "Classify", p: "What group do these belong to?", l: "Iron, Lead, Copper", a: "Metals", o: ["Metals", "Liquids", "Gases", "Trees"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Lion, Bear, Goat, Mouse", a: "Animals (Mammals)", o: ["Insects", "Birds", "Animals (Mammals)", "Fish"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Jacket, Blouse, Trousers, Skirt", a: "Clothes", o: ["Clothes", "Footwear", "Crockery", "Tools"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Canary, Eagle, Pigeon, Magpie", a: "Birds", o: ["Insects", "Birds", "Mammals", "Fish"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Lawyer, Butcher, Engineer, Doctor", a: "Occupations", o: ["Relatives", "Occupations", "Seasons", "Games"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Beetle, Ant, Bee, Locust", a: "Insects", o: ["Birds", "Insects", "Metals", "Vegetables"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Bus, Car, Lorry, Wagon", a: "Vehicles", o: ["Furniture", "Vehicles", "Crockery", "Tools"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Daffodil, Tulip, Violet, Crocus", a: "Flowers", o: ["Trees", "Flowers", "Cereals", "Fruit"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Cup, Saucer, Bowl, Plate", a: "Crockery", o: ["Clothes", "Crockery", "Metals", "Liquids"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Flounder, Haddock, Trout, Herring", a: "Fish", o: ["Fish", "Mammals", "Birds", "Insects"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Autumn, Winter, Spring, Summer", a: "Seasons", o: ["Months", "Seasons", "Days", "Years"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Potato, Carrot, Beetroot, Turnip", a: "Vegetables", o: ["Fruit", "Vegetables", "Cereals", "Trees"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Bread, Butter, Meat, Porridge", a: "Foodstuff", o: ["Foodstuff", "Liquids", "Metals", "Clothes"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Shoes, Wellingtons, Boots, Slippers", a: "Footwear", o: ["Clothes", "Footwear", "Occupations", "Games"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Hawthorn, Palm, Beech, Chestnut", a: "Trees", o: ["Flowers", "Trees", "Vegetables", "Fish"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Mango, Orange, Banana, Lemon", a: "Fruit", o: ["Cereals", "Fruit", "Liquids", "Vegetables"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Water, Milk, Brine, Paraffin", a: "Liquids", o: ["Gases", "Liquids", "Metals", "Trees"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Wheat, Maize, Oats, Barley", a: "Cereals", o: ["Cereals", "Flowers", "Fish", "Clothes"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Aunt, Uncle, Niece, Cousin", a: "Relatives", o: ["Relatives", "Occupations", "Seasons", "Birds"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Twelve, Seven, Twenty, Eight", a: "Numbers", o: ["Currencies", "Numbers", "Months", "Metals"] },
+        { m: "Classify", p: "What group do these belong to?", l: "Football, Hockey, Rugby, Cricket", a: "Games", o: ["Occupations", "Games", "Vehicles", "Seasons"] },
+
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Rose, Hibiscus, Poinsettia, Tomato, Carnation", a: "Tomato", o: ["Rose", "Hibiscus", "Tomato", "Carnation"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Hen, Hare, Duck, Goose, Turkey", a: "Hare", o: ["Hen", "Hare", "Duck", "Goose"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Pine, Oak, Violet, Rhododendron, Ash", a: "Violet", o: ["Pine", "Oak", "Violet", "Ash"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Slate, Gold, Silver, Iron, Lead", a: "Slate", o: ["Slate", "Gold", "Silver", "Iron"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Potato, Lemon, Maize, Cauliflower, Spinach", a: "Lemon", o: ["Potato", "Lemon", "Maize", "Spinach"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Diamond, Emerald, Pearl, Ruby, Sapphire", a: "Pearl", o: ["Diamond", "Emerald", "Pearl", "Ruby"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Mumbai, London, Washington, Islamabad, Kingston", a: "Mumbai", o: ["Mumbai", "London", "Washington", "Kingston"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Ireland, Sri Lanka, Jamaica, Cyprus, Mexico", a: "Mexico", o: ["Ireland", "Sri Lanka", "Jamaica", "Mexico"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Tea, Coffee, Cocoa, Chocolate, Biscuit", a: "Biscuit", o: ["Tea", "Coffee", "Chocolate", "Biscuit"] },
+        { m: "Odd One Out", p: "Which item does NOT belong?", l: "Bus, Tractor, Yacht, Train, Lorry", a: "Yacht", o: ["Bus", "Tractor", "Yacht", "Lorry"] },
+
+        { m: "Descriptor", p: "Which fits the set above?", l: "Cap, Balmoral, Hat", a: "Turban", o: ["Face", "Book", "Turban", "Coat"] },
+        { m: "Descriptor", p: "Which fits the set above?", l: "Jug, Teapot, Cup", a: "Bowl", o: ["Bowl", "Loaf", "Hammer", "Key"] },
+        { m: "Descriptor", p: "Which fits the set above?", l: "Stork, Hen, Eagle", a: "Owl", o: ["Egg", "Butterfly", "Owl", "Nest"] },
+        { m: "Descriptor", p: "Which fits the set above?", l: "Tulip, Daisy, Violet", a: "Rose", o: ["Foot", "Cup", "Brush", "Rose"] },
+        { m: "Descriptor", p: "Which fits the set above?", l: "Eye, Nose, Mouth", a: "Ear", o: ["Hand", "Leg", "Knee", "Ear"] },
+        { m: "Descriptor", p: "Which fits the set above?", l: "Iron, Lead, Copper", a: "Zinc", o: ["Marble", "Coal", "Slate", "Zinc"] },
+        { m: "Descriptor", p: "Which fits the set above?", l: "Car, Train, Taxi", a: "Bicycle", o: ["Bicycle", "Steamer", "Canoe", "Seaplane"] },
+
+        { m: "Synonyms", p: "Pick the best synonym for the group:", l: "Cost, Fee, Charge", a: "Price", o: ["Money", "Price", "Purse", "Silver"] },
+        { m: "Synonyms", p: "Pick the best synonym for the group:", l: "Mount, Soar, Rise", a: "Ascend", o: ["Depart", "Arrive", "Retire", "Ascend"] },
+        { m: "Synonyms", p: "Pick the best synonym for the group:", l: "Concluded, Finished, Ended", a: "Completed", o: ["Commenced", "Allowed", "Completed", "Carried"] },
+        { m: "Synonyms", p: "Pick the best synonym for the group:", l: "Vagabond, Wanderer, Tramp", a: "Vagrant", o: ["Milliner", "Caddie", "Collector", "Vagrant"] }
+    ];
+
+    let idx = 0; let score = 0;
+    let deck = [...safariData].sort(() => Math.random() - 0.5);
+
+    function loadQuestion() {
+        const item = deck[idx];
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('progress').textContent = `${idx + 1}/${deck.length}`;
+        document.getElementById('target-list').textContent = item.l;
+        document.getElementById('prompt').textContent = item.p;
+        
+        const banner = document.getElementById('banner');
+        banner.textContent = item.m;
+        banner.style.background = item.m === "Odd One Out" ? "var(--card-red)" : item.m === "Synonyms" ? "var(--weaver-purple)" : "var(--card-blue)";
+
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        item.o.sort(() => Math.random() - 0.5).forEach(opt => {
+            const b = document.createElement('button');
+            b.className = 'btn'; b.textContent = opt;
+            b.onclick = () => {
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { 
+                    b.classList.add('wrong'); 
+                    document.querySelectorAll('.btn').forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        idx++;
+        if(idx < deck.length) loadQuestion();
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--weaver-purple); text-align:center;">Safari Complete! 🏆</h1>
+                <div class="question-area">
+                    <p style="font-size:2rem; font-weight:900;">Final Score: ${score}/${deck.length}</p>
+                    <p>You have mastered the Safari!</p>
+                </div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Replay Mission</button>
+            `;
+        }
+    };
+
+    loadQuestion();
+</script>
+</body>
+</html>

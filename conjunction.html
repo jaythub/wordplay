@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conjunction Junction | 80 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --conj-purple: #a29bfe; 
+            --conj-bg: #fff9f0; 
+            --success: #55efc4; 
+            --error: #ff7675; 
+            --text-dark: #2d3436;
+        }
+        
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--conj-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--text-dark);
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%; 
+            max-width: 780px; 
+            position: relative;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            font-size: 1.2rem;
+        }
+
+        .instruction { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            letter-spacing: 1px; 
+        }
+
+        .sentence-display { 
+            font-size: 1.6rem; 
+            line-height: 1.6; 
+            color: var(--text-dark); 
+            margin-bottom: 30px; 
+            padding: 40px 30px; 
+            background: #fdfdfd; 
+            border-radius: 15px; 
+            text-align: center; 
+            border: 3px dashed #dfe6e9; 
+        }
+
+        .blank { 
+            color: var(--conj-purple); 
+            font-weight: bold; 
+            text-decoration: underline;
+            padding: 0 5px; 
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--text-dark); 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-size: 1.2rem; 
+            color: var(--text-dark);
+            box-shadow: 4px 4px 0px var(--text-dark);
+            font-family: inherit;
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background: #fafaff;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct { 
+            background: var(--success) !important; 
+        }
+
+        .btn.wrong { 
+            background: var(--error) !important; 
+            color: white; 
+        }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--conj-purple); 
+            color: var(--text-dark); 
+            border: 3px solid var(--text-dark);
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/80</span>
+    </div>
+    <div class="instruction">Choose the conjunction that best connects the ideas:</div>
+    <div class="sentence-display" id="sentence">...</div>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Connect Next →</button>
+</div>
+
+<script>
+    const conjunctionData = [
+        // Original 20 Questions
+        {s: "I wanted to go for a run, <span class='blank'>___</span> it started to rain heavily.", a: "but", d: ["so", "or", "and"]},
+        {s: "You can have <span class='blank'>___</span> the chocolate cake <span class='blank'>___</span> the vanilla ice cream, but not both.", a: "either - or", d: ["neither - nor", "not only - but also", "both - and"]},
+        {s: "<span class='blank'>___</span> it was very late, he decided to finish the report.", a: "Although", d: ["Because", "Since", "Unless"]},
+        {s: "He didn't study for the exam, <span class='blank'>___</span> did he complete the homework.", a: "nor", d: ["or", "but", "so"]},
+        {s: "We should leave now, <span class='blank'>___</span> we will miss the beginning of the movie.", a: "otherwise", d: ["furthermore", "consequently", "nevertheless"]},
+        {s: "I'll go to the party <span class='blank'>___</span> you come with me.", a: "provided that", d: ["unless", "even though", "so that"]},
+        {s: "She is <span class='blank'>___</span> intelligent <span class='blank'>___</span> incredibly hard-working.", a: "not only - but also", d: ["either - or", "neither - nor", "whether - or"]},
+        {s: "He stayed at home <span class='blank'>___</span> he was feeling unwell.", a: "because", d: ["although", "unless", "yet"]},
+        {s: "I haven't seen him <span class='blank'>___</span> we graduated from high school.", a: "since", d: ["while", "until", "before"]},
+        {s: "You won't pass the test <span class='blank'>___</span> you start studying harder.", a: "unless", d: ["if", "provided", "since"]},
+        {s: "The coffee was <span class='blank'>___</span> hot <span class='blank'>___</span> I couldn't drink it immediately.", a: "so - that", d: ["too - than", "such - that", "as - as"]},
+        {s: "I like tea, <span class='blank'>___</span> my brother prefers coffee.", a: "whereas", d: ["because", "since", "so"]},
+        {s: "He ran as fast as he could, <span class='blank'>___</span> he still missed the bus.", a: "yet", d: ["so", "and", "for"]},
+        {s: "Finish your chores; <span class='blank'>___</span>, you cannot go out tonight.", a: "otherwise", d: ["moreover", "nonetheless", "indeed"]},
+        {s: "He is <span class='blank'>___</span> a liar <span class='blank'>___</span> a thief; I don't trust him at all.", a: "both - and", d: ["either - or", "neither - nor", "whether - or"]},
+        {s: "I will call you <span class='blank'>___</span> I arrive at the airport.", a: "as soon as", d: ["while", "until", "unless"]},
+        {s: "He worked hard <span class='blank'>___</span> he could save enough money for a car.", a: "so that", d: ["in case", "although", "even if"]},
+        {s: "It was <span class='blank'>___</span> a beautiful day <span class='blank'>___</span> we decided to have a picnic.", a: "such - that", d: ["so - that", "very - that", "too - that"]},
+        {s: "She was tired; <span class='blank'>___</span>, she continued to practice the piano.", a: "nevertheless", d: ["furthermore", "consequently", "otherwise"]},
+        {s: "I am not sure <span class='blank'>___</span> he is coming <span class='blank'>___</span> not.", a: "whether - or", d: ["either - or", "neither - nor", "both - and"]},
+        // 60 New Questions
+        {s: "The weather was freezing, <span class='blank'>___</span> we decided to stay indoors by the fire.", a: "so", d: ["yet", "but", "for"]},
+        {s: "You can <span class='blank'>___</span> pay by credit card <span class='blank'>___</span> use cash at this counter.", a: "either - or", d: ["neither - nor", "both - and", "whether - or"]},
+        {s: "I will not go to the beach <span class='blank'>___</span> the sun comes out.", a: "unless", d: ["because", "since", "if"]},
+        {s: "He is very wealthy, <span class='blank'>___</span> he leads a very simple and modest life.", a: "yet", d: ["so", "and", "consequently"]},
+        {s: "We had <span class='blank'>___</span> finished our dinner <span class='blank'>___</span> the doorbell rang.", a: "hardly - when", d: ["no sooner - than", "not only - but also", "both - and"]},
+        {s: "I haven't been back to my hometown <span class='blank'>___</span> I left for college ten years ago.", a: "since", d: ["while", "until", "as"]},
+        {s: "<span class='blank'>___</span> had the teacher entered the room <span class='blank'>___</span> the students became silent.", a: "No sooner - than", d: ["Scarcely - when", "Whether - or", "Both - and"]},
+        {s: "She decided to take the job, <span class='blank'>___</span> the salary was much higher than her current one.", a: "for", d: ["or", "but", "so"]},
+        {s: "You should carry an umbrella <span class='blank'>___</span> it rains later this afternoon.", a: "in case", d: ["although", "unless", "provided that"]},
+        {s: "The movie was <span class='blank'>___</span> long <span class='blank'>___</span> many people left before the ending.", a: "so - that", d: ["such - that", "too - to", "as - as"]},
+        {s: "I am not sure <span class='blank'>___</span> he will arrive on time <span class='blank'>___</span> if he will be late again.", a: "whether - or", d: ["either - or", "neither - nor", "not only - but also"]},
+        {s: "He spoke quietly <span class='blank'>___</span> wake the sleeping baby in the next room.", a: "so as not to", d: ["in order to", "because of", "so that"]},
+        {s: "The task was difficult; <span class='blank'>___</span>, we managed to complete it before the deadline.", a: "nevertheless", d: ["moreover", "therefore", "furthermore"]},
+        {s: "I will lend you my car <span class='blank'>___</span> you promise to drive carefully.", a: "as long as", d: ["even if", "unless", "although"]},
+        {s: "He is <span class='blank'>___</span> a talented musician <span class='blank'>___</span> a brilliant painter.", a: "both - and", d: ["either - or", "neither - nor", "whether - or"]},
+        {s: "I didn't buy the dress <span class='blank'>___</span> it was too expensive for my current budget.", a: "because", d: ["although", "unless", "while"]},
+        {s: "Keep the food covered <span class='blank'>___</span> flies don't get on it.", a: "lest", d: ["until", "since", "unless"]},
+        {s: "He behaved <span class='blank'>___</span> he were the owner of the entire company.", a: "as if", d: ["since", "because", "although"]},
+        {s: "We stayed inside <span class='blank'>___</span> the storm had completely passed over.", a: "until", d: ["while", "since", "as"]},
+        {s: "The cake was <span class='blank'>___</span> delicious <span class='blank'>___</span> I had to have a second slice.", a: "so - that", d: ["such - that", "as - as", "too - to"]},
+        {s: "He is <span class='blank'>___</span> handsome <span class='blank'>___</span> intelligent, making him very popular.", a: "not only - but also", d: ["either - or", "neither - nor", "whether - or"]},
+        {s: "I will go for a walk <span class='blank'>___</span> it stops raining.", a: "once", d: ["unless", "although", "while"]},
+        {s: "You must study hard; <span class='blank'>___</span>, you might fail the upcoming entrance exam.", a: "otherwise", d: ["moreover", "consequently", "however"]},
+        {s: "<span class='blank'>___</span> it was raining, the football match continued as planned.", a: "Even though", d: ["Because", "Since", "Unless"]},
+        {s: "I was listening to music <span class='blank'>___</span> I was doing my homework last night.", a: "while", d: ["until", "unless", "since"]},
+        {s: "She didn't know <span class='blank'>___</span> to laugh <span class='blank'>___</span> to cry when she heard the news.", a: "whether - or", d: ["either - or", "neither - nor", "both - and"]},
+        {s: "The house is small <span class='blank'>___</span> cozy, which makes it feel like home.", a: "yet", d: ["so", "for", "or"]},
+        {s: "He won't come to the party <span class='blank'>___</span> we invite him personally.", a: "unless", d: ["if", "since", "provided that"]},
+        {s: "He studied hard <span class='blank'>___</span> he wouldn't fail the final exam.", a: "lest", d: ["so", "because", "since"]},
+        {s: "The car is <span class='blank'>___</span> old <span class='blank'>___</span> it frequently breaks down on the highway.", a: "so - that", d: ["such - that", "as - as", "too - to"]},
+        {s: "I have <span class='blank'>___</span> the time <span class='blank'>___</span> the money to go on a luxury vacation.", a: "neither - nor", d: ["either - or", "both - and", "not only - but also"]},
+        {s: "It was <span class='blank'>___</span> a heavy rain <span class='blank'>___</span> the streets were flooded within minutes.", a: "such - that", d: ["so - that", "as - as", "too - to"]},
+        {s: "We can go to the park, <span class='blank'>___</span> we can go to the museum if you prefer.", a: "or", d: ["and", "but", "so"]},
+        {s: "He is very tired <span class='blank'>___</span> he has been working all day without a break.", a: "because", d: ["although", "unless", "yet"]},
+        {s: "I will wait for you <span class='blank'>___</span> you are ready to leave.", a: "until", d: ["since", "while", "unless"]},
+        {s: "<span class='blank'>___</span> I'm concerned, the matter is already settled.", a: "As far as", d: ["As long as", "Provided that", "Since"]},
+        {s: "He is not coming; <span class='blank'>___</span>, he hasn't even called to apologize.", a: "furthermore", d: ["nevertheless", "otherwise", "yet"]},
+        {s: "I'll help you <span class='blank'>___</span> I can find some spare time today.", a: "provided", d: ["unless", "although", "even if"]},
+        {s: "He looked <span class='blank'>___</span> he hadn't slept for at least two days.", a: "as though", d: ["since", "because", "unless"]},
+        {s: "She is <span class='blank'>___</span> tall <span class='blank'>___</span> her older sister now.", a: "as - as", d: ["so - that", "too - to", "more - than"]},
+        {s: "We should go now <span class='blank'>___</span> we get stuck in the heavy evening traffic.", a: "before", d: ["after", "until", "since"]},
+        {s: "He was <span class='blank'>___</span> tired <span class='blank'>___</span> he fell asleep during the meeting.", a: "so - that", d: ["such - that", "as - as", "too - to"]},
+        {s: "You cannot enter <span class='blank'>___</span> you have a valid ticket.", a: "unless", d: ["if", "since", "because"]},
+        {s: "The food was expensive, <span class='blank'>___</span> it wasn't very good at all.", a: "but", d: ["so", "and", "for"]},
+        {s: "He took a map <span class='blank'>___</span> he wouldn't get lost in the forest.", a: "so that", d: ["because", "although", "unless"]},
+        {s: "She didn't study; <span class='blank'>___</span>, she failed the exam.", a: "consequently", d: ["nevertheless", "however", "moreover"]},
+        {s: "I will stay here <span class='blank'>___</span> you come back from the shop.", a: "until", d: ["while", "since", "as"]},
+        {s: "<span class='blank'>___</span> the traffic was bad, we arrived on time for the play.", a: "Although", d: ["Because", "Since", "Unless"]},
+        {s: "He is <span class='blank'>___</span> a teacher <span class='blank'>___</span> a mentor to all his students.", a: "not only - but also", d: ["either - or", "neither - nor", "whether - or"]},
+        {s: "You can go out <span class='blank'>___</span> you finish your dinner first.", a: "as soon as", d: ["until", "unless", "while"]},
+        {s: "He didn't want to go, <span class='blank'>___</span> did he want to stay home alone.", a: "nor", d: ["or", "but", "so"]},
+        {s: "The water was <span class='blank'>___</span> cold <span class='blank'>___</span> we couldn't go swimming.", a: "so - that", d: ["such - that", "too - to", "as - as"]},
+        {s: "I like coffee, <span class='blank'>___</span> my wife prefers herbal tea.", a: "whereas", d: ["because", "since", "so"]},
+        {s: "We have to wait <span class='blank'>___</span> the rain stops before we leave.", a: "until", d: ["since", "while", "as"]},
+        {s: "He is <span class='blank'>___</span> smart <span class='blank'>___</span> he solved the puzzle in seconds.", a: "so - that", d: ["such - that", "as - as", "too - to"]},
+        {s: "You must be quiet <span class='blank'>___</span> the baby is sleeping.", a: "because", d: ["although", "unless", "yet"]},
+        {s: "I will call you <span class='blank'>___</span> I get home from work.", a: "when", d: ["while", "until", "unless"]},
+        {s: "The shirt is <span class='blank'>___</span> cheap <span class='blank'>___</span> I think I will buy two.", a: "so - that", d: ["such - that", "as - as", "too - to"]},
+        {s: "He is <span class='blank'>___</span> a singer <span class='blank'>___</span> a dancer; he is very talented.", a: "both - and", d: ["either - or", "neither - nor", "whether - or"]},
+        {s: "I'll be there <span class='blank'>___</span> I can, probably by 6 PM.", a: "as soon as", d: ["while", "until", "unless"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        // Randomize the 80 questions
+        deck = [...conjunctionData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            alert("Conjunction King! You've mastered all 80 rounds. Final Score: " + score + "/80"); 
+            init(); return; 
+        }
+        const item = deck[current];
+        document.getElementById('sentence').innerHTML = item.s;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+
+    init();
+</script>
+</body>
+</html>

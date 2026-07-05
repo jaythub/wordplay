@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concord Harmony | 123 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --concord-orange: #ff9f43; 
+            --concord-bg: #fff9f0; 
+            --success: #55efc4; 
+            --error: #ff6b6b; 
+            --text-dark: #2d3436;
+        }
+        
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background: var(--concord-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--text-dark);
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%; 
+            max-width: 780px; 
+            position: relative;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            font-size: 1.2rem;
+            color: var(--text-dark); 
+        }
+
+        .instruction { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            letter-spacing: 1px; 
+        }
+
+        .sentence-display { 
+            font-size: 1.6rem; 
+            line-height: 1.6; 
+            color: var(--text-dark); 
+            margin-bottom: 30px; 
+            padding: 40px 30px; 
+            background: #fdfdfd; 
+            border-radius: 15px; 
+            text-align: center; 
+            border: 3px dashed #dfe6e9; 
+            position: relative;
+        }
+
+        .blank { 
+            color: var(--concord-orange); 
+            font-weight: bold; 
+            text-decoration: underline;
+            padding: 0 5px; 
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--text-dark); 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-size: 1.2rem; 
+            color: var(--text-dark);
+            box-shadow: 4px 4px 0px var(--text-dark);
+            font-family: inherit;
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background: var(--concord-bg);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct { 
+            background: var(--success) !important; 
+            color: var(--text-dark); 
+        }
+
+        .btn.wrong { 
+            background: var(--error) !important; 
+            color: white; 
+        }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--concord-orange); 
+            color: var(--text-dark); 
+            border: 3px solid var(--text-dark);
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/123</span>
+    </div>
+    <div class="instruction">Select the pair of verbs that match the subject's number:</div>
+    <div class="sentence-display" id="sentence">...</div>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Next Round →</button>
+</div>
+
+<script>
+    const concordData = [
+        {s: "Each of the boys <span class='blank'>___</span> going on holiday, so each of them <span class='blank'>___</span> gone to bed early.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "All of you but Andrew <span class='blank'>___</span> good, so all of you but Andrew <span class='blank'>___</span> a reward.", a: "are - get", d: ["is - gets", "are - gets", "is - get"]},
+        {s: "Neither of my friends <span class='blank'>___</span> here, so neither of them <span class='blank'>___</span> what happened.", a: "is - knows", d: ["are - know", "is - know", "are - knows"]},
+        {s: "Everyone in the class <span class='blank'>___</span> studying, and everyone <span class='blank'>___</span> to pass the test.", a: "is - wants", d: ["are - want", "is - want", "are - wants"]},
+        {s: "The group of singers <span class='blank'>___</span> practicing, so the group <span class='blank'>___</span> ready to perform.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "A number of workers <span class='blank'>___</span> striking, because they <span class='blank'>___</span> higher wages.", a: "are - want", d: ["is - wants", "are - wants", "is - want"]},
+        {s: "The number of accidents <span class='blank'>___</span> high, so the number <span class='blank'>___</span> to be reduced.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "One of the players <span class='blank'>___</span> injured, so he <span class='blank'>___</span> to sit on the bench.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "None of the milk <span class='blank'>___</span> fresh, so none of it <span class='blank'>___</span> used in the cake.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Either the teacher or the students <span class='blank'>___</span> wrong, and they <span class='blank'>___</span> to apologize.", a: "are - need", d: ["is - needs", "are - needs", "is - need"]},
+        {s: "Both of the cars <span class='blank'>___</span> expensive, so both <span class='blank'>___</span> special insurance.", a: "are - require", d: ["is - requires", "are - requires", "is - require"]},
+        {s: "Most of the water <span class='blank'>___</span> gone, so most of it <span class='blank'>___</span> replaced daily.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Statistics <span class='blank'>___</span> a difficult subject, but it <span class='blank'>___</span> very useful for research.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Bread and butter <span class='blank'>___</span> served for breakfast, and it <span class='blank'>___</span> my favorite meal.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The pair of trousers <span class='blank'>___</span> torn, so the pair <span class='blank'>___</span> to be mended.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "The scissors <span class='blank'>___</span> sharp, so the scissors <span class='blank'>___</span> kept in a safe place.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Someone at the door <span class='blank'>___</span> knocking, but someone <span class='blank'>___</span> not answering.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The jury <span class='blank'>___</span> reached a verdict, and it <span class='blank'>___</span> being read now.", a: "has - is", d: ["have - are", "has - are", "have - is"]},
+        {s: "Everything on the menu <span class='blank'>___</span> available, so everything <span class='blank'>___</span> worth trying.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Half of the apples <span class='blank'>___</span> rotten, so half of them <span class='blank'>___</span> thrown away.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Ten kilometers <span class='blank'>___</span> a long walk, but it <span class='blank'>___</span> good for your health.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Not only the cat but also the kittens <span class='blank'>___</span> hungry, so they <span class='blank'>___</span> meowing.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Civics <span class='blank'>___</span> my best subject, and it <span class='blank'>___</span> me to understand laws.", a: "is - helps", d: ["are - help", "is - help", "are - helps"]},
+        {s: "Mumps <span class='blank'>___</span> a contagious disease, and it <span class='blank'>___</span> often painful.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The furniture <span class='blank'>___</span> old, so the furniture <span class='blank'>___</span> to be replaced.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "Information <span class='blank'>___</span> power, so information <span class='blank'>___</span> shared cautiously.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "A lot of money <span class='blank'>___</span> required, so a lot <span class='blank'>___</span> been saved up.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "The cattle <span class='blank'>___</span> grazing, and they <span class='blank'>___</span> to move to the next field.", a: "are - need", d: ["is - needs", "are - needs", "is - need"]},
+        {s: "Mathematics <span class='blank'>___</span> essential, so it <span class='blank'>___</span> taught in every school.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Many a student <span class='blank'>___</span> failed, because many a student <span class='blank'>___</span> not study enough.", a: "has - does", d: ["have - do", "has - do", "have - does"]},
+        {s: "Each of the girls <span class='blank'>___</span> a bike, and each <span class='blank'>___</span> it to work.", a: "has - rides", d: ["have - ride", "has - ride", "have - rides"]},
+        {s: "Every man and woman <span class='blank'>___</span> invited, and every guest <span class='blank'>___</span> a gift.", a: "is - gets", d: ["are - get", "is - get", "are - gets"]},
+        {s: "The sheep <span class='blank'>___</span> eating, and all the sheep <span class='blank'>___</span> healthy.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Politics <span class='blank'>___</span> interesting, but politics <span class='blank'>___</span> sometimes confusing.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Measles <span class='blank'>___</span> dangerous, so the vaccine <span class='blank'>___</span> important.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The pair of gloves <span class='blank'>___</span> lost, so the pair <span class='blank'>___</span> to be found.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "None of the players <span class='blank'>___</span> ready, so none of them <span class='blank'>___</span> playing tonight.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "A bunch of grapes <span class='blank'>___</span> on the table, and it <span class='blank'>___</span> delicious.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Either he or I <span class='blank'>___</span> going, so either he or I <span class='blank'>___</span> to drive.", a: "am - have", d: ["is - has", "am - has", "is - have"]},
+        {s: "The news <span class='blank'>___</span> bad, but the news <span class='blank'>___</span> expected.", a: "is - was", d: ["are - were", "is - were", "are - was"]},
+        {s: "The family <span class='blank'>___</span> coming over, so the family <span class='blank'>___</span> to eat dinner together.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "The police <span class='blank'>___</span> searching, and they <span class='blank'>___</span> already found a clue.", a: "are - have", d: ["is - has", "are - has", "is - have"]},
+        {s: "The committee <span class='blank'>___</span> voting, and it <span class='blank'>___</span> about to announce the winner.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "One of the windows <span class='blank'>___</span> open, so it <span class='blank'>___</span> to be closed.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "Everybody <span class='blank'>___</span> excited, and everybody <span class='blank'>___</span> cheering.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "My glasses <span class='blank'>___</span> dirty, so my glasses <span class='blank'>___</span> to be cleaned.", a: "are - need", d: ["is - needs", "are - needs", "is - need"]},
+        {s: "Neither of the roads <span class='blank'>___</span> safe, so neither <span class='blank'>___</span> recommended.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "A collection of coins <span class='blank'>___</span> worth a lot, and it <span class='blank'>___</span> kept in a safe.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Some of the rice <span class='blank'>___</span> burnt, so some of it <span class='blank'>___</span> wasted.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Fifty dollars <span class='blank'>___</span> too much, so the price <span class='blank'>___</span> to be lowered.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "The acoustics of the hall <span class='blank'>___</span> good, and they <span class='blank'>___</span> the music clear.", a: "are - make", d: ["is - makes", "are - makes", "is - make"]},
+        {s: "Economics <span class='blank'>___</span> taught here, and it <span class='blank'>___</span> students about money.", a: "is - teaches", d: ["are - teach", "is - teach", "are - teaches"]},
+        {s: "The audience <span class='blank'>___</span> clapping, and the audience <span class='blank'>___</span> standing up.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Both the knife and the fork <span class='blank'>___</span> silver, so both <span class='blank'>___</span> shining.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Nothing <span class='blank'>___</span> impossible, and nothing <span class='blank'>___</span> beyond reach.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Physics <span class='blank'>___</span> difficult, but it <span class='blank'>___</span> many mysteries.", a: "is - explains", d: ["are - explain", "is - explain", "are - explains"]},
+        {s: "The team <span class='blank'>___</span> winning, and the team <span class='blank'>___</span> celebrating.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Every boy and girl <span class='blank'>___</span> a locker, and every locker <span class='blank'>___</span> a key.", a: "has - has", d: ["have - have", "has - have", "have - has"]},
+        {s: "Not only the fruits but also the meat <span class='blank'>___</span> spoiled, so it <span class='blank'>___</span> smells bad.", a: "is - smells", d: ["are - smell", "is - smell", "are - smells"]},
+        {s: "Billiards <span class='blank'>___</span> his favorite game, and it <span class='blank'>___</span> a lot of skill.", a: "is - requires", d: ["are - require", "is - require", "are - requires"]},
+        {s: "Great Expectations <span class='blank'>___</span> a classic book, and it <span class='blank'>___</span> written by Dickens.", a: "is - was", d: ["are - were", "is - were", "are - was"]},
+        {s: "The clothes <span class='blank'>___</span> wet, so the clothes <span class='blank'>___</span> hanging on the line.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "A pack of wolves <span class='blank'>___</span> howling, and the pack <span class='blank'>___</span> nearby.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Neither of the answers <span class='blank'>___</span> correct, so neither <span class='blank'>___</span> points.", a: "is - earns", d: ["are - earn", "is - earn", "are - earns"]},
+        {s: "The percentage of errors <span class='blank'>___</span> low, so the score <span class='blank'>___</span> high.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "All of the cake <span class='blank'>___</span> gone, and all <span class='blank'>___</span> eaten by him.", a: "is - was", d: ["are - were", "is - were", "are - was"]},
+        {s: "None of my clothes <span class='blank'>___</span> fit, so none of them <span class='blank'>___</span> used.", a: "do - are", d: ["does - is", "do - is", "does - are"]},
+        {s: "The pilot along with the crew <span class='blank'>___</span> safe, and they <span class='blank'>___</span> home.", a: "is - are", d: ["are - are", "is - is", "are - is"]},
+        {s: "A few of the cookies <span class='blank'>___</span> left, so a few <span class='blank'>___</span> on the plate.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Everything about him <span class='blank'>___</span> strange, and everything <span class='blank'>___</span> suspicious.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "One-third of the city <span class='blank'>___</span> flooded, and one-third <span class='blank'>___</span> under water.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Two-thirds of the people <span class='blank'>___</span> voted, and they <span class='blank'>___</span> for change.", a: "have - want", d: ["has - wants", "have - wants", "has - want"]},
+        {s: "Neither you nor she <span class='blank'>___</span> to blame, and neither <span class='blank'>___</span> guilty.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Either the dogs or the cat <span class='blank'>___</span> hungry, so it <span class='blank'>___</span> for food.", a: "is - begs", d: ["are - beg", "is - beg", "are - begs"]},
+        {s: "The quality of the eggs <span class='blank'>___</span> poor, so the eggs <span class='blank'>___</span> returned.", a: "is - are", d: ["are - are", "is - is", "are - is"]},
+        {s: "Athletics <span class='blank'>___</span> popular, and it <span class='blank'>___</span> physical fitness.", a: "is - promotes", d: ["are - promote", "is - promote", "are - promotes"]},
+        {s: "The rich <span class='blank'>___</span> getting richer, and they <span class='blank'>___</span> to pay more tax.", a: "are - have", d: ["is - has", "are - has", "is - have"]},
+        {s: "The poor <span class='blank'>___</span> suffering, and they <span class='blank'>___</span> help.", a: "are - need", d: ["is - needs", "are - needs", "is - need"]},
+        {s: "The deaf <span class='blank'>___</span> signing, and they <span class='blank'>___</span> a special language.", a: "are - use", d: ["is - uses", "are - uses", "is - use"]},
+        {s: "A pair of socks <span class='blank'>___</span> on the floor, and the pair <span class='blank'>___</span> mismatched.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The staff <span class='blank'>___</span> meeting today, and they <span class='blank'>___</span> discussing the plan.", a: "is - are", d: ["are - are", "is - is", "are - is"]},
+        {s: "Gulliver's Travels <span class='blank'>___</span> famous, and it <span class='blank'>___</span> read by many.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Five years <span class='blank'>___</span> gone, and five years <span class='blank'>___</span> a long time.", a: "has - is", d: ["have - are", "has - are", "have - is"]},
+        {s: "The scissors <span class='blank'>___</span> missing, and they <span class='blank'>___</span> very sharp.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "A flock of birds <span class='blank'>___</span> flying, and the flock <span class='blank'>___</span> headed south.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Everyone but the boys <span class='blank'>___</span> happy, so everyone <span class='blank'>___</span> laughing.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Many a flower <span class='blank'>___</span> blooming, and many a flower <span class='blank'>___</span> a sweet scent.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "Neither he nor they <span class='blank'>___</span> going, and they <span class='blank'>___</span> not ready.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "The news <span class='blank'>___</span> surprising, and it <span class='blank'>___</span> everyone curious.", a: "is - makes", d: ["are - make", "is - make", "are - makes"]},
+        {s: "The majority of the work <span class='blank'>___</span> done, and it <span class='blank'>___</span> finished.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The majority of the students <span class='blank'>___</span> passed, and they <span class='blank'>___</span> celebrating.", a: "have - are", d: ["has - is", "have - is", "has - are"]},
+        {s: "A variety of books <span class='blank'>___</span> available, and they <span class='blank'>___</span> to be read.", a: "are - need", d: ["is - needs", "are - needs", "is - need"]},
+        {s: "The owner with his pets <span class='blank'>___</span> here, and he <span class='blank'>___</span> a big leash.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "Every desk and chair <span class='blank'>___</span> new, and every desk <span class='blank'>___</span> a drawer.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "Nobody <span class='blank'>___</span> to fail, and nobody <span class='blank'>___</span> lazy.", a: "wants - is", d: ["want - are", "wants - are", "want - is"]},
+        {s: "The box of tools <span class='blank'>___</span> heavy, and it <span class='blank'>___</span> a lot of space.", a: "is - takes", d: ["are - take", "is - take", "are - takes"]},
+        {s: "Someone <span class='blank'>___</span> singing, and someone <span class='blank'>___</span> playing the flute.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The team <span class='blank'>___</span> divided, so they <span class='blank'>___</span> arguing.", a: "is - are", d: ["are - are", "is - is", "are - is"]},
+        {s: "Three hours <span class='blank'>___</span> enough time, and it <span class='blank'>___</span> the whole exam.", a: "is - covers", d: ["are - cover", "is - cover", "are - covers"]},
+        {s: "The data <span class='blank'>___</span> being analyzed, and they <span class='blank'>___</span> used for the report.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "Not only the boy but also his parents <span class='blank'>___</span> coming, and they <span class='blank'>___</span> early.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "The collection <span class='blank'>___</span> rare, and it <span class='blank'>___</span> a fortune.", a: "is - costs", d: ["are - cost", "is - cost", "are - costs"]},
+        {s: "The public <span class='blank'>___</span> demanding answers, and the public <span class='blank'>___</span> angry.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Every student <span class='blank'>___</span> present, and every student <span class='blank'>___</span> to listen.", a: "is - has", d: ["are - have", "is - have", "are - has"]},
+        {s: "The scissors <span class='blank'>___</span> on the floor, so they <span class='blank'>___</span> to be picked up.", a: "are - need", d: ["is - needs", "are - needs", "is - need"]},
+        {s: "Each of the houses <span class='blank'>___</span> a garden, and each <span class='blank'>___</span> beautiful.", a: "has - is", d: ["have - are", "has - are", "have - is"]},
+        {s: "Neither the player nor the coach <span class='blank'>___</span> happy, and they <span class='blank'>___</span> to win.", a: "is - want", d: ["are - want", "is - wants", "are - wants"]},
+        {s: "All of the cake <span class='blank'>___</span> delicious, so all of it <span class='blank'>___</span> eaten.", a: "is - was", d: ["are - were", "is - were", "are - was"]},
+        {s: "All of the students <span class='blank'>___</span> smart, so all of them <span class='blank'>___</span> passing.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "The majority of the population <span class='blank'>___</span> voting, and it <span class='blank'>___</span> for change.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Either you or Andrew <span class='blank'>___</span> right, so one of you <span class='blank'>___</span> the winner.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Bread and jam <span class='blank'>___</span> tasty, and it <span class='blank'>___</span> a good snack.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "None of the water <span class='blank'>___</span> clean, so none of it <span class='blank'>___</span> drinkable.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "Both of them <span class='blank'>___</span> coming, and both <span class='blank'>___</span> to see you.", a: "are - want", d: ["is - wants", "are - wants", "is - want"]},
+        {s: "Everything <span class='blank'>___</span> ready, and everything <span class='blank'>___</span> in place.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "One of the books <span class='blank'>___</span> missing, and it <span class='blank'>___</span> to be found.", a: "is - needs", d: ["are - need", "is - need", "are - needs"]},
+        {s: "Someone <span class='blank'>___</span> waiting, and someone <span class='blank'>___</span> to see you.", a: "is - wants", d: ["are - want", "is - want", "are - wants"]},
+        {s: "The cattle <span class='blank'>___</span> here, and they <span class='blank'>___</span> grazing.", a: "are - are", d: ["is - is", "are - is", "is - are"]},
+        {s: "The team <span class='blank'>___</span> practicing, and the team <span class='blank'>___</span> hard.", a: "is - works", d: ["are - work", "is - work", "are - works"]},
+        {s: "The police <span class='blank'>___</span> here, and they <span class='blank'>___</span> questions.", a: "are - ask", d: ["is - asks", "are - asks", "is - ask"]},
+        {s: "Economics <span class='blank'>___</span> fun, and it <span class='blank'>___</span> how money works.", a: "is - explains", d: ["are - explain", "is - explain", "are - explains"]},
+        {s: "Fifty miles <span class='blank'>___</span> far, and it <span class='blank'>___</span> a long drive.", a: "is - is", d: ["are - are", "is - are", "are - is"]},
+        {s: "The group <span class='blank'>___</span> singing, and it <span class='blank'>___</span> a loud song.", a: "is - sings", d: ["are - sing", "is - sing", "are - sings"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...concordData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            alert("Concord Master! All 123 rounds complete. Final Score: " + score); 
+            init(); return; 
+        }
+        const item = deck[current];
+        document.getElementById('sentence').innerHTML = item.s;
+        document.getElementById('progress').textContent = `${current + 1}/123`;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+
+    init();
+</script>
+</body>
+</html>

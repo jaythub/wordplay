@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Degree Duel | The English Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff9f0;
+            --weaver-teal: #00897b;
+            --card-yellow: #feca57;
+            --card-red: #ff6b6b;
+            --card-blue: #4ecdc4;
+            --text-dark: #2d3436;
+            --paper: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            /* Duel Theme Colors */
+            --btn-wine: #722f37;
+            --btn-brown: #5d4037;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--weaver-teal) 0.5px, transparent 0);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-box {
+            background: var(--paper);
+            border: 5px solid var(--text-dark);
+            border-radius: 30px;
+            box-shadow: 12px 12px 0px var(--text-dark);
+            padding: 35px;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .stats {
+            display: flex; justify-content: space-between;
+            font-weight: 900; margin-bottom: 20px;
+            font-size: 1.2rem; text-transform: uppercase;
+        }
+
+        .instruction-header {
+            text-align: center; font-weight: 900;
+            color: #636e72; text-transform: uppercase;
+            margin-bottom: 15px; letter-spacing: 1px;
+            font-size: 1rem;
+        }
+
+        .sentence-display {
+            background: var(--card-yellow);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 25px; text-align: center;
+            border: 5px solid var(--text-dark);
+            box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
+            font-size: 1.5rem; line-height: 1.5;
+            font-weight: 700; color: #000;
+        }
+
+        .wrong-word { 
+            color: var(--card-red); 
+            text-decoration: underline; 
+            font-weight: 900; 
+        }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .btn {
+            background: white; border: 4px solid var(--text-dark);
+            padding: 15px; border-radius: 15px;
+            font-family: inherit; font-weight: 900; cursor: pointer;
+            transition: all 0.1s ease; color: var(--text-dark);
+            font-size: 1.2rem; box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--card-blue);
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--text-dark);
+        }
+
+        .btn.correct { background-color: var(--success) !important; color: white; }
+        .btn.wrong { background-color: var(--error) !important; color: white; }
+
+        #next-btn {
+            width: 100%; padding: 20px;
+            background-color: var(--btn-wine) !important;
+            color: white !important; border: 4px solid var(--text-dark);
+            border-radius: 15px; margin-top: 25px; cursor: pointer;
+            display: none; font-weight: 900; font-family: inherit;
+            font-size: 1.4rem; box-shadow: 6px 6px 0px var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        #next-btn:hover {
+            background-color: var(--btn-brown) !important;
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 0px var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> ⚔️</span>
+        <span id="progress">1/123</span>
+    </div>
+
+    <div class="instruction-header">Choose the correct form to fix the sentence:</div>
+    <div class="sentence-display" id="sentence">...</div>
+
+    <div class="options-grid" id="choices"></div>
+
+    <button id="next-btn">Next Duel Round →</button>
+</div>
+
+<script>
+    const compData = [
+        {w: "She was the <span class='wrong-word'>oldest</span> of the two sisters.", a: "older", d: ["oldest", "more old", "most oldest"]},
+        {w: "This is the <span class='wrong-word'>more delicious</span> cake I have ever eaten!", a: "most delicious", d: ["more delicious", "deliciousest", "much delicious"]},
+        {w: "He is <span class='wrong-word'>more taller</span> than his brother.", a: "taller", d: ["more taller", "tallest", "more tall"]},
+        {w: "Of all the runners, she was the <span class='wrong-word'>faster</span>.", a: "fastest", d: ["faster", "more fast", "most fastest"]},
+        {w: "My cat is <span class='wrong-word'>more big</span> than your dog.", a: "bigger", d: ["more big", "biggest", "more bigger"]},
+        {w: "This puzzle is the <span class='wrong-word'>difficulter</span> one in the book.", a: "most difficult", d: ["difficulter", "more difficult", "difficultest"]},
+        {w: "Yesterday was the <span class='wrong-word'>baddest</span> day of my life.", a: "worst", d: ["baddest", "worse", "most bad"]},
+        {w: "I have the <span class='wrong-word'>littlest</span> money of everyone here.", a: "least", d: ["littlest", "less", "lesser"]},
+        {w: "Between red and blue, I like red <span class='wrong-word'>best</span>.", a: "better", d: ["best", "more better", "gooder"]},
+        {w: "The mountain is <span class='wrong-word'>more high</span> than the hill.", a: "higher", d: ["more high", "highest", "more higher"]},
+        {w: "He is the <span class='wrong-word'>more intelligent</span> student in the school.", a: "most intelligent", d: ["more intelligent", "intelligenter", "intelligentest"]},
+        {w: "My phone is <span class='wrong-word'>more good</span> than yours.", a: "better", d: ["more good", "gooder", "best"]},
+        {w: "The weather is <span class='wrong-word'>more hot</span> than yesterday.", a: "hotter", d: ["more hot", "hottest", "more hotter"]},
+        {w: "This is the <span class='wrong-word'>beautifulest</span> painting here.", a: "most beautiful", d: ["beautifulest", "more beautiful", "beautifuler"]},
+        {w: "Of the two paths, this is the <span class='wrong-word'>shortest</span>.", a: "shorter", d: ["shortest", "more short", "most short"]},
+        {w: "She is the <span class='wrong-word'>more happy</span> person I know.", a: "happiest", d: ["more happy", "happier", "happyest"]},
+        {w: "I am <span class='wrong-word'>more busy</span> today than Monday.", a: "busier", d: ["more busy", "busiest", "more busier"]},
+        {w: "This chair is the <span class='wrong-word'>comfortablest</span> in the room.", a: "most comfortable", d: ["comfortablest", "more comfortable", "comfortabler"]},
+        {w: "He ran <span class='wrong-word'>more far</span> than I did.", a: "farther", d: ["more far", "farthest", "more farther"]},
+        {w: "It was the <span class='wrong-word'>excitingest</span> movie ever!", a: "most exciting", d: ["excitingest", "more exciting", "excitinger"]},
+        {w: "Gold is <span class='wrong-word'>more heavy</span> than silver.", a: "heavier", d: ["more heavy", "heaviest", "more heavier"]},
+        {w: "Which is the <span class='wrong-word'>more large</span> planet?", a: "largest", d: ["more large", "larger", "most large"]},
+        {w: "The city is <span class='wrong-word'>more noisy</span> than the farm.", a: "noisier", d: ["more noisy", "noisiest", "more noisier"]},
+        {w: "That was the <span class='wrong-word'>funnier</span> joke I've heard.", a: "funniest", d: ["funnier", "more funny", "most funny"]},
+        {w: "Is it <span class='wrong-word'>more cheap</span> to go by bus?", a: "cheaper", d: ["more cheap", "cheapest", "more cheaper"]},
+        {w: "She is <span class='wrong-word'>politer</span> than her brother.", a: "more polite", d: ["politer", "most polite", "more politest"]},
+        {w: "This is the <span class='wrong-word'>most cheapest</span> shirt in the shop.", a: "cheapest", d: ["most cheapest", "more cheap", "cheaply"]},
+        {w: "He is <span class='wrong-word'>more smart</span> than he looks.", a: "smarter", d: ["more smart", "smartest", "more smarter"]},
+        {w: "The blue car is <span class='wrong-word'>fastest</span> than the red one.", a: "faster", d: ["fastest", "more fast", "most fastest"]},
+        {w: "It is <span class='wrong-word'>more cold</span> today than it was yesterday.", a: "colder", d: ["more cold", "coldest", "more colder"]},
+        {w: "He is the <span class='wrong-word'>taller</span> man in the room.", a: "tallest", d: ["taller", "more tall", "most tall"]},
+        {w: "That was the <span class='wrong-word'>most bad</span> idea ever.", a: "worst", d: ["most bad", "baddest", "worse"]},
+        {w: "Mercury is <span class='wrong-word'>more near</span> to the sun than Earth.", a: "nearer", d: ["more near", "nearest", "more nearer"]},
+        {w: "She is <span class='wrong-word'>more young</span> than her cousin.", a: "younger", d: ["more young", "youngest", "more younger"]},
+        {w: "This box is <span class='wrong-word'>more light</span> than the other.", a: "lighter", d: ["more light", "lightest", "more lighter"]},
+        {w: "He is the <span class='wrong-word'>richer</span> man in the city.", a: "richest", d: ["richer", "more rich", "most richest"]},
+        {w: "The water is <span class='wrong-word'>more deep</span> here than over there.", a: "deeper", d: ["more deep", "deepest", "more deeper"]},
+        {w: "This is the <span class='wrong-word'>more expensive</span> watch I own.", a: "most expensive", d: ["more expensive", "expensivest", "much expensive"]},
+        {w: "The knife is <span class='wrong-word'>more sharp</span> now.", a: "sharper", d: ["more sharp", "sharpest", "more sharper"]},
+        {w: "He is <span class='wrong-word'>more strong</span> than a lion.", a: "stronger", d: ["more strong", "strongest", "more stronger"]},
+        {w: "This road is <span class='wrong-word'>more wide</span> than the lane.", a: "wider", d: ["more wide", "widest", "more wider"]},
+        {w: "She is the <span class='wrong-word'>most kind</span> girl I know.", a: "kindest", d: ["most kind", "kinder", "more kind"]},
+        {w: "The cat is <span class='wrong-word'>more small</span> than the dog.", a: "smaller", d: ["more small", "smallest", "more smaller"]},
+        {w: "That tree is <span class='wrong-word'>more old</span> than my house.", a: "older", d: ["more old", "oldest", "more older"]},
+        {w: "It is <span class='wrong-word'>more dark</span> in here than outside.", a: "darker", d: ["more dark", "darkest", "more darker"]},
+        {w: "He is <span class='wrong-word'>more brave</span> than his friends.", a: "braver", d: ["more brave", "bravest", "more braver"]},
+        {w: "The lake is <span class='wrong-word'>more shallow</span> near the shore.", a: "shallower", d: ["more shallow", "shallowest", "more shallower"]},
+        {w: "This is the <span class='wrong-word'>more narrow</span> street in town.", a: "narrowest", d: ["more narrow", "narrower", "most narrow"]},
+        {w: "She is <span class='wrong-word'>more pretty</span> than her sister.", a: "prettier", d: ["more pretty", "prettiest", "more prettier"]},
+        {w: "The coffee is <span class='wrong-word'>more sweet</span> than I like.", a: "sweeter", d: ["more sweet", "sweetest", "more sweeter"]},
+        {w: "He is the <span class='wrong-word'>more lazy</span> boy in the class.", a: "laziest", d: ["more lazy", "lazier", "lazyest"]},
+        {w: "This task is <span class='wrong-word'>more easy</span> than the last one.", a: "easier", d: ["more easy", "easiest", "more easier"]},
+        {w: "The soup is <span class='wrong-word'>more thick</span> than before.", a: "thicker", d: ["more thick", "thickest", "more thicker"]},
+        {w: "That bird is <span class='wrong-word'>more rare</span> than the others.", a: "rarer", d: ["more rare", "rarest", "more rarer"]},
+        {w: "He is <span class='wrong-word'>more wise</span> than his years.", a: "wiser", d: ["more wise", "wisest", "more wiser"]},
+        {w: "The glass is <span class='wrong-word'>more thin</span> than it looks.", a: "thinner", d: ["more thin", "thinnest", "more thinner"]},
+        {w: "This is the <span class='wrong-word'>more clear</span> photo of the two.", a: "clearer", d: ["more clear", "clearest", "most clear"]},
+        {w: "The stone is <span class='wrong-word'>more hard</span> than wood.", a: "harder", d: ["more hard", "hardest", "more harder"]},
+        {w: "She is the <span class='wrong-word'>more neat</span> of the twins.", a: "neater", d: ["more neat", "neatest", "most neat"]},
+        {w: "The sky is <span class='wrong-word'>more blue</span> today.", a: "bluer", d: ["more blue", "bluest", "more bluer"]},
+        {w: "This is the <span class='wrong-word'>more long</span> bridge in the world.", a: "longest", d: ["more long", "longer", "most long"]},
+        {w: "He is <span class='wrong-word'>more slow</span> than a turtle.", a: "slower", d: ["more slow", "slowest", "more slower"]},
+        {w: "The ground is <span class='wrong-word'>more dry</span> than yesterday.", a: "dryer", d: ["more dry", "dryest", "more dryer"]},
+        {w: "She is <span class='wrong-word'>more fat</span> than she used to be.", a: "fatter", d: ["more fat", "fattest", "more fatter"]},
+        {w: "This is the <span class='wrong-word'>more warm</span> blanket I have.", a: "warmest", d: ["more warm", "warmer", "most warm"]},
+        {w: "The room is <span class='wrong-word'>more bright</span> now.", a: "brighter", d: ["more bright", "brightest", "more brighter"]},
+        {w: "He is <span class='wrong-word'>more quick</span> than a flash.", a: "quicker", d: ["more quick", "quickest", "more quicker"]},
+        {w: "This is the <span class='wrong-word'>more fresh</span> bread.", a: "freshest", d: ["more fresh", "fresher", "most fresh"]},
+        {w: "The music is <span class='wrong-word'>more loud</span> than before.", a: "louder", d: ["more loud", "loudest", "more louder"]},
+        {w: "She is the <span class='wrong-word'>more slim</span> of the three.", a: "slimmest", d: ["more slim", "slimmer", "most slim"]},
+        {w: "The grass is <span class='wrong-word'>more green</span> here.", a: "greener", d: ["more green", "greenest", "more greener"]},
+        {w: "He is <span class='wrong-word'>more poor</span> than his neighbor.", a: "poorer", d: ["more poor", "poorest", "more poorer"]},
+        {w: "This is the <span class='wrong-word'>more grand</span> palace in Europe.", a: "grandest", d: ["more grand", "grander", "most grand"]},
+        {w: "The air is <span class='wrong-word'>more pure</span> in the mountains.", a: "purer", d: ["more pure", "purest", "more purer"]},
+        {w: "He is <span class='wrong-word'>more mad</span> than ever.", a: "madder", d: ["more mad", "maddest", "more madder"]},
+        {w: "This is the <span class='wrong-word'>more safe</span> way to go.", a: "safest", d: ["more safe", "safer", "most safe"]},
+        {w: "The juice is <span class='wrong-word'>more sour</span> than the milk.", a: "sourer", d: ["more sour", "sourest", "more sourer"]},
+        {w: "She is the <span class='wrong-word'>more cute</span> baby.", a: "cutest", d: ["more cute", "cuter", "most cute"]},
+        {w: "The floor is <span class='wrong-word'>more smooth</span> now.", a: "smoother", d: ["more smooth", "smoothest", "more smoother"]},
+        {w: "He is <span class='wrong-word'>more pale</span> than a ghost.", a: "paler", d: ["more pale", "palest", "more paler"]},
+        {w: "This is the <span class='wrong-word'>more loose</span> shirt.", a: "loosest", d: ["more loose", "looser", "most loose"]},
+        {w: "The tea is <span class='wrong-word'>more bitter</span> than the coffee.", a: "bitterer", d: ["more bitter", "bitterest", "more bitterer"]},
+        {w: "She is <span class='wrong-word'>more shy</span> than her sister.", a: "shyer", d: ["more shy", "shyest", "more shyer"]},
+        {w: "This is the <span class='wrong-word'>more cheap</span> car.", a: "cheapest", d: ["more cheap", "cheaper", "most cheap"]},
+        {w: "The light is <span class='wrong-word'>more dim</span> here.", a: "dimmer", d: ["more dim", "dimmest", "more dimmer"]},
+        {w: "He is <span class='wrong-word'>more rich</span> than Bill Gates.", a: "richer", d: ["more rich", "richest", "more richer"]},
+        {w: "This is the <span class='wrong-word'>more strange</span> thing.", a: "strangest", d: ["more strange", "stranger", "most strange"]},
+        {w: "The cake is <span class='wrong-word'>more moist</span> than the bread.", a: "moister", d: ["more moist", "moistest", "more moister"]},
+        {w: "He is the <span class='wrong-word'>more rude</span> man.", a: "rudest", d: ["more rude", "ruder", "most rude"]},
+        {w: "This is the <span class='wrong-word'>more wide</span> river.", a: "widest", d: ["more wide", "wider", "most wide"]},
+        {w: "She is <span class='wrong-word'>more calm</span> than him.", a: "calmer", d: ["more calm", "calmest", "more calmer"]},
+        {w: "This is the <span class='wrong-word'>more tight</span> belt.", a: "tightest", d: ["more tight", "tighter", "most tight"]},
+        {w: "The water is <span class='wrong-word'>more cold</span> in winter.", a: "colder", d: ["more cold", "coldest", "more colder"]},
+        {w: "He is <span class='wrong-word'>more deaf</span> than his father.", a: "deafer", d: ["more deaf", "deafest", "more deafer"]},
+        {w: "This is the <span class='wrong-word'>more odd</span> pair.", a: "oddest", d: ["more odd", "odder", "most odd"]},
+        {w: "The path is <span class='wrong-word'>more steep</span> here.", a: "steeper", d: ["more steep", "steepest", "more steeper"]},
+        {w: "He is <span class='wrong-word'>more tall</span> than the door.", a: "taller", d: ["more tall", "tallest", "more taller"]},
+        {w: "This is the <span class='wrong-word'>more flat</span> land.", a: "flattest", d: ["more flat", "flatter", "most flat"]},
+        {w: "The knife is <span class='wrong-word'>more blunt</span> than before.", a: "blunter", d: ["more blunt", "bluntest", "more blunter"]},
+        {w: "She is <span class='wrong-word'>more fair</span> than the others.", a: "fairer", d: ["more fair", "fairest", "more fairer"]},
+        {w: "This is the <span class='wrong-word'>more damp</span> room.", a: "dampest", d: ["more damp", "damper", "most damp"]},
+        {w: "The cloud is <span class='wrong-word'>more gray</span> now.", a: "grayer", d: ["more gray", "grayest", "more grayer"]},
+        {w: "He is <span class='wrong-word'>more proud</span> than a peacock.", a: "prouder", d: ["more proud", "proudest", "more prouder"]},
+        {w: "This is the <span class='wrong-word'>more rough</span> surface.", a: "roughest", d: ["more rough", "rougher", "most rough"]},
+        {w: "The boy is <span class='wrong-word'>more slim</span> than his brother.", a: "slimmer", d: ["more slim", "slimmest", "more slimmer"]},
+        {w: "This is the <span class='wrong-word'>more brief</span> report.", a: "briefest", d: ["more brief", "briefer", "most brief"]},
+        {w: "The box is <span class='wrong-word'>more square</span>.", a: "squarer", d: ["more square", "squarest", "more squarer"]},
+        {w: "He is the <span class='wrong-word'>more brave</span> of the two.", a: "braver", d: ["more brave", "bravest", "most brave"]},
+        {w: "The milk is <span class='wrong-word'>more fresh</span>.", a: "fresher", d: ["more fresh", "freshest", "more fresher"]},
+        {w: "This is the <span class='wrong-word'>more large</span> size.", a: "largest", d: ["more large", "larger", "most large"]},
+        {w: "She is <span class='wrong-word'>more kind</span> than her sister.", a: "kinder", d: ["more kind", "kindest", "more kinder"]},
+        {w: "This is the <span class='wrong-word'>more fast</span> runner.", a: "fastest", d: ["more fast", "faster", "most fast"]},
+        {w: "The room is <span class='wrong-word'>more small</span> than mine.", a: "smaller", d: ["more small", "smallest", "more smaller"]},
+        {w: "This is the <span class='wrong-word'>more deep</span> end.", a: "deepest", d: ["more deep", "deeper", "most deep"]},
+        {w: "He is <span class='wrong-word'>more strong</span> than I thought.", a: "stronger", d: ["more strong", "strongest", "more stronger"]},
+        {w: "This is the <span class='wrong-word'>more short</span> story.", a: "shortest", d: ["more short", "shorter", "most short"]},
+        {w: "The wall is <span class='wrong-word'>more high</span>.", a: "higher", d: ["more high", "highest", "more higher"]},
+        {w: "She is the <span class='wrong-word'>youngest</span> player.", a: "youngest", d: ["more young", "younger", "most young"]},
+        {w: "This is the <span class='wrong-word'>more wide</span> gap.", a: "widest", d: ["more wide", "wider", "most wide"]},
+        {w: "He is <span class='wrong-word'>more old</span> than her.", a: "older", d: ["more old", "oldest", "more older"]},
+        {w: "This is the <span class='wrong-word'>more light</span> bag.", a: "lightest", d: ["more light", "lighter", "most light"]},
+        {w: "The sun is <span class='wrong-word'>more hot</span> today.", a: "hotter", d: ["more hot", "hottest", "more hotter"]},
+        {w: "This is the <span class='wrong-word'>more near</span> shop.", a: "nearest", d: ["more near", "nearer", "most near"]}
+    ];
+
+    let current = 0; let score = 0;
+    let deck = [...compData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        document.getElementById('sentence').innerHTML = item.w;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        // Always 4 options
+        let options = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        options.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { 
+                    b.classList.add('wrong'); 
+                    document.querySelectorAll('.btn').forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        current++;
+        if(current < deck.length) load();
+        else {
+            document.getElementById('game-box').innerHTML = `
+                <h1 style="color:var(--weaver-teal); text-align:center;">Duel Complete! 🏆</h1>
+                <div class="sentence-display">
+                    Final Score: ${score} / ${deck.length}
+                </div>
+                <button onclick="location.reload()" class="btn" style="width:100%">Challenge Again</button>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>
