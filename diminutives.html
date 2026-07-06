@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diminutive Detective | 50 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --ctx-blue: #3498db; 
+            --ctx-bg: #fff9f0; 
+            --success: #55efc4; 
+            --error: #ff7675; 
+            --text-dark: #2d3436;
+        }
+        
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--ctx-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--text-dark);
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%; 
+            max-width: 800px; 
+            position: relative;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            font-size: 1.2rem;
+            color: var(--ctx-blue);
+        }
+
+        .instruction { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            letter-spacing: 1px; 
+            text-align: center;
+        }
+
+        .sentence-display { 
+            font-size: 1.6rem; 
+            line-height: 1.8; 
+            color: var(--text-dark); 
+            margin-bottom: 30px; 
+            padding: 35px; 
+            background: #fdfdfd; 
+            border-radius: 15px; 
+            text-align: center; 
+            border: 3px dashed var(--ctx-blue); 
+            min-height: 120px;
+            display: block; /* Changed back to block for standard text flow */
+        }
+
+        /* Blank space on the same line */
+        .blank-space {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 4px solid var(--text-dark);
+            margin: 0 8px;
+            text-align: center;
+            vertical-align: bottom;
+            transition: all 0.2s;
+        }
+
+        .inserted-word {
+            font-weight: 900;
+            color: var(--ctx-blue);
+            font-size: 1.7rem;
+            position: relative;
+            bottom: 2px; /* Pulls text slightly above the underline */
+        }
+
+        .wrong-text {
+            color: var(--error);
+            text-decoration: line-through;
+            margin-right: 10px;
+            font-size: 1.4rem;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--text-dark); 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-size: 1.1rem; 
+            color: var(--text-dark);
+            box-shadow: 4px 4px 0px var(--text-dark);
+            font-family: inherit;
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background: #f0f7ff;
+        }
+
+        .btn.correct { background: var(--success) !important; }
+        .btn.wrong { background: var(--error) !important; color: white; }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--ctx-blue); 
+            color: white; 
+            border: 3px solid var(--text-dark);
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        #next-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px var(--text-dark); }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/50</span>
+    </div>
+    <div class="instruction">Select the correct diminutive to complete the sentence:</div>
+    <div class="sentence-display" id="sentence-target">...</div>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Next Case →</button>
+</div>
+
+<script>
+    // sentenceData remains the same as your source file
+    const sentenceData = [
+        {s: "The hiker drank from a clear____that trickled down the mountain.", c: "rivulet", o: ["riverette", "rivering", "streamlet"]},
+        {s: "In the center of the square stood a____of the founder.", c: "statuette", o: ["statuelet", "stature", "statling"]},
+        {s: "The scientist viewed a single____under the microscope.", c: "molecule", o: ["molelet", "moleling", "molite"]},
+        {s: "She cooked every meal in a tiny____in her studio apartment.", c: "kitchenette", o: ["kitchenling", "cookery", "kitchenlet"]},
+        {s: "The swan was followed by a small, grey____.", c: "cygnet", o: ["swanling", "swanlet", "gosling"]},
+        {s: "He wore a silver____around his wrist.", c: "bracelet", o: ["armlet", "braceling", "wristlet"]},
+        {s: "A young____was jumping playfully in the field of sheep.", c: "lambkin", o: ["lambette", "sheeplet", "lamby"]},
+        {s: "The forest floor was covered in oak____.", c: "saplings", o: ["treelets", "treelings", "sap-ettes"]},
+        {s: "She tucked the____into her pocket after reading about the museum.", c: "leaflet", o: ["leaf-ling", "leaf-ette", "paperlet"]},
+        {s: "The noble was granted the title of____by the King.", c: "baronet", o: ["baroness", "baronling", "baronette"]},
+        {s: "He used a____to transfer one drop of the liquid.", c: "pipette", o: ["pipeling", "pipe-let", "droplet"]},
+        {s: "The queen wore a golden____atop her head.", c: "coronet", o: ["crownlet", "crownling", "coronette"]},
+        {s: "A single____of dust danced in the beam of sunlight.", c: "particle", o: ["partlet", "partling", "part-ette"]},
+        {s: "The____followed her mother cat through the garden.", c: "kitten", o: ["catlet", "cat-ling", "cat-kin"]},
+        {s: "The wind caught a____of her hair.", c: "ringlet", o: ["ring-ling", "ring-ette", "hairlet"]},
+        {s: "He consulted the instruction____to learn how to build the model.", c: "booklet", o: ["booklette", "manual-ling", "book-ette"]},
+        {s: "The fuel was compressed into a small____for the campfire.", c: "briquette", o: ["bricklet", "brickling", "brick-ette"]},
+        {s: "The farmer used a strong____to pull the heavy plow.", c: "bullock", o: ["bull-let", "bullette", "bull-ling"]},
+        {s: "A fluffy____pecked at the grain in the farmyard.", c: "chicken", o: ["chicklet", "chick-ette", "chick-kin"]},
+        {s: "He stepped outside for a quick____after dinner.", c: "cigarette", o: ["cigarillo", "cigarlet", "cigar-ette-y"]},
+        {s: "The princess wore a diamond____around her brow.", c: "circlet", o: ["circle-let", "ringlet", "circle-ette"]},
+        {s: "The office was divided into several small____for privacy.", c: "cubicles", o: ["roomlets", "cubettes", "cubic-lings"]},
+        {s: "In the old tale, a young____lived in a grand castle.", c: "damsel", o: ["damette", "dameling", "lady-ette"]},
+        {s: "She called her grandchild 'my____' as she gave him a hug.", c: "darling", o: ["dearling", "dearie", "darsel"]},
+        {s: "The grandmother wrote, 'Hello my____' at the start of the letter.", c: "dearie", o: ["deary", "dearlet", "dear-ette"]},
+        {s: "The soldier's uniform featured a gold____on each shoulder.", c: "epaulette", o: ["shoulder-let", "épaule-ling", "epaulety"]},
+        {s: "The old man smiled at his____when she brought him tea.", c: "girlie", o: ["girl-let", "girl-ette", "girl-ling"]},
+        {s: "A tiny____of oil floated on the surface of the water.", c: "globule", o: ["globlet", "globeling", "sphere-let"]},
+        {s: "The knight drank his wine from a heavy silver____.", c: "goblet", o: ["gobeling", "cup-let", "gobette"]},
+        {s: "The____followed the mother goose to the pond.", c: "gosling", o: ["gooseling", "goosette", "duckling"]},
+        {s: "They sat on a small____to watch the sunset over the valley.", c: "hillock", o: ["hill-let", "mountain-let", "hill-ette"]},
+        {s: "A sharp____hung from the frozen roof.", c: "icicle", o: ["ice-let", "ice-ling", "ice-ette"]},
+        {s: "The ship dropped anchor near a tiny, uninhabited____.", c: "islet", o: ["island-ette", "isling", "isle-ette"]},
+        {s: "A young____climbed over the wall in the Scottish countryside.", c: "laddie", o: ["ladlet", "lad-ette", "lad-kin"]},
+        {s: "The shepherd called to the____working in the fields.", c: "lassie", o: ["lasslet", "lass-ette", "lassling"]},
+        {s: "A swift____darted across the path, hiding in the tall grass.", c: "leveret", o: ["hareling", "harelet", "levrette"]},
+        {s: "She wore a gold____containing a photo of her mother.", c: "locket", o: ["lockette", "keylet", "lock-ling"]},
+        {s: "The young____worked in the manor house.", c: "maiden", o: ["maid-ette", "maid-kin", "maidling"]},
+        {s: "The artist used a____to display the miniature clothing.", c: "mannikin", o: ["man-let", "man-ette", "manling"]},
+        {s: "He ate a tiny____of cake before leaving the party.", c: "morsel", o: ["bitlet", "morseling", "morsette"]},
+        {s: "Please use your____to wipe your face after dinner.", c: "napkin", o: ["cloth-ette", "nap-ling", "napette"]},
+        {s: "The____waited in the nest for its mother to return with food.", c: "nestling", o: ["bird-ette", "nest-let", "nest-kin"]},
+        {s: "A baby____blinked its large eyes in the hollow tree.", c: "owlet", o: ["owl-ling", "owl-ette", "owl-kin"]},
+        {s: "A muddy____rolled around happily in the farm pen.", c: "piglet", o: ["pig-ling", "pig-ette", "pig-kin"]},
+        {s: "The boy pulled a coin out of his____to pay for the candy.", c: "pocket", o: ["poka-ette", "pouch-let", "pockette"]},
+        {s: "The baker decorated the cake with a sugar____.", c: "rosette", o: ["rose-let", "rose-ling", "rose-ette-y"]},
+        {s: "He carried his books to school in a leather____.", c: "satchel", o: ["bag-ette", "sachette", "saccing"]},
+        {s: "The tiny____began to sprout roots in the damp soil.", c: "seedling", o: ["seed-let", "seed-ette", "seed-kin"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [...sentenceData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        // The underline blank is on the same line as the text
+        const blankHTML = `<span class="blank-space" id="blank-slot"></span>`;
+        document.getElementById('sentence-target').innerHTML = item.s.replace("____", blankHTML);
+        document.getElementById('progress').textContent = `${current + 1}/50`;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.c, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const blankSlot = document.getElementById('blank-slot');
+                if(opt === item.c) { 
+                    b.classList.add('correct'); score++; 
+                    blankSlot.innerHTML = `<span class="inserted-word">${item.c}</span>`;
+                } else { 
+                    b.classList.add('wrong'); 
+                    blankSlot.innerHTML = `<span class="wrong-text">${opt}</span><span class="inserted-word">${item.c}</span>`;
+                    Array.from(box.children).forEach(btn => { if(btn.textContent === item.c) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+                Array.from(box.children).forEach(btn => btn.disabled = true);
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 50 && current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>Philology Champion!</h2><p style="text-align:center; font-size: 1.5rem;">50 Tiny Words Mastered.<br>Final Score: ${score}/50</p><button onclick="location.reload()" class="btn" style="width:100%">Play Again</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

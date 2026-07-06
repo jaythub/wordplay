@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Reference Finder | 30 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --echo-indigo: #6c5ce7; 
+            --echo-dark: #2d3436; 
+            --echo-bg: #fff9f0;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-indigo: #f0edff;
+        }
+        
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--echo-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--echo-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--echo-dark);
+            box-shadow: 10px 10px 0px var(--echo-dark); 
+            width: 100%; 
+            max-width: 750px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--echo-indigo);
+            font-size: 1.2rem;
+        }
+
+        .instructions { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.85rem; 
+            letter-spacing: 1px; 
+        }
+        
+        .sentence-display { 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            line-height: 1.8; 
+            color: var(--echo-dark); 
+            background: #f8f9ff; 
+            padding: 25px; 
+            border-radius: 15px; 
+            margin-bottom: 30px; 
+            border: 3px dashed var(--echo-indigo); 
+            min-height: 80px;
+            display: block;
+        }
+
+        .highlight { 
+            color: var(--echo-indigo); 
+            text-decoration: underline; 
+            font-weight: 800; 
+            margin: 0 4px; 
+            display: inline-block;
+        } 
+        
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--echo-dark); 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-family: inherit; 
+            font-size: 1rem; 
+            color: var(--echo-dark);
+            box-shadow: 4px 4px 0px var(--echo-dark);
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--echo-dark);
+            background: var(--hover-indigo);
+            border-color: var(--echo-indigo);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--echo-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--echo-dark); }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--echo-indigo); 
+            color: white; 
+            border: 3px solid var(--echo-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--echo-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--echo-dark);
+        }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/30</span>
+    </div>
+    <p class="instructions">Choose the correct reference source:</p>
+    <div class="sentence-display" id="sentence-target">...</div>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Next Reference →</button>
+</div>
+
+<script>
+    const referenceData = [
+        {s: "To find the address of a person, you check a____.", c: "directory", o: ["thesaurus", "atlas", "manual"]},
+        {s: "To find the meaning of a word, consult a____.", c: "dictionary", o: ["gazetteer", "almanac", "ledger"]},
+        {s: "To find a synonym for a word, look in a____.", c: "thesaurus", o: ["glossary", "index", "catalog"]},
+        {s: "To find a specific map of a country, open an____.", c: "atlas", o: ["encyclopedia", "journal", "brochure"]},
+        {s: "To find general information on a topic, use an____.", c: "encyclopedia", o: ["almanac", "directory", "concordance"]},
+        {s: "To find holidays and moon phases, check an____.", c: "almanac", o: ["anthology", "atlas", "manual"]},
+        {s: "To find a geographical place by name, use a____.", c: "gazetteer", o: ["thesaurus", "glossary", "manual"]},
+        {s: "To find out how to operate machinery, read the____.", c: "manual", o: ["directory", "catalog", "index"]},
+        {s: "To find all the books in a library, check the____.", c: "catalog", o: ["atlas", "dictionary", "glossary"]},
+        {s: "To find definitions at the back of a book, see the____.", c: "glossary", o: ["thesaurus", "almanac", "appendix"]},
+        {s: "To find a specific page for a topic, use the____.", c: "index", o: ["preface", "directory", "glossary"]},
+        {s: "To find every instance of a word in a text, use a____.", c: "concordance", o: ["thesaurus", "gazetteer", "dictionary"]},
+        {s: "To find family history and ancestors, research a____.", c: "genealogy", o: ["directory", "glossary", "manual"]},
+        {s: "To find a collection of poems by various authors, look in an____.", c: "anthology", o: ["encyclopedia", "almanac", "index"]},
+        {s: "To find the financial records of a company, examine the____.", c: "ledger", o: ["gazetteer", "manual", "dictionary"]},
+        {s: "To find a brief summary of a movie, check the____.", c: "synopsis", o: ["index", "catalog", "atlas"]},
+        {s: "To find the departure times for trains, look at the____.", c: "timetable", o: ["manual", "almanac", "glossary"]},
+        {s: "To find names of actors in a play, look at the____.", c: "programme", o: ["dictionary", "atlas", "manual"]},
+        {s: "To find a list of ingredients for a dish, use a____.", c: "cookbook", o: ["manual", "glossary", "directory"]},
+        {s: "To find historical documents of a place, visit the____.", c: "archives", o: ["thesaurus", "dictionary", "index"]},
+        {s: "To find the spelling of a chemical element, look at the____.", c: "periodic table", o: ["atlas", "ledger", "thesaurus"]},
+        {s: "To find the pronunciation of a medical term, check a medical____.", c: "dictionary", o: ["almanac", "gazetteer", "manual"]},
+        {s: "To find a list of ships in a fleet, consult the____.", c: "register", o: ["index", "atlas", "thesaurus"]},
+        {s: "To find the coordinates of a star, use an astronomical____.", c: "ephemeris", o: ["encyclopedia", "manual", "glossary"]},
+        {s: "To find the biographical details of a famous person, check a biographical____.", c: "dictionary", o: ["thesaurus", "catalog", "manual"]},
+        {s: "To find the rules of a card game, read the____.", c: "rulebook", o: ["directory", "ledger", "atlas"]},
+        {s: "To find the spelling of a colleague's name, look at their____.", c: "business card", o: ["almanac", "thesaurus", "atlas"]},
+        {s: "To find the summary of a news story, read the____.", c: "headline", o: ["glossary", "index", "manual"]},
+        {s: "To find out what is inside a magazine, check the table of____.", c: "contents", o: ["definitions", "synonyms", "addresses"]},
+        {s: "To find the legal rules of a city, consult the city____.", c: "code", o: ["atlas", "thesaurus", "manual"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [...referenceData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('sentence-target').innerHTML = item.s.replace("____", "<span class='highlight'>____</span>");
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.c, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                
+                if(opt === item.c) { 
+                    b.classList.add('correct'); score++; 
+                    document.getElementById('sentence-target').innerHTML = item.s.replace("____", `<span class='highlight'>${item.c}</span>`);
+                } else { 
+                    b.classList.add('wrong'); 
+                    btns.forEach(btn => { if(btn.textContent === item.c) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>Researcher Complete!</h2><p>Score: ${score}/${deck.length}</p><button onclick="location.reload()" class="btn" style="width:100%">Restart Game</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

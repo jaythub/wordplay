@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Gender Shift</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --echo-indigo: #6c5ce7; 
+            --echo-dark: #2d3436; 
+            --echo-bg: #fff9f0;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-indigo: #f0edff;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--echo-bg);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px;
+            color: var(--echo-dark);
+        }
+
+        #game-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 4px solid var(--echo-dark);
+            box-shadow: 10px 10px 0px var(--echo-dark);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        h1 { color: var(--echo-dark); margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; }
+        .instruction { color: #636e72; margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+        #word-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--echo-indigo);
+            margin-bottom: 1.5rem;
+            background: #f8f9ff;
+            border-radius: 15px;
+            border: 3px dashed var(--echo-indigo);
+            min-height: 6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        input[type="text"] {
+            padding: 18px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 3px solid var(--echo-dark);
+            border-radius: 12px;
+            font-size: 1.3rem;
+            text-align: center;
+            outline: none;
+            margin-bottom: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--echo-indigo);
+        }
+
+        .btn {
+            border: 3px solid var(--echo-dark);
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: 800;
+            width: 100%;
+            font-family: inherit;
+            transition: all 0.1s;
+            box-shadow: 4px 4px 0px var(--echo-dark);
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--echo-dark);
+        }
+
+        #submit-btn { background: var(--echo-indigo); color: white; }
+        #next-btn { background: var(--echo-dark); color: white; display: none; }
+
+        #feedback { margin-top: 1.5rem; font-size: 1.2rem; min-height: 3.5rem; }
+        .correct { color: var(--success); font-weight: 900; text-shadow: 1px 1px 0px var(--echo-dark); }
+        .wrong { color: var(--error); font-weight: 900; }
+
+        #stats {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: var(--echo-indigo);
+            font-weight: bold;
+            border-top: 3px solid #eee;
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>The Gender Shift</h1>
+    <p class="instruction">Opposite Gender? <strong>'Common'</strong>? or <strong>'Neuter'</strong>?</p>
+    
+    <div id="word-display">...</div>
+
+    <div class="input-group">
+        <input type="text" id="user-input" placeholder="Type answer here..." autocomplete="off">
+        <button onclick="checkAnswer()" id="submit-btn" class="btn">Check Connection!</button>
+        <button onclick="loadNewQuestion()" id="next-btn" class="btn">Next Challenge ➔</button>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div id="stats">
+        <span>Score: <span id="score">0</span> / <span id="total">0</span> 🏆</span>
+        <span>Left: <span id="remaining">0</span> 🧩</span>
+    </div>
+</div>
+
+<script>
+    const masterList = [
+        // --- MASCULINE TO FEMININE ---
+        { q: "Abbot", a: "Abbess" }, { q: "Actor", a: "Actress" }, { q: "Baron", a: "Baroness" },
+        { q: "Count", a: "Countess" }, { q: "Duke", a: "Duchess" }, { q: "Emperor", a: "Empress" },
+        { q: "Enchanter", a: "Enchantress" }, { q: "God", a: "Goddess" }, { q: "Heir", a: "Heiress" },
+        { q: "Host", a: "Hostess" }, { q: "Lion", a: "Lioness" }, { q: "Marquis", a: "Marchioness" },
+        { q: "Master", a: "Mistress" }, { q: "Mayor", a: "Mayoress" }, { q: "Priest", a: "Priestess" },
+        { q: "Prince", a: "Princess" }, { q: "Male", a: "Female" }, { q: "Man", a: "Woman" },
+        { q: "Monk", a: "Nun" }, { q: "Nephew", a: "Niece" }, { q: "Bachelor", a: "Spinster" },
+        { q: "Beau", a: "Belle" }, { q: "Boy", a: "Girl" }, { q: "Bridegroom", a: "Bride" },
+        { q: "Brother", a: "Sister" }, { q: "Earl", a: "Countess" }, { q: "Father", a: "Mother" },
+        { q: "Fiancé", a: "Fiancée" }, { q: "Friar", a: "Nun" }, { q: "Gentleman", a: "Lady" },
+        { q: "He", a: "She" }, { q: "Hero", a: "Heroine" }, { q: "Him", a: "Her" },
+        { q: "Husband", a: "Wife" }, { q: "King", a: "Queen" }, { q: "Lad", a: "Lass" },
+        { q: "Lord", a: "Lady" }, { q: "Masseur", a: "Masseuse" }, { q: "Mr", a: "Mrs" },
+        { q: "Shepherd", a: "Shepherdess" }, { q: "Sorcerer", a: "Sorceress" }, { q: "Steward", a: "Stewardess" },
+        { q: "Tiger", a: "Tigress" }, { q: "Widower", a: "Widow" }, { q: "Waiter", a: "Waitress" },
+        { q: "Boar", a: "Sow" }, { q: "Buck", a: "Doe" }, { q: "Bull", a: "Cow" },
+        { q: "Bullock", a: "Heifer" }, { q: "Cock", a: "Hen" }, { q: "Colt", a: "Filly" },
+        { q: "Dog", a: "Bitch" }, { q: "Drake", a: "Duck" }, { q: "Gander", a: "Goose" },
+        { q: "Hart", a: "Hind" }, { q: "Hound", a: "Brach" }, { q: "Ram", a: "Ewe" },
+        { q: "Sire", a: "Dam" }, { q: "Stag", a: "Hind" }, { q: "Stallion", a: "Mare" },
+        { q: "Steer", a: "Heifer" }, { q: "Tomcat", a: "Tabby cat" }, { q: "Sir", a: "Madam" },
+        { q: "Son", a: "Daughter" }, { q: "Sultan", a: "Sultana" }, { q: "Tutor", a: "Governess" },
+        { q: "Uncle", a: "Aunt" }, { q: "Wizard", a: "Witch" }, { q: "Billy-goat", a: "Nanny-goat" },
+        { q: "Buck-rabbit", a: "Doe-rabbit" }, { q: "Bull-calf", a: "Cow-calf" }, { q: "Cock-sparrow", a: "Hen-sparrow" },
+        { q: "Father-in-law", a: "Mother-in-law" }, { q: "Grandfather", a: "Grandmother" }, { q: "Headmaster", a: "Headmistress" },
+        { q: "He-goat", a: "She-goat" }, { q: "Landlord", a: "Landlady" }, { q: "Male-child", a: "Female-child" },
+        { q: "Manservant", a: "Maidservant" }, { q: "Postman", a: "Postwoman" }, { q: "Postmaster", a: "Postmistress" },
+        { q: "Son-in-law", a: "Daughter-in-law" }, { q: "Stepfather", a: "Stepmother" }, { q: "Stepson", a: "Stepdaughter" },
+
+        // --- NAMES ---
+        { q: "Alexander", a: "Alexandra" }, { q: "Cecil", a: "Cecilia" }, { q: "Charles", a: "Charlotte" },
+        { q: "Christian", a: "Christina" }, { q: "Clarence", a: "Clara" }, { q: "Francis", a: "Frances" },
+        { q: "George", a: "Georgina" }, { q: "Henry", a: "Henrietta" }, { q: "John", a: "Joan" },
+        { q: "Joseph", a: "Josephine" }, { q: "Oliver", a: "Olive" }, { q: "Patrick", a: "Patricia" },
+        { q: "Paul", a: "Pauline" }, { q: "Robert", a: "Roberta" }, { q: "Victor", a: "Victoria" },
+        { q: "William", a: "Wilhelmina" },
+
+        // --- COMMON GENDER ---
+        { q: "Adult", a: "Common" }, { q: "Animal", a: "Common" }, { q: "Baby", a: "Common" },
+        { q: "Bird", a: "Common" }, { q: "Cat", a: "Common" }, { q: "Cattle", a: "Common" },
+        { q: "Child", a: "Common" }, { q: "Companion", a: "Common" }, { q: "Comrade", a: "Common" },
+        { q: "Cousin", a: "Common" }, { q: "Darling", a: "Common" }, { q: "Dear", a: "Common" },
+        { q: "Deer", a: "Common" }, { q: "Fowl", a: "Common" }, { q: "Friend", a: "Common" },
+        { q: "Guardian", a: "Common" }, { q: "Guest", a: "Common" }, { q: "Infant", a: "Common" },
+        { q: "Juvenile", a: "Common" }, { q: "Orphan", a: "Common" }, { q: "Owner", a: "Common" },
+        { q: "Parent", a: "Common" }, { q: "Passenger", a: "Common" }, { q: "Pig", a: "Common" },
+        { q: "Pupil", a: "Common" }, { q: "Relation", a: "Common" }, { q: "Relative", a: "Common" },
+        { q: "Scholar", a: "Common" }, { q: "Sheep", a: "Common" }, { q: "Singer", a: "Common" },
+        { q: "Student", a: "Common" }, { q: "Swan", a: "Common" }, { q: "Teacher", a: "Common" },
+        { q: "Tourist", a: "Common" }, { q: "Traveller", a: "Common" }, { q: "Visitor", a: "Common" },
+
+        // --- NEUTER GENDER ---
+        { q: "Bag", a: "Neuter" }, { q: "Boots", a: "Neuter" }, { q: "Box", a: "Neuter" },
+        { q: "Bread", a: "Neuter" }, { q: "Butter", a: "Neuter" }, { q: "Chair", a: "Neuter" },
+        { q: "Chalk", a: "Neuter" }, { q: "Church", a: "Neuter" }, { q: "Desk", a: "Neuter" },
+        { q: "Door", a: "Neuter" }, { q: "Floor", a: "Neuter" }, { q: "House", a: "Neuter" },
+        { q: "Mirror", a: "Neuter" }, { q: "Pencil", a: "Neuter" }, { q: "Table", a: "Neuter" },
+        { q: "Book", a: "Neuter" },
+
+        // --- PERSONIFIED / EXCEPTIONS ---
+        { q: "Ship", a: "She" }, { q: "Car", a: "She" }, { q: "Aeroplane", a: "She" },
+        { q: "Time", a: "He" }, { q: "Winter", a: "He" }, { q: "Mountains", a: "He" },
+        { q: "Sun", a: "He" }, { q: "Death", a: "He" }, { q: "Spring", a: "She" },
+        { q: "Moon", a: "She" }, { q: "Liberty", a: "She" }, { q: "Peace", a: "She" },
+        { q: "Nature", a: "She" }
+    ];
+
+    const reversedPairs = masterList
+        .filter(item => item.a !== "Common" && item.a !== "Neuter" && item.a !== "He" && item.a !== "She")
+        .map(item => ({ q: item.a, a: item.q }));
+    
+    const finalGameList = [...masterList, ...reversedPairs];
+
+    let deck = [];
+    let score = 0;
+    let totalQuestions = 0;
+
+    const wordDisplay = document.getElementById('word-display');
+    const userInput = document.getElementById('user-input');
+    const feedback = document.getElementById('feedback');
+    const scoreDisplay = document.getElementById('score');
+    const totalDisplay = document.getElementById('total');
+    const remainingDisplay = document.getElementById('remaining');
+    const submitBtn = document.getElementById('submit-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initDeck() {
+        deck = shuffle([...finalGameList]);
+    }
+
+    function loadNewQuestion() {
+        if (deck.length === 0) {
+            alert("Amazing! You've gone through every word. Restarting...");
+            initDeck();
+        }
+        currentQuestion = deck.pop();
+        nextBtn.style.display = "none";
+        submitBtn.style.display = "block";
+        userInput.disabled = false;
+        userInput.value = "";
+        feedback.textContent = "";
+        wordDisplay.textContent = currentQuestion.q;
+        remainingDisplay.textContent = deck.length;
+        userInput.focus();
+    }
+
+    function checkAnswer() {
+        const uA = userInput.value.trim().toLowerCase();
+        const cA = currentQuestion.a.toLowerCase();
+        if (uA === "") return;
+
+        totalQuestions++;
+        userInput.disabled = true;
+        
+        if (uA === cA) {
+            score++;
+            feedback.innerHTML = `<span class="correct">✨ Correct Connection!</span>`;
+        } else {
+            feedback.innerHTML = `<span class="wrong">Oops!</span><br>The workshop says: <strong>${currentQuestion.a}</strong>`;
+        }
+
+        scoreDisplay.textContent = score;
+        totalDisplay.textContent = totalQuestions;
+        submitBtn.style.display = "none";
+        nextBtn.style.display = "block";
+    }
+
+    userInput.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+            (submitBtn.style.display !== "none") ? checkAnswer() : loadNewQuestion();
+        }
+    });
+
+    initDeck();
+    loadNewQuestion();
+</script>
+</body>
+</html>

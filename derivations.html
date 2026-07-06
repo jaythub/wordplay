@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derivation Detective | 80 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --root-teal: #1abc9c; 
+            --root-bg: #fff9f0; 
+            --success: #55efc4; 
+            --error: #ff7675; 
+            --text-dark: #2d3436;
+        }
+        
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--root-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--text-dark);
+            box-shadow: 10px 10px 0px var(--text-dark);
+            width: 100%; 
+            max-width: 850px; 
+            position: relative;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            font-size: 1.2rem;
+        }
+
+        .root-display { 
+            font-size: 1.6rem; 
+            line-height: 1.6; 
+            color: var(--text-dark); 
+            background: #f0fffb; 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            text-align: center;
+            border: 3px dashed var(--root-teal); 
+        }
+
+        .root-word {
+            font-size: 2.5rem;
+            color: var(--root-teal);
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .hint { 
+            font-size: 1rem; 
+            color: #636e72; 
+            font-style: italic;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .label { 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            color: var(--text-dark); 
+            margin-bottom: 10px; 
+            display: block; 
+            letter-spacing: 1px; 
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--text-dark); 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-size: 1.2rem; 
+            color: var(--text-dark);
+            box-shadow: 4px 4px 0px var(--text-dark);
+            font-family: inherit;
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--text-dark);
+            background: #fafffe;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--text-dark);
+        }
+
+        .btn.correct { background: var(--success) !important; }
+        .btn.wrong { background: var(--error) !important; color: white; }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--root-teal); 
+            color: white; 
+            border: 3px solid var(--text-dark);
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--text-dark);
+        }
+
+        #next-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px var(--text-dark); }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/80</span>
+    </div>
+    <span class="label">Root & Derivatives:</span>
+    <div class="root-display">
+        <span class="root-word" id="root-term">...</span>
+        <div class="hint" id="derivatives">...</div>
+    </div>
+    <span class="label">Select the primary meaning:</span>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Investigate Next Root →</button>
+</div>
+
+<script>
+    const derivationData = [
+        {r: "Aqua", d: "aquatic, aqueduct, aquarium", c: "Water", o: ["Air", "Fire", "Life"]},
+        {r: "Bio", d: "biology, biography, biosphere", c: "Life", o: ["Earth", "Death", "Light"]},
+        {r: "Chron", d: "chronological, chronic, chronicle", c: "Time", o: ["Sound", "Color", "Place"]},
+        {r: "Dict", d: "dictionary, dictate, prediction", c: "Say / Speak", o: ["Write", "Hear", "Run"]},
+        {r: "Geo", d: "geology, geography, geometry", c: "Earth", o: ["Star", "Water", "Mind"]},
+        {r: "Graph", d: "autograph, graphic, telegraph", c: "Write", o: ["See", "Measure", "Build"]},
+        {r: "Hydr", d: "hydrate, hydraulic, hydrogen", c: "Water", o: ["Sun", "Gas", "Speed"]},
+        {r: "Log", d: "logic, apology, dialogue", c: "Word / Study", o: ["Hand", "Foot", "Eye"]},
+        {r: "Meter", d: "thermometer, perimeter, metric", c: "Measure", o: ["Distance", "Weight", "Power"]},
+        {r: "Micro", d: "microscope, microfilm, microwave", c: "Small", o: ["Large", "Wide", "Heavy"]},
+        {r: "Phon", d: "telephone, symphony, phonics", c: "Sound", o: ["Sight", "Taste", "Smell"]},
+        {r: "Photo", d: "photograph, photon, synthesis", c: "Light", o: ["Dark", "Heat", "Cold"]},
+        {r: "Port", d: "portable, transport, export", c: "Carry", o: ["Pull", "Push", "Jump"]},
+        {r: "Psych", d: "psychology, psychic, psychiatrist", c: "Mind", o: ["Body", "Soul", "Brain"]},
+        {r: "Scrib / Script", d: "scribble, manuscript, describe", c: "Write", o: ["Draw", "Read", "Talk"]},
+        {r: "Spec", d: "spectacles, inspect, spectator", c: "Look / See", o: ["Listen", "Touch", "Think"]},
+        {r: "Tele", d: "television, telescope, telepathy", c: "Distant / Far", o: ["Close", "Fast", "Strong"]},
+        {r: "Therm", d: "thermometer, thermal, thermostat", c: "Heat", o: ["Cool", "Energy", "Weather"]},
+        {r: "Vac", d: "vacant, vacuum, evacuate", c: "Empty", o: ["Full", "Clean", "Safe"]},
+        {r: "Vis / Vid", d: "vision, video, evidence", c: "See", o: ["Hear", "Feel", "Move"]},
+        {r: "Aud", d: "audience, audio, audition", c: "Hear", o: ["Speak", "Look", "Dance"]},
+        {r: "Auto", d: "automatic, automobile, autonomy", c: "Self", o: ["Other", "Group", "Machine"]},
+        {r: "Bene", d: "benefit, benevolent, beneficial", c: "Good / Well", o: ["Bad", "Hard", "Fast"]},
+        {r: "Mal", d: "malice, malfunction, malnourished", c: "Bad / Evil", o: ["Slow", "Wrong", "Weak"]},
+        {r: "Cent", d: "century, centimeter, centipede", c: "Hundred", o: ["Ten", "Thousand", "Million"]},
+        {r: "Circum", d: "circumference, circumstance, circumnavigate", c: "Around", o: ["Through", "Above", "Below"]},
+        {r: "Contra", d: "contradict, contrast, contrary", c: "Against", o: ["With", "For", "Between"]},
+        {r: "Cred", d: "credit, incredible, credible", c: "Believe", o: ["Doubt", "Know", "Think"]},
+        {r: "Cycle", d: "bicycle, cyclone, recycle", c: "Circle / Wheel", o: ["Square", "Line", "Box"]},
+        {r: "Dem", d: "democracy, epidemic, demographics", c: "People", o: ["Land", "Power", "City"]},
+        {r: "Derm", d: "dermatologist, epidermis, pachyderm", c: "Skin", o: ["Bone", "Blood", "Hair"]},
+        {r: "Equi", d: "equivalent, equinox, equilibrium", c: "Equal", o: ["Different", "High", "Low"]},
+        {r: "Ex", d: "exit, exhale, extract", c: "Out / From", o: ["Into", "Under", "Beside"]},
+        {r: "Fac", d: "factory, manufacture, facilitate", c: "Make / Do", o: ["Break", "Lose", "Find"]},
+        {r: "Frater", d: "fraternity, fraternize, fraternal", c: "Brother", o: ["Sister", "Father", "Mother"]},
+        {r: "Gen", d: "generation, genuine, genesis", c: "Birth / Origin", o: ["End", "Growth", "Death"]},
+        {r: "Inter", d: "international, intercept, intermission", c: "Between", o: ["Inside", "Outside", "Above"]},
+        {r: "Junct", d: "junction, conjunction, adjunct", c: "Join", o: ["Split", "Hold", "Move"]},
+        {r: "Lib", d: "liberty, liberate, liberal", c: "Free", o: ["Bound", "Old", "Rich"]},
+        {r: "Lingu", d: "linguistics, bilingual, language", c: "Tongue / Language", o: ["Teeth", "Ear", "Voice"]},
+        {r: "Luc", d: "lucid, translucent, elucidate", c: "Light", o: ["Dark", "Clear", "Hard"]},
+        {r: "Magn", d: "magnify, magnificent, magnitude", c: "Large / Great", o: ["Tiny", "Quiet", "Bright"]},
+        {r: "Man", d: "manual, manufacture, manicure", c: "Hand", o: ["Foot", "Mind", "Head"]},
+        {r: "Mar", d: "marine, submarine, maritime", c: "Sea", o: ["Sky", "Land", "River"]},
+        {r: "Mater", d: "maternal, maternity, matriarch", c: "Mother", o: ["Father", "Child", "Aunt"]},
+        {r: "Mort", d: "mortal, mortician, immortal", c: "Death", o: ["Life", "Sleep", "Sick"]},
+        {r: "Multi", d: "multiply, multiple, multicultural", c: "Many", o: ["Few", "One", "None"]},
+        {r: "Nat", d: "native, nature, prenatal", c: "Born", o: ["Built", "Lost", "Found"]},
+        {r: "Nav", d: "navigation, navy, naval", c: "Ship", o: ["Car", "Plane", "Train"]},
+        {r: "Neo", d: "neonatal, neophyte, neoclassic", c: "New", o: ["Old", "Recent", "Next"]},
+        {r: "Omni", d: "omnivore, omnipresent, omnipotent", c: "All", o: ["Some", "One", "None"]},
+        {r: "Orth", d: "orthodontist, orthodox, orthopedic", c: "Straight / Correct", o: ["Curved", "Broken", "False"]},
+        {r: "Pater", d: "paternal, paternity, patriarch", c: "Father", o: ["Mother", "Son", "Grandpa"]},
+        {r: "Path", d: "sympathy, pathetic, apathy", c: "Feeling / Suffering", o: ["Thinking", "Doing", "Going"]},
+        {r: "Ped", d: "pedal, pedestrian, pedicure", c: "Foot", o: ["Hand", "Child", "Head"]},
+        {r: "Phil", d: "philosophy, philanthropist, bibliophile", c: "Love", o: ["Hate", "Fear", "Need"]},
+        {r: "Poly", d: "polygon, polymer, polytheism", c: "Many", o: ["Two", "Half", "All"]},
+        {r: "Pop", d: "population, popular, populous", c: "People", o: ["Cities", "Trees", "Animals"]},
+        {r: "Pre", d: "prefix, preview, preheat", c: "Before", o: ["After", "During", "Under"]},
+        {r: "Re", d: "return, review, redo", c: "Again / Back", o: ["Next", "Fast", "Forward"]},
+        {r: "Rupt", d: "rupture, interrupt, bankrupt", c: "Break", o: ["Fix", "Build", "Join"]},
+        {r: "Scope", d: "microscope, telescope, periscope", c: "Watch / See", o: ["Hear", "Touch", "Smell"]},
+        {r: "Sect", d: "section, dissect, intersect", c: "Cut", o: ["Glue", "Burn", "Fold"]},
+        {r: "Sol", d: "solo, solitary, solitude", c: "Alone", o: ["Together", "Sun", "Bright"]},
+        {r: "Struct", d: "structure, construct, destruction", c: "Build", o: ["Plan", "Dig", "Fly"]},
+        {r: "Sub", d: "submarine, substitute, subway", c: "Under / Below", o: ["Over", "Inside", "Above"]},
+        {r: "Syn / Sym", d: "symphony, synonym, synchronize", c: "Together / With", o: ["Apart", "Against", "Before"]},
+        {r: "Terra", d: "terrain, territory, terrestrial", c: "Land / Earth", o: ["Sky", "Water", "Stars"]},
+        {r: "Tract", d: "attract, tractor, distract", c: "Pull / Drag", o: ["Push", "Carry", "Hold"]},
+        {r: "Trans", d: "transfer, translate, transparent", c: "Across / Over", o: ["Under", "Within", "Beside"]},
+        {r: "Uni", d: "unicycle, uniform, unique", c: "One", o: ["Two", "Many", "None"]},
+        {r: "Vene / Vent", d: "convene, prevent, adventure", c: "Come", o: ["Go", "Stay", "Watch"]},
+        {r: "Ver", d: "verify, verdict, veracity", c: "Truth", o: ["Lie", "Word", "Choice"]},
+        {r: "Viv / Vit", d: "vivid, survive, vital", c: "Life / Live", o: ["Death", "Strength", "Energy"]},
+        {r: "Voc", d: "vocal, vocation, advocate", c: "Voice / Call", o: ["Look", "Hand", "Think"]},
+        {r: "Vol", d: "volunteer, voluntary, volition", c: "Wish / Will", o: ["Force", "Need", "Know"]},
+        {r: "Vor", d: "herbivore, voracious, carnivore", c: "Eat / Devour", o: ["Kill", "Hunt", "Cook"]},
+        {r: "Zo", d: "zoology, zodiac, zoo", c: "Animal", o: ["Plant", "Rock", "Star"]},
+        {r: "Grad / Gress", d: "graduate, progress, aggressive", c: "Step / Go", o: ["Stay", "Run", "Fall"]},
+        {r: "Lum", d: "luminous, illuminate, illuminate", c: "Light", o: ["Heat", "Color", "Heavy"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [...derivationData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('root-term').textContent = item.r;
+        document.getElementById('derivatives').textContent = `Derivatives: ${item.d}`;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.c, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.c) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.c) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>Case Closed!</h2><p style="text-align:center; font-size: 1.5rem;">Etymology Expert Status: UNLOCKED.<br>Final Score: ${score}/80</p><button onclick="location.reload()" class="btn" style="width:100%">Re-investigate</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

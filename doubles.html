@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Contextual Echo | 62 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --echo-indigo: #6c5ce7; 
+            --echo-dark: #2d3436; 
+            --echo-bg: #fff9f0;
+            --success: #55efc4; 
+            --error: #ff7675;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--echo-bg);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px;
+            color: var(--echo-dark);
+        }
+
+        #game-box {
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px;
+            border: 4px solid var(--echo-dark);
+            box-shadow: 10px 10px 0px var(--echo-dark);
+            width: 100%;
+            max-width: 650px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--echo-indigo);
+            font-size: 1.2rem;
+        }
+
+        .sentence-display {
+            font-size: 1.5rem; 
+            font-weight: bold; 
+            line-height: 1.6;
+            margin-bottom: 30px; 
+            padding: 25px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            border: 3px dashed var(--echo-indigo);
+            min-height: 100px;
+            /* Using standard block display to keep underscores in-line with text */
+            display: block;
+            text-align: center;
+        }
+
+        .blank-space { 
+            color: var(--echo-indigo); 
+            font-weight: 800; 
+            white-space: nowrap;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: #fff;
+            border: 3px solid var(--echo-dark);
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 1rem;
+            color: var(--echo-dark);
+            font-family: inherit;
+            box-shadow: 4px 4px 0px var(--echo-dark);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--echo-dark);
+            background: #f0f7ff;
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--echo-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--echo-dark); }
+
+        #next-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--echo-indigo);
+            color: white;
+            border: 3px solid var(--echo-dark);
+            border-radius: 12px;
+            margin-top: 25px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--echo-dark);
+        }
+
+        #next-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px var(--echo-dark); }
+        
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/62</span>
+    </div>
+    <div class="sentence-display" id="sentence-box">Loading Challenges...</div>
+    <div id="choices" class="options-grid"></div>
+    <button id="next-btn">Next Challenge →</button>
+</div>
+
+<script>
+    const fullMasterSet = [
+        { s: "He checked the lock <span class='blank-space'>_____</span> to be absolutely sure.", a: "over and over", o: ["over and over", "again and again", "by and by", "so and so"] },
+        { s: "The boat drifted slowly <span class='blank-space'>_____</span> until it reached the shore.", a: "by and by", o: ["by and by", "round and round", "out and out", "neck and neck"] },
+        { s: "The two runners were <span class='blank-space'>_____</span> for the entire race.", a: "neck and neck", o: ["neck and neck", "step and step", "again and again", "such and such"] },
+        { s: "I won't listen to <span class='blank-space'>_____</span> telling tales about my friends.", a: "such and such", o: ["such and such", "so and so", "one and all", "this and that"] },
+        { s: "The wheel went <span class='blank-space'>_____</span> until the car finally stopped.", a: "round and round", o: ["round and round", "over and over", "out and out", "by and by"] },
+        { s: "The manager has several <span class='blank-space'>_____</span> to achieve the sales goal.", a: "ways and means", o: ["ways and means", "odds and ends", "fits and starts", "pros and cons"] },
+        { s: "He is <span class='blank-space'>_____</span> the most talented musician in the group.", a: "far and away", o: ["far and away", "out and away", "high and dry", "null and void"] },
+        { s: "The hikers began to <span class='blank-space'>_____</span> as they reached the steep peak.", a: "puff and blow", o: ["puff and blow", "rant and rave", "bawl and shout", "high and dry"] },
+        { s: "The drawer was filled with <span class='blank-space'>_____</span> like old buttons and string.", a: "odds and ends", o: ["odds and ends", "bits and pieces", "part and parcel", "null and void"] },
+        { s: "She began to <span class='blank-space'>_____</span> about the poor service at the restaurant.", a: "rant and rave", o: ["rant and rave", "humming and hawing", "puff and blow", "hue and cry"] },
+        { s: "The lost child began to <span class='blank-space'>_____</span> for his mother in the park.", a: "bawl and shout", o: ["bawl and shout", "rant and rave", "beck and call", "kith and kin"] },
+        { s: "The old sailor was <span class='blank-space'>_____</span> but still very strong.", a: "old and grey", o: ["old and grey", "hale and hearty", "lean and lanky", "safe and sound"] },
+        { s: "He is very protective of his <span class='blank-space'>_____</span>.", a: "kith and kin", o: ["kith and kin", "one and all", "so and so", "heart and soul"] },
+        { s: "Taking risks is <span class='blank-space'>_____</span> of being an entrepreneur.", a: "part and parcel", o: ["part and parcel", "root and branch", "ways and means", "lock and key"] },
+        { s: "The captain returned the ship to the harbor <span class='blank-space'>_____</span>.", a: "safe and sound", o: ["safe and sound", "hale and hearty", "spick and span", "high and dry"] },
+        { s: "Everything in the hotel room was <span class='blank-space'>_____</span>.", a: "spick and span", o: ["spick and span", "rough and ready", "fair and square", "null and void"] },
+        { s: "We must finish the harvest because <span class='blank-space'>_____</span> wait for no man.", a: "time and tide", o: ["time and tide", "fits and starts", "odds and ends", "give and take"] },
+        { s: "The campsite was <span class='blank-space'>_____</span>, but it served our needs for the night.", a: "rough and ready", o: ["rough and ready", "spick and span", "high and dry", "null and void"] },
+        { s: "He is the <span class='blank-space'>_____</span> person I trust with this secret.", a: "one and only", o: ["one and only", "first and foremost", "all and sundry", "so and so"] },
+        { s: "The explorer hiked through <span class='blank-space'>_____</span> to reach the temple.", a: "thick and thin", o: ["thick and thin", "high and low", "in and out", "here and there"] },
+        { s: "The light was flickering <span class='blank-space'>_____</span> all night.", a: "on and off", o: ["on and off", "in and out", "ups and downs", "here and there"] },
+        { s: "The charity helps everyone, <span class='blank-space'>_____</span>.", a: "great and small", o: ["great and small", "one and all", "kith and kin", "high and low"] },
+        { s: "The children were running <span class='blank-space'>_____</span> of the house.", a: "in and out", o: ["in and out", "on and off", "high and low", "here and there"] },
+        { s: "The price of gold has its <span class='blank-space'>_____</span> every week.", a: "ups and downs", o: ["ups and downs", "pros and cons", "ins and outs", "give and take"] },
+        { s: "He was standing <span class='blank-space'>_____</span> just a moment ago.", a: "here and there", o: ["here and there", "this and that", "high and low", "in and out"] },
+        { s: "After the engine failed, the car was left <span class='blank-space'>_____</span> in the desert.", a: "high and dry", o: ["high and dry", "fair and square", "out and about", "safe and sound"] },
+        { s: "The umpire's decision was <span class='blank-space'>_____</span>.", a: "fair and square", o: ["fair and square", "high and dry", "touch and go", "hard and fast"] },
+        { s: "It's nice to be <span class='blank-space'>_____</span> again after being sick for a week.", a: "out and about", o: ["out and about", "up and down", "high and dry", "free and easy"] },
+        { s: "The carpet showed a lot of <span class='blank-space'>_____</span> near the entrance.", a: "wear and tear", o: ["wear and tear", "rack and ruin", "odds and ends", "fits and starts"] },
+        { s: "The soldiers fought <span class='blank-space'>_____</span> to hold the bridge.", a: "tooth and nail", o: ["tooth and nail", "hammer and tongs", "hip and thigh", "heart and soul"] },
+        { s: "He committed himself <span class='blank-space'>_____</span> to the new project.", a: "body and soul", o: ["body and soul", "kith and kin", "one and all", "hale and hearty"] },
+        { s: "The government promised to reform the system <span class='blank-space'>_____</span>.", a: "root and branch", o: ["root and branch", "part and parcel", "ways and means", "lock and key"] },
+        { s: "He was working <span class='blank-space'>_____</span> to finish the repairs before the rain.", a: "hammer and tongs", o: ["hammer and tongs", "tooth and nail", "might and main", "fits and starts"] },
+        { s: "The suspicious characters were seen in every <span class='blank-space'>_____</span> of the city.", a: "hole and corner", o: ["hole and corner", "high and low", "here and there", "in and out"] },
+        { s: "She is <span class='blank-space'>_____</span> above her classmates in mathematics.", a: "head and shoulders", o: ["head and shoulders", "far and away", "high and dry", "one and only"] },
+        { s: "The prisoner was bound <span class='blank-space'>_____</span>.", a: "hand and foot", o: ["hand and foot", "neck and neck", "back and forth", "hard and fast"] },
+        { s: "The news was broadcast to <span class='blank-space'>_____</span>.", a: "all and sundry", o: ["all and sundry", "one and all", "great and small", "so and so"] },
+        { s: "He played <span class='blank-space'>_____</span> with her feelings.", a: "fast and loose", o: ["fast and loose", "hard and fast", "free and easy", "rough and tumble"] },
+        { s: "The old engine only runs in <span class='blank-space'>_____</span>.", a: "fits and starts", o: ["fits and starts", "on and off", "wear and tear", "rack and ruin"] },
+        { s: "There is no <span class='blank-space'>_____</span> rule about how to dress for the party.", a: "hard and fast", o: ["hard and fast", "fair and square", "rough and ready", "null and void"] },
+        { s: "The weekend retreat was very <span class='blank-space'>_____</span>.", a: "free and easy", o: ["free and easy", "rough and tumble", "fair and square", "high and dry"] },
+        { s: "The playground was a scene of <span class='blank-space'>_____</span> during recess.", a: "rough and tumble", o: ["rough and tumble", "fits and starts", "high and low", "hue and cry"] },
+        { s: "The witness was a man of <span class='blank-space'>_____</span> in the community.", a: "habit and repute", o: ["habit and repute", "hale and hearty", "old and grey", "high and dry"] },
+        { s: "He charged me ten dollars <span class='blank-space'>_____</span> the original price.", a: "over and above", o: ["over and above", "more or less", "again and again", "by and by"] },
+        { s: "It has happened <span class='blank-space'>_____</span>; I've lost count.", a: "time and again", o: ["time and again", "over and over", "once or twice", "now and then"] },
+        { s: "Alas and <span class='blank-space'>_____</span>, the treasure was never found.", a: "a lack", o: ["a lack", "a loss", "a shame", "a worry"] },
+        { s: "He gave his <span class='blank-space'>_____</span> to the performance.", a: "heart and soul", o: ["heart and soul", "might and main", "tooth and nail", "body and soul"] },
+        { s: "The legal documents are kept under <span class='blank-space'>_____</span>.", a: "lock and key", o: ["lock and key", "hand and foot", "safe and sound", "null and void"] }
+    ];
+
+    const extraData = [
+        { s: "The company went to <span class='blank-space'>_____</span> after the CEO resigned.", a: "rack and ruin", o: ["rack and ruin", "bits and pieces", "odds and ends", "null and void"] },
+        { s: "He attacked the enemy <span class='blank-space'>_____</span>.", a: "hip and thigh", o: ["hip and thigh", "tooth and nail", "hand and foot", "might and main"] },
+        { s: "The contract was signed <span class='blank-space'>_____</span>.", a: "fair and square", o: ["fair and square", "null and void", "hard and fast", "high and dry"] },
+        { s: "The weather was <span class='blank-space'>_____</span> during our vacation.", a: "on and off", o: ["on and off", "high and low", "in and out", "here and there"] },
+        { s: "She explained the <span class='blank-space'>_____</span> of the problem.", a: "ins and outs", o: ["ins and outs", "pros and cons", "ups and downs", "ways and means"] },
+        { s: "We need to weigh the <span class='blank-space'>_____</span> before deciding.", a: "pros and cons", o: ["pros and cons", "ins and outs", "ups and downs", "give and take"] },
+        { s: "He looked <span class='blank-space'>_____</span> for his lost dog.", a: "high and low", o: ["high and low", "here and there", "far and away", "in and out"] },
+        { s: "The project was <span class='blank-space'>_____</span> for a while.", a: "touch and go", o: ["touch and go", "on and off", "fits and starts", "hard and fast"] },
+        { s: "The army attacked <span class='blank-space'>_____</span>.", a: "might and main", o: ["might and main", "tooth and nail", "hammer and tongs", "hip and thigh"] },
+        { s: "They are <span class='blank-space'>_____</span> in the same business.", a: "one and all", o: ["one and all", "kith and kin", "this and that", "so and so"] },
+        { s: "I told him <span class='blank-space'>_____</span> to be careful.", a: "again and again", o: ["again and again", "over and over", "time and again", "once and for all"] },
+        { s: "The room was <span class='blank-space'>_____</span>.", a: "spick and span", o: ["spick and span", "rough and ready", "new and fresh", "null and void"] },
+        { s: "It was an <span class='blank-space'>_____</span> victory.", a: "out and out", o: ["out and out", "far and away", "high and dry", "one and only"] },
+        { s: "They were <span class='blank-space'>_____</span> in the race.", a: "neck and neck", o: ["neck and neck", "step by step", "face to face", "hand in hand"] }
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...fullMasterSet, ...extraData].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            document.getElementById('game-box').innerHTML = `<h2>Legendary Mastery!</h2><p>All 62 Challenges Completed!<br>Final Score: ${score}/${deck.length}</p><button onclick="location.reload()" class="btn" style="width:100%">Play Again</button>`;
+            return; 
+        }
+        const item = deck[current];
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        
+        // Keeps underscores exactly as they appear in the data
+        document.getElementById('sentence-box').innerHTML = item.s;
+        
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        item.o.sort(() => Math.random() - 0.5).forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { 
+                    b.classList.add('correct'); score++; 
+                } else { 
+                    b.classList.add('wrong'); 
+                    btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => { current++; load(); };
+
+    init();
+</script>
+</body>
+</html>
