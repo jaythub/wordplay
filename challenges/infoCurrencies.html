@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Global Identity Quest | 80 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --world-teal: #00b894; 
+            --world-indigo: #6c5ce7;
+            --world-dark: #2d3436; 
+            --world-bg: #f0fff4;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-teal: #e6fffa;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--world-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--world-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--world-dark);
+            box-shadow: 10px 10px 0px var(--world-dark); 
+            width: 100%; 
+            max-width: 800px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--world-indigo);
+            font-size: 1.2rem;
+        }
+
+        .label { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            letter-spacing: 1px; 
+            display: block;
+        }
+        
+        .question-display { 
+            font-size: 1.5rem; 
+            line-height: 1.6; 
+            color: var(--world-dark); 
+            background: #f8f9ff; 
+            padding: 35px; 
+            border-radius: 15px; 
+            border: 3px dashed var(--world-teal); 
+            margin-bottom: 30px; 
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--world-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-family: inherit; 
+            font-size: 1.1rem; 
+            color: var(--world-dark);
+            box-shadow: 4px 4px 0px var(--world-dark);
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--world-dark);
+            background: var(--hover-teal);
+            border-color: var(--world-teal);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--world-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--world-dark); }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--world-dark); 
+            color: white; 
+            border: 3px solid var(--world-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--world-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--world-dark);
+            background: var(--world-indigo);
+        }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats"><span>Score: <span id="score">0</span> 🏆</span><span id="progress">1/80</span></div>
+    <span class="label">International Intelligence:</span>
+    <div class="question-display" id="question-target">...</div>
+    <span class="label">Select the correct option:</span>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Next Continent →</button>
+</div>
+
+<script>
+    const identityData = [
+        // CURRENCY QUESTIONS
+        {q: "Which of these countries uses the Euro?", a: "Netherlands", o: ["United Kingdom", "Japan", "USA"]},
+        {q: "Which country uses the Yen?", a: "Japan", o: ["China", "Thailand", "South Korea"]},
+        {q: "Which country uses the Pound Sterling?", a: "United Kingdom", o: ["France", "Germany", "Italy"]},
+        {q: "Which country uses the Rupee?", a: "India", o: ["Egypt", "Brazil", "Mexico"]},
+        {q: "Which country uses the Peso?", a: "Mexico", o: ["Spain", "Portugal", "Greece"]},
+        {q: "Which country uses the Real?", a: "Brazil", o: ["Argentina", "Chile", "Peru"]},
+        {q: "Which country uses the Ruble?", a: "Russia", o: ["Poland", "Ukraine", "Finland"]},
+        {q: "Which country uses the Yuan?", a: "China", o: ["Japan", "Vietnam", "Malaysia"]},
+        {q: "Which country uses the Rand?", a: "South Africa", o: ["Kenya", "Nigeria", "Ghana"]},
+        {q: "Which country uses the Lira?", a: "Turkey", o: ["Greece", "Italy", "Egypt"]},
+        {q: "Which of these countries uses the Euro?", a: "Belgium", o: ["Norway", "Sweden", "Switzerland"]},
+        {q: "Which country uses the Won?", a: "South Korea", o: ["Thailand", "China", "Singapore"]},
+        {q: "Which country uses the Baht?", a: "Thailand", o: ["Indonesia", "Vietnam", "Myanmar"]},
+        {q: "Which country uses the Shekel?", a: "Israel", o: ["Saudi Arabia", "Iraq", "Iran"]},
+        {q: "Which country uses the Ringgit?", a: "Malaysia", o: ["Philippines", "Singapore", "Laos"]},
+        {q: "Which country uses the Dong?", a: "Vietnam", o: ["Cambodia", "Thailand", "Malaysia"]},
+        {q: "Which country uses the Krona?", a: "Sweden", o: ["Denmark", "Germany", "Finland"]},
+        {q: "Which country uses the Hryvnia?", a: "Ukraine", o: ["Russia", "Poland", "Bulgaria"]},
+        {q: "Which country uses the Dirham?", a: "United Arab Emirates", o: ["Egypt", "Turkey", "Israel"]},
+        {q: "Which country uses the Swiss Franc?", a: "Switzerland", o: ["Austria", "France", "Italy"]},
+
+        // CAPITAL QUESTIONS
+        {q: "What is the capital of Netherlands?", a: "Amsterdam", o: ["Rotterdam", "The Hague", "Utrecht"]},
+        {q: "What is the capital of Belgium?", a: "Brussels", o: ["Antwerp", "Bruges", "Ghent"]},
+        {q: "What is the capital of France?", a: "Paris", o: ["Lyon", "Marseille", "Nice"]},
+        {q: "What is the capital of Germany?", a: "Berlin", o: ["Munich", "Frankfurt", "Hamburg"]},
+        {q: "What is the capital of Italy?", a: "Rome", o: ["Milan", "Venice", "Florence"]},
+        {q: "What is the capital of Spain?", a: "Madrid", o: ["Barcelona", "Seville", "Valencia"]},
+        {q: "What is the capital of Japan?", a: "Tokyo", o: ["Osaka", "Kyoto", "Nagoya"]},
+        {q: "What is the capital of China?", a: "Beijing", o: ["Shanghai", "Hong Kong", "Guangzhou"]},
+        {q: "What is the capital of India?", a: "New Delhi", o: ["Mumbai", "Calcutta", "Bangalore"]},
+        {q: "What is the capital of Russia?", a: "Moscow", o: ["St. Petersburg", "Kiev", "Novosibirsk"]},
+        {q: "What is the capital of Egypt?", a: "Cairo", o: ["Alexandria", "Luxor", "Giza"]},
+        {q: "What is the capital of Brazil?", a: "Brasilia", o: ["Rio de Janeiro", "Sao Paulo", "Salvador"]},
+        {q: "What is the capital of USA?", a: "Washington D.C.", o: ["New York", "Los Angeles", "Chicago"]},
+        {q: "What is the capital of Canada?", a: "Ottawa", o: ["Toronto", "Montreal", "Vancouver"]},
+        {q: "What is the capital of Australia?", a: "Canberra", o: ["Sydney", "Melbourne", "Perth"]},
+        {q: "What is the capital of South Korea?", a: "Seoul", o: ["Busan", "Incheon", "Daegu"]},
+        {q: "What is the capital of Thailand?", a: "Bangkok", o: ["Phuket", "Chiang Mai", "Pattaya"]},
+        {q: "What is the capital of Turkey?", a: "Ankara", o: ["Istanbul", "Izmir", "Antalya"]},
+        {q: "What is the capital of Greece?", a: "Athens", o: ["Thessaloniki", "Patras", "Heraklion"]},
+        {q: "What is the capital of Portugal?", a: "Lisbon", o: ["Porto", "Braga", "Coimbra"]},
+
+        // PEOPLE QUESTIONS
+        {q: "What are the people of Belgium called?", a: "Belgians", o: ["Belgics", "Belgese", "Bels"]},
+        {q: "What are the people of Netherlands called?", a: "Dutch", o: ["Nethermen", "Hollanders", "Nethers"]},
+        {q: "What are the people of France called?", a: "French", o: ["Francais", "Francos", "Frenchmen"]},
+        {q: "What are the people of Germany called?", a: "Germans", o: ["Deutsch", "Allemands", "Germanic"]},
+        {q: "What are the people of Italy called?", a: "Italians", o: ["Italics", "Italos", "Romans"]},
+        {q: "What are the people of Spain called?", a: "Spaniards", o: ["Spanishers", "Espanyols", "Spains"]},
+        {q: "What are the people of Japan called?", a: "Japanese", o: ["Nipponese", "Japs", "Japans"]},
+        {q: "What are the people of China called?", a: "Chinese", o: ["Cathayans", "Chinesians", "Orientals"]},
+        {q: "What are the people of India called?", a: "Indians", o: ["Hindus", "Indics", "Bharatis"]},
+        {q: "What are the people of Brazil called?", a: "Brazilians", o: ["Brazilese", "Lusos", "Samba"]},
+        {q: "What are the people of Mexico called?", a: "Mexicans", o: ["Mexicas", "Chicanos", "Spanish"]},
+        {q: "What are the people of Russia called?", a: "Russians", o: ["Slavs", "Soviets", "Rus"]},
+        {q: "What are the people of Poland called?", a: "Poles", o: ["Polishers", "Polskas", "Polands"]},
+        {q: "What are the people of Sweden called?", a: "Swedes", o: ["Swedishers", "Svenskas", "Nordics"]},
+        {q: "What are the people of Norway called?", a: "Norwegians", o: ["Norses", "Norways", "Vikings"]},
+        {q: "What are the people of Denmark called?", a: "Danes", o: ["Danishers", "Danics", "Denmarks"]},
+        {q: "What are the people of Finland called?", a: "Finns", o: ["Finnishers", "Suomis", "Laplanders"]},
+        {q: "What are the people of Greece called?", a: "Greeks", o: ["Hellens", "Grecians", "Attics"]},
+        {q: "What are the people of Turkey called?", a: "Turks", o: ["Turkics", "Anatolians", "Ottomans"]},
+        {q: "What are the people of Israel called?", a: "Israelis", o: ["Israelites", "Hebrews", "Jews"]},
+
+        // LANGUAGE QUESTIONS
+        {q: "What language do the Belgians speak?", a: "Flemish & French", o: ["Dutch & German", "French & Italian", "English & Latin"]},
+        {q: "What is the primary language of Netherlands?", a: "Dutch", o: ["Flemish", "German", "English"]},
+        {q: "What language is spoken in Brazil?", a: "Portuguese", o: ["Spanish", "Brazilian", "Latin"]},
+        {q: "What is the official language of Egypt?", a: "Arabic", o: ["Coptic", "Egyptian", "French"]},
+        {q: "What language is primarily spoken in Austria?", a: "German", o: ["Austrian", "Swiss", "Hungarian"]},
+        {q: "What are the two main languages of Canada?", a: "English & French", o: ["English & Spanish", "French & German", "English & Inuit"]},
+        {q: "What language is spoken in Mexico?", a: "Spanish", o: ["Mexican", "Latin", "Portuguese"]},
+        {q: "What language is spoken in Argentina?", a: "Spanish", o: ["Portuguese", "Argentine", "Italian"]},
+        {q: "What is the main language of Iran?", a: "Persian (Farsi)", o: ["Arabic", "Urdu", "Kurdish"]},
+        {q: "What language is spoken in Pakistan?", a: "Urdu", o: ["Hindi", "Arabic", "Bengali"]},
+        {q: "What language is spoken in Israel?", a: "Hebrew", o: ["Yiddish", "Aramaic", "Arabic"]},
+        {q: "What is the language of Switzerland?", a: "German, French & Italian", o: ["Swiss", "German only", "Latin"]},
+        {q: "What language is spoken in Thailand?", a: "Thai", o: ["Baht", "Siam", "Laos"]},
+        {q: "What is the official language of China?", a: "Mandarin", o: ["Cantonese", "Hakka", "Wu"]},
+        {q: "What language is spoken in Portugal?", a: "Portuguese", o: ["Spanish", "Galician", "Luso"]},
+        {q: "What language is spoken in South Korea?", a: "Korean", o: ["Japanese", "Mandarin", "Won"]},
+        {q: "What language is spoken in Greece?", a: "Greek", o: ["Cypriot", "Hellene", "Latin"]},
+        {q: "What is the language of Kenya?", a: "Swahili & English", o: ["Zulu", "Afrikaans", "Arabic"]},
+        {q: "What is the language of Nigeria?", a: "English", o: ["Naira", "Swahili", "Arabic"]},
+        {q: "What is the language of Australia?", a: "English", o: ["Australian", "Maori", "British"]}
+    ];
+
+    let current = 0; let score = 0; 
+    let deck = [...identityData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('question-target').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/80`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 80) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>World Expert!</h2><p>You have mastered 80 identity questions.<br>Final Score: ${score}/80</p><button onclick="location.reload()" class="btn" style="width:100%">Play Again</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

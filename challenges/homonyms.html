@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Sound Alike | 125 Precision Challenges</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --echo-indigo: #6c5ce7; 
+            --echo-orange: #e67e22;
+            --echo-dark: #2d3436; 
+            --echo-bg: #fff9f0;
+            --success: #55efc4; 
+            --error: #ff7675;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--echo-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--echo-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--echo-dark);
+            box-shadow: 10px 10px 0px var(--echo-dark); 
+            width: 100%; 
+            max-width: 800px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--echo-orange);
+            font-size: 1.2rem;
+        }
+        
+        .sentence-box { 
+            font-size: 1.5rem; 
+            line-height: 1.8; 
+            color: var(--echo-dark); 
+            background: #fffbf0; 
+            padding: 35px; 
+            border-radius: 15px; 
+            border: 3px dashed var(--echo-orange); 
+            margin-bottom: 30px; 
+            font-weight: bold;
+            min-height: 80px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        .blank { 
+            color: var(--echo-indigo); 
+            font-weight: 800; 
+            border-bottom: 3px solid var(--echo-orange); 
+            padding: 0 5px; 
+        }
+
+        .options { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--echo-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-family: inherit; 
+            font-size: 1.1rem; 
+            color: var(--echo-dark);
+            box-shadow: 4px 4px 0px var(--echo-dark);
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--echo-dark);
+            background: #fff7ed;
+            border-color: var(--echo-orange);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--echo-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--echo-dark); }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--echo-indigo); 
+            color: white; 
+            border: 3px solid var(--echo-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--echo-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--echo-dark);
+        }
+
+        @media (max-width: 500px) {
+            .options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats"><span>Score: <span id="score">0</span></span><span id="progress">0/125</span></div>
+    <div class="sentence-box" id="sentence-area">Loading challenges...</div>
+    <div class="options" id="choices"></div>
+    <button id="next-btn">Next Challenge →</button>
+</div>
+
+<script>
+    const dataset = [
+        {s: "The chef cooked a thick <span class='blank'>____</span> on the grill.", a: "steak", d: ["stake", "stare", "stack"]},
+        {s: "He hammered a wooden <span class='blank'>____</span> into the ground.", a: "stake", d: ["steak", "stack", "stair"]},
+        {s: "The teacher read the story <span class='blank'>____</span> to the class.", a: "aloud", d: ["allowed", "cloud", "along"]},
+        {s: "You are not <span class='blank'>____</span> to run in the hallway.", a: "allowed", d: ["aloud", "alloyed", "allied"]},
+        {s: "I <span class='blank'>____</span> the letter <span class='blank'>____</span> the mail yesterday.", a: "sent — through", d: ["scent — threw", "cent — threw", "send — through"]},
+        {s: "The <span class='blank'>____</span> of the roses filled the garden.", a: "scent", d: ["cent", "sent", "send"]},
+        {s: "A penny is worth exactly one <span class='blank'>____</span>.", a: "cent", d: ["scent", "sent", "send"]},
+        {s: "The <span class='blank'>____</span> rises at dawn and sets at dusk.", a: "sun", d: ["son", "sum", "soon"]},
+        {s: "The king's <span class='blank'>____</span> will inherit the throne.", a: "son", d: ["sun", "sum", "soon"]},
+        {s: "The <span class='blank'>____</span> of the mountain was covered in snow.", a: "peak", d: ["peek", "pick", "pack"]},
+        {s: "Don't <span class='blank'>____</span> at your birthday presents early!", a: "peek", d: ["peak", "pick", "puck"]},
+        {s: "The <span class='blank'>____</span> wind <span class='blank'>____</span> the hat off my head.", a: "blue — blew", d: ["blew — blue", "blow — blue", "blue — blow"]},
+        {s: "I can <span class='blank'>____</span> the music from <span class='blank'>____</span>.", a: "hear — here", d: ["here — hear", "hear — hair", "here — hair"]},
+        {s: "We used white <span class='blank'>____</span> to bake the <span class='blank'>____</span>.", a: "flour — bread", d: ["flower — bred", "flour — bred", "flower — bread"]},
+        {s: "A yellow <span class='blank'>____</span> grew in the garden.", a: "flower", d: ["flour", "floor", "flyer"]},
+        {s: "The <span class='blank'>____</span> of the boat is called the <span class='blank'>____</span>.", a: "front — bow", d: ["front — bough", "back — bow", "back — bough"]},
+        {s: "The thick <span class='blank'>____</span> of the tree broke in the storm.", a: "bough", d: ["bow", "boy", "bought"]},
+        {s: "He <span class='blank'>____</span> the ball <span class='blank'>____</span> the open window.", a: "threw — through", d: ["through — threw", "threw — thorough", "thorough — threw"]},
+        {s: "The <span class='blank'>____</span> wore heavy armor and rode a horse.", a: "knight", d: ["night", "neat", "knot"]},
+        {s: "Stars are only visible during the <span class='blank'>____</span>.", a: "night", d: ["knight", "neat", "net"]},
+        {s: "I <span class='blank'>____</span> you were getting a <span class='blank'>____</span> car.", a: "knew — new", d: ["new — knew", "know — new", "knew — now"]},
+        {s: "She <span class='blank'>____</span> <span class='blank'>____</span> apples at the store.", a: "bought — eight", d: ["brought — ate", "bought — ate", "brought — eight"]},
+        {s: "I <span class='blank'>____</span> a sandwich for lunch at <span class='blank'>____</span> o'clock.", a: "ate — eight", d: ["eight — ate", "ate — eat", "eight — eat"]},
+        {s: "The <span class='blank'>____</span> today is sunny, but I don't know <span class='blank'>____</span> it will rain.", a: "weather — whether", d: ["whether — weather", "wether — weather", "weather — wether"]},
+        {s: "I need to <span class='blank'>____</span> a new <span class='blank'>____</span> of shoes.", a: "buy — pair", d: ["by — pear", "buy — pear", "bye — pair"]},
+        {s: "The <span class='blank'>____</span> is a sweet and juicy fruit.", a: "pear", d: ["pair", "pare", "peer"]},
+        {s: "A <span class='blank'>____</span> was eating a red <span class='blank'>____</span> in the forest.", a: "deer — berry", d: ["dear — bury", "deer — bury", "dear — berry"]},
+        {s: "Oh <span class='blank'>____</span>! I forgot to <span class='blank'>____</span> the treasure.", a: "dear — bury", d: ["deer — berry", "dear — berry", "deer — bury"]},
+        {s: "The <span class='blank'>____</span> has thick brown <span class='blank'>____</span>.", a: "bear — fur", d: ["bare — fir", "bear — fir", "bare — fur"]},
+        {s: "The trees were <span class='blank'>____</span> because it was winter.", a: "bare", d: ["bear", "beer", "bore"]},
+        {s: "The <span class='blank'>____</span> is an evergreen tree.", a: "fir", d: ["fur", "for", "far"]},
+        {s: "I can <span class='blank'>____</span> the <span class='blank'>____</span> splashing in the <span class='blank'>____</span>.", a: "hear — whale — sea", d: ["here — wail — see", "hear — wail — sea", "here — whale — see"]},
+        {s: "The baby began to <span class='blank'>____</span> when it was hungry.", a: "wail", d: ["whale", "wall", "well"]},
+        {s: "The <span class='blank'>____</span> from the clouds will water the garden.", a: "rain", d: ["reign", "rein", "ran"]},
+        {s: "A king's <span class='blank'>____</span> can last for many years.", a: "reign", d: ["rain", "rein", "run"]},
+        {s: "Pull on the <span class='blank'>____</span> to stop the horse.", a: "rein", d: ["rain", "reign", "rainy"]},
+        {s: "I <span class='blank'>____</span> the <span class='blank'>____</span> on my bicycle.", a: "broke — brake", d: ["brake — broke", "break — brake", "brake — break"]},
+        {s: "It is not <span class='blank'>____</span> to <span class='blank'>____</span> on the desk.", a: "right — write", d: ["write — right", "rite — right", "right — rite"]},
+        {s: "The <span class='blank'>____</span> was very <span class='blank'>____</span>, so I fell asleep.", a: "board — bored", d: ["bored — board", "board — board", "bored — bored"]},
+        {s: "He <span class='blank'>____</span> his bike down the long <span class='blank'>____</span>.", a: "rode — road", d: ["road — rode", "rowed — road", "rode — rowed"]},
+        {s: "We <span class='blank'>____</span> the boat across the lake.", a: "rowed", d: ["road", "rode", "row"]},
+        {s: "A <span class='blank'>____</span> is an animal that can run very fast.", a: "hare", d: ["hair", "here", "hear"]},
+        {s: "She brushed her long, dark <span class='blank'>____</span>.", a: "hair", d: ["hare", "hear", "here"]},
+        {s: "The <span class='blank'>____</span> was made of solid gold.", a: "medal", d: ["meddle", "metal", "model"]},
+        {s: "Do not <span class='blank'>____</span> in other people's business!", a: "meddle", d: ["medal", "metal", "middle"]},
+        {s: "Steel is a very strong <span class='blank'>____</span>.", a: "metal", d: ["medal", "meddle", "mental"]},
+        {s: "I <span class='blank'>____</span> the <span class='blank'>____</span> of the bell ringing.", a: "heard — peal", d: ["herd — peel", "heard — peel", "herd — peal"]},
+        {s: "A large <span class='blank'>____</span> of cattle moved across the field.", a: "herd", d: ["heard", "head", "hard"]},
+        {s: "Please <span class='blank'>____</span> the orange before eating it.", a: "peel", d: ["peal", "pool", "pal"]},
+        {s: "The <span class='blank'>____</span> is the person who leads the school.", a: "principal", d: ["principle", "princely", "practice"]},
+        {s: "Honesty is an important <span class='blank'>____</span> to live by.", a: "principle", d: ["principal", "prince", "practice"]},
+        {s: "I need a <span class='blank'>____</span> of paper to <span class='blank'>____</span> a note.", a: "piece — write", d: ["peace — right", "piece — right", "peace — write"]},
+        {s: "The two countries signed a <span class='blank'>____</span> treaty to end the war.", a: "peace", d: ["piece", "pace", "place"]},
+        {s: "The <span class='blank'>____</span> in the window was cracked.", a: "pane", d: ["pain", "pine", "plan"]},
+        {s: "He felt a sharp <span class='blank'>____</span> in his knee.", a: "pain", d: ["pane", "pine", "pan"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was five dollars.", a: "price — rice", d: ["prize — rice", "price — rise", "prize — rise"]},
+        {s: "He won first <span class='blank'>____</span> in the science fair.", a: "prize", d: ["price", "praise", "pride"]},
+        {s: "They are over <span class='blank'>____</span> playing with <span class='blank'>____</span> toys.", a: "there — their", d: ["their — there", "they're — their", "there — they're"]},
+        {s: "<span class='blank'>____</span> going to be late if they don't hurry.", a: "They're", d: ["Their", "There", "They"]},
+        {s: "The <span class='blank'>____</span> was <span class='blank'>____</span> for the wedding ceremony.", a: "altar — ready", d: ["alter — ready", "altar — reddy", "alter — reddy"]},
+        {s: "You may need to <span class='blank'>____</span> your plans if it rains.", a: "alter", d: ["altar", "after", "alert"]},
+        {s: "The <span class='blank'>____</span> walked down the <span class='blank'>____</span> toward the groom.", a: "bride — aisle", d: ["bride — isle", "bridle — aisle", "bridle — isle"]},
+        {s: "A small <span class='blank'>____</span> is a piece of land surrounded by water.", a: "isle", d: ["aisle", "I'll", "eel"]},
+        {s: "The <span class='blank'>____</span> is the part of the plant underground.", a: "root", d: ["route", "rot", "road"]},
+        {s: "Which <span class='blank'>____</span> should we take to get to the city?", a: "route", d: ["root", "rot", "road"]},
+        {s: "I <span class='blank'>____</span> <span class='blank'>____</span> hours doing <span class='blank'>____</span> homework.", a: "spent — four — our", d: ["scent — for — our", "spent — for — are", "scent — four — are"]},
+        {s: "This gift is <span class='blank'>____</span> you.", a: "for", d: ["four", "fir", "far"]},
+        {s: "We <span class='blank'>____</span> the game <span class='blank'>____</span> to zero.", a: "won — one", d: ["one — won", "won — won", "one — one"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was very high.", a: "tide — sea", d: ["tied — see", "tide — see", "tied — sea"]},
+        {s: "He <span class='blank'>____</span> his shoelaces into a tight knot.", a: "tied", d: ["tide", "tidy", "toed"]},
+        {s: "The <span class='blank'>____</span> of the tree is very rough.", a: "bark", d: ["bark", "back", "beak"]},
+        {s: "The <span class='blank'>____</span> is a bird that swims in the pond.", a: "duck", d: ["duck", "deck", "dock"]},
+        {s: "I <span class='blank'>____</span> <span class='blank'>____</span> much <span class='blank'>____</span>.", a: "ate — too — meat", d: ["eight — to — meet", "ate — to — meat", "eight — too — meet"]},
+        {s: "We are going <span class='blank'>____</span> the park <span class='blank'>____</span> <span class='blank'>____</span> our friends.", a: "to — to — meet", d: ["too — too — meat", "to — too — meet", "too — to — meat"]},
+        {s: "A <span class='blank'>____</span> can <span class='blank'>____</span> a heavy wagon.", a: "horse — haul", d: ["hoarse — hall", "horse — hall", "hoarse — haul"]},
+        {s: "His voice sounded <span class='blank'>____</span> because he had a cold.", a: "hoarse", d: ["horse", "house", "hose"]},
+        {s: "Walk down the <span class='blank'>____</span> to get to the gym.", a: "hall", d: ["haul", "heel", "hill"]},
+        {s: "The <span class='blank'>____</span> of the shoe was worn out.", a: "sole", d: ["soul", "sail", "sell"]},
+        {s: "Some people believe the <span class='blank'>____</span> lives on after death.", a: "soul", d: ["sole", "sail", "soil"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was white as it caught the wind.", a: "sail — boat", d: ["sale — boat", "sail — boot", "sale — boot"]},
+        {s: "The department store is having a big <span class='blank'>____</span>.", a: "sale", d: ["sail", "sell", "seal"]},
+        {s: "The <span class='blank'>____</span> is the person who lead the army.", a: "colonel", d: ["kernel", "colony", "corner"]},
+        {s: "A popcorn <span class='blank'>____</span> got stuck in my teeth.", a: "kernel", d: ["colonel", "kennel", "canal"]},
+        {s: "The <span class='blank'>____</span> is a type of bird, like a chicken.", a: "fowl", d: ["foul", "fall", "fool"]},
+        {s: "In baseball, a <span class='blank'>____</span> ball goes outside the lines.", a: "foul", d: ["fowl", "full", "fail"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was 10 dollars.", a: "fare — ticket", d: ["fair — ticket", "fare — thicket", "fair — thicket"]},
+        {s: "The carnival is held at the county <span class='blank'>____</span>.", a: "fair", d: ["fare", "fear", "fire"]},
+        {s: "The <span class='blank'>____</span> is a wild animal that looks like a large rabbit.", a: "hare", d: ["hair", "here", "hear"]},
+        {s: "The <span class='blank'>____</span> of the chimney was blocked with <span class='blank'>____</span>.", a: "flue — soot", d: ["flew — suit", "flue — suit", "flew — soot"]},
+        {s: "The bird <span class='blank'>____</span> away to the south.", a: "flew", d: ["flue", "flow", "floor"]},
+        {s: "A businessman wears a <span class='blank'>____</span> and a tie.", a: "suit", d: ["soot", "seat", "site"]},
+        {s: "I <span class='blank'>____</span> the <span class='blank'>____</span> of the ocean <span class='blank'>____</span>.", a: "heard — roar — here", d: ["herd — raw — here", "heard — raw — hear", "herd — roar — hear"]},
+        {s: "He <span class='blank'>____</span> a <span class='blank'>____</span> of socks at the store.", a: "bought — pair", d: ["brought — pear", "bought — pear", "brought — pair"]},
+        {s: "I <span class='blank'>____</span> a <span class='blank'>____</span> on the <span class='blank'>____</span> of paper.", a: "wrote — note — sheet", d: ["rote — knot — sheet", "wrote — knot — sheet", "rote — note — shoot"]},
+        {s: "I tied a <span class='blank'>____</span> in the rope.", a: "knot", d: ["not", "nut", "net"]},
+        {s: "He <span class='blank'>____</span> the <span class='blank'>____</span> of the mountain after a long climb.", a: "reached — peak", d: ["reached — peek", "reached — pick", "reached — pack"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was very heavy.", a: "weight — rock", d: ["wait — rock", "weight — rack", "wait — rack"]},
+        {s: "Please <span class='blank'>____</span> a moment for the bus to arrive.", a: "wait", d: ["weight", "watt", "wet"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was blue.", a: "color — sky", d: ["color — stair", "collar — sky", "collar — stair"]},
+        {s: "The <span class='blank'>____</span> of the shirt was too tight.", a: "collar", d: ["color", "caller", "cellar"]},
+        {s: "He <span class='blank'>____</span> his bike down the <span class='blank'>____</span>.", a: "rode — road", d: ["road — rode", "rowed — road", "rode — rowed"]},
+        {s: "The <span class='blank'>____</span> is <span class='blank'>____</span> for the show.", a: "cast — ready", d: ["caste — ready", "cast — reddy", "caste — reddy"]},
+        {s: "In some societies, people are divided by <span class='blank'>____</span>.", a: "caste", d: ["cast", "cost", "case"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was sweet.", a: "scent — rose", d: ["sent — rows", "cent — rose", "sent — rose"]},
+        {s: "The gardener planted three <span class='blank'>____</span> of corn.", a: "rows", d: ["rose", "roes", "raws"]},
+        {s: "He <span class='blank'>____</span> the <span class='blank'>____</span> of the tree.", a: "cut — bough", d: ["cut — bow", "caught — bough", "caught — bow"]},
+        {s: "I <span class='blank'>____</span> <span class='blank'>____</span> books from the shelf.", a: "took — two", d: ["took — too", "tuck — two", "tuck — too"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was cold.", a: "night — air", d: ["knight — air", "night — heir", "knight — heir"]},
+        {s: "The prince is the <span class='blank'>____</span> to the throne.", a: "heir", d: ["air", "hair", "hare"]},
+        {s: "The <span class='blank'>____</span> is <span class='blank'>____</span> in the lake.", a: "bass — fish", d: ["base — fish", "bass — fresh", "base — fresh"]},
+        {s: "The <span class='blank'>____</span> of the statue was made of marble.", a: "base", d: ["bass", "bus", "boss"]},
+        {s: "I <span class='blank'>____</span> a <span class='blank'>____</span> of water.", a: "poured — glass", d: ["poured — grass", "poor — glass", "poor — grass"]},
+        {s: "The <span class='blank'>____</span> family had no money for food.", a: "poor", d: ["pour", "pore", "pure"]},
+        {s: "Please <span class='blank'>____</span> the milk into the bowl.", a: "pour", d: ["poor", "pore", "pure"]},
+        {s: "A <span class='blank'>____</span> is a tiny opening in the skin.", a: "pore", d: ["poor", "pour", "pure"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was slow.", a: "pace — snail", d: ["pace — sail", "pass — snail", "pass — sail"]},
+        {s: "He <span class='blank'>____</span> a <span class='blank'>____</span> of the pie.", a: "ate — slice", d: ["eight — slice", "ate — sluice", "eight — sluice"]},
+        {s: "The <span class='blank'>____</span> family has <span class='blank'>____</span> children.", a: "their — four", d: ["there — for", "they're — four", "there — four"]},
+        {s: "I <span class='blank'>____</span> the <span class='blank'>____</span> on the fence.", a: "saw — bird", d: ["saw — board", "see — bird", "see — board"]},
+        {s: "He <span class='blank'>____</span> a <span class='blank'>____</span> in the wall.", a: "drilled — hole", d: ["drilled — whole", "filled — hole", "filled — whole"]},
+        {s: "I ate the <span class='blank'>____</span> pizza by myself!", a: "whole", d: ["hole", "hall", "haul"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was 1 cent.", a: "cost — cent", d: ["cost — sent", "cost — scent", "cost — send"]},
+        {s: "The <span class='blank'>____</span> of the <span class='blank'>____</span> was dark.", a: "hue — blue", d: ["hew — blue", "hue — blew", "hew — blew"]},
+        {s: "To <span class='blank'>____</span> means to chop or cut something.", a: "hew", d: ["hue", "how", "who"]},
+        {s: "He <span class='blank'>____</span> a <span class='blank'>____</span> of bread.", a: "needs — loaf", d: ["kneads — loaf", "needs — life", "kneads — life"]},
+        {s: "The baker <span class='blank'>____</span> the dough before baking.", a: "kneads", d: ["needs", "nodes", "nods"]},
+        {s: "I <span class='blank'>____</span> the <span class='blank'>____</span> of the bell.", a: "hear — toll", d: ["here — toll", "hear — tail", "here — tail"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [];
+
+    function init() {
+        deck = [...dataset].sort(() => Math.random() - 0.5);
+        current = 0; score = 0;
+        document.getElementById('score').textContent = "0";
+        load();
+    }
+
+    function load() {
+        if(current >= deck.length) { 
+            alert("Homonym Legend! You finished 125 rounds. Final Score: " + score); 
+            init(); return; 
+        }
+        const item = deck[current];
+        document.getElementById('sentence-area').innerHTML = item.s;
+        document.getElementById('progress').textContent = `${current + 1}/125`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.d].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; load();
+    };
+    init();
+</script>
+</body>
+</html>

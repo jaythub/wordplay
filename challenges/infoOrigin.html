@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>Origin of Nations | 80 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --origin-indigo: #6c5ce7; 
+            --origin-amber: #ffca28;
+            --origin-dark: #2d3436; 
+            --origin-bg: #fffdf5;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-amber: #fff8e1;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--origin-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--origin-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--origin-dark);
+            box-shadow: 10px 10px 0px var(--origin-dark); 
+            width: 100%; 
+            max-width: 850px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--origin-indigo);
+            font-size: 1.2rem;
+        }
+
+        .label { 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.85rem; 
+            letter-spacing: 1.5px; 
+            display: block;
+        }
+        
+        .origin-display { 
+            font-size: 1.4rem; 
+            line-height: 1.6; 
+            color: var(--origin-dark); 
+            background: #fffcf0; 
+            padding: 35px; 
+            border-radius: 15px; 
+            border: 3px dashed var(--origin-amber); 
+            margin-bottom: 30px; 
+            font-weight: bold;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--origin-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-family: inherit; 
+            font-size: 1.1rem; 
+            color: var(--origin-dark);
+            box-shadow: 4px 4px 0px var(--origin-dark);
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--origin-dark);
+            background: var(--hover-amber);
+            border-color: var(--origin-indigo);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--origin-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--origin-dark); }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--origin-dark); 
+            color: white; 
+            border: 3px solid var(--origin-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--origin-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--origin-dark);
+            background: var(--origin-indigo);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats"><span>Score: <span id="score">0</span> 🌍</span><span id="progress">1/80</span></div>
+    <span class="label">Historical Etymology:</span>
+    <div class="origin-display" id="question-target">...</div>
+    <span class="label">Identify the Subject:</span>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Uncover Next History →</button>
+</div>
+
+<script>
+    const originData = [
+        {q: "Named by the Romans after the 'Afri' tribe of Tunisia.", a: "Africa", o: ["Asia", "Australia", "America"]},
+        {q: "Named after the Italian explorer Amerigo Vespucci.", a: "America", o: ["Australia", "Antarctica", "Argentina"]},
+        {q: "Derived from the Latin 'Terra Australis Incognita', meaning 'Unknown Southern Land'.", a: "Australia", o: ["Austria", "Antarctica", "Argentina"]},
+        {q: "Derived from the Phoenician word 'I-Shpania', meaning 'Island of Rabbits'.", a: "Spain", o: ["Italy", "Portugal", "France"]},
+        {q: "Derived from 'Cattigara', or more likely 'Qin', referring to the first imperial dynasty.", a: "China", o: ["Japan", "Vietnam", "India"]},
+        {q: "Means 'Land of the Franks', a Germanic tribe.", a: "France", o: ["Germany", "Finland", "Fiji"]},
+        {q: "Derived from the Indus River, known to the ancient Greeks as Indos.", a: "India", o: ["Indonesia", "Iran", "Iraq"]},
+        {q: "Derived from 'Nippon', which means 'The Sun's Origin'.", a: "Japan", o: ["China", "Korea", "Thailand"]},
+        {q: "Originally 'Land of the Germans' (Allemania), based on the tribe name.", a: "Germany", o: ["Greece", "Georgia", "Denmark"]},
+        {q: "Derived from the Latin 'Graecia', the land of the Graikoi people.", a: "Greece", o: ["Italy", "Egypt", "Germany"]},
+        {q: "Named after the explorer Christopher Columbus.", a: "Colombia", o: ["Costa Rica", "Cuba", "Canada"]},
+        {q: "Named 'Land of the Silver' by Spanish settlers (from the Latin 'Argentum').", a: "Argentina", o: ["Brazil", "Chile", "Bolivia"]},
+        {q: "Named after a type of redwood tree that produces a deep red dye.", a: "Brazil", o: ["Peru", "Ecuador", "Paraguay"]},
+        {q: "Named after the Roman God Mars (or perhaps the Umman-Manda tribe).", a: "Myanmar", o: ["Mexico", "Mali", "Madagascar"]},
+        {q: "Named 'The Savior' in Spanish.", a: "El Salvador", o: ["Ecuador", "Equatorial Guinea", "Eritrea"]},
+        {q: "Derived from the Aztec word 'Metztliapan', meaning 'In the Lake of the Moon'.", a: "Mexico", o: ["Guatemala", "Honduras", "Spain"]},
+        {q: "Meaning 'The Rich Coast' in Spanish.", a: "Costa Rica", o: ["Puerto Rico", "Ecuador", "Peru"]},
+        {q: "Derived from the Iroquois word 'Kanata', meaning 'Village' or 'Settlement'.", a: "Canada", o: ["USA", "Greenland", "Iceland"]},
+        {q: "Named after Simon Bolivar, the liberator of South America.", a: "Bolivia", o: ["Brazil", "Colombia", "Venezuela"]},
+        {q: "Named 'The Equator' in Spanish due to its geographic location.", a: "Ecuador", o: ["Equatorial Guinea", "Ethiopia", "Eritrea"]},
+        {q: "Derived from 'Aithiopia', the Greek word for 'Burnt-Face' (referring to sun-tanned skin).", a: "Ethiopia", o: ["Egypt", "Eritrea", "Angola"]},
+        {q: "Meaning 'Land of the Rus' people.", a: "Russia", o: ["Romania", "Rwanda", "Poland"]},
+        {q: "Derived from 'Vitalia', meaning 'Land of Young Cattle'.", a: "Italy", o: ["Ireland", "Iceland", "Ivory Coast"]},
+        {q: "Named after King Philip II of Spain.", a: "Philippines", o: ["Poland", "Peru", "Portugal"]},
+        {q: "Named after the Phoenician princess in Greek mythology.", a: "Europe", o: ["Eurasia", "Estonia", "England"]},
+        {q: "Derived from 'Eire', a Celtic goddess.", a: "Ireland", o: ["Iceland", "Italy", "Israel"]},
+        {q: "Derived from 'Land of the Angles', a Germanic tribe.", a: "England", o: ["Estonia", "Egypt", "Ecuador"]},
+        {q: "Named for its location 'Under the Wind' or 'The Lowlands' (Neder-landen).", a: "Netherlands", o: ["Norway", "New Zealand", "Namibia"]},
+        {q: "Meaning 'Deep Waters' in Spanish, named by Columbus for the depth of the sea off its coast.", a: "Honduras", o: ["Haiti", "Hungary", "Holland"]},
+        {q: "Derived from 'Portus Cale', an ancient Roman settlement.", a: "Portugal", o: ["Poland", "Peru", "Panama"]},
+        {q: "Named 'Land of the Free' (Thai means free).", a: "Thailand", o: ["Taiwan", "Togo", "Tonga"]},
+        {q: "Named after its location at the 'Bridge of the World'.", a: "Panama", o: ["Peru", "Paraguay", "Palau"]},
+        {q: "Meaning 'Land of the Morning Calm'.", a: "Korea", o: ["Japan", "China", "Vietnam"]},
+        {q: "Named after the 'Vatne' or 'Wado' (Water) by Norse explorers.", a: "Iceland", o: ["Ireland", "Israel", "India"]},
+        {q: "Derived from 'Libya', the name Greeks gave to North Africa.", a: "Libya", o: ["Lebanon", "Liberia", "Laos"]},
+        {q: "Named after the Roman deity of the dawn, 'Aurora'.", a: "Norway (suggested link to North)", o: ["New Zealand", "Nigeria", "Namibia"]},
+        {q: "Meaning 'Land of the Finns'.", a: "Finland", o: ["France", "Fiji", "Faroe Islands"]},
+        {q: "Derived from the Persian 'Stan' (Land of) and 'Afghan' (Highlander).", a: "Afghanistan", o: ["Pakistan", "Kazakhstan", "Uzbekistan"]},
+        {q: "Named after the River Niger.", a: "Nigeria", o: ["Niger", "Namibia", "Nicaragua"]},
+        {q: "Means 'The Lion Mountain' in Portuguese.", a: "Sierra Leone", o: ["Singapore", "Senegal", "Slovakia"]},
+        {q: "Derived from 'Singapura', meaning 'Lion City'.", a: "Singapore", o: ["Sri Lanka", "Syria", "Sudan"]},
+        {q: "Named 'Rich Port' in Spanish.", a: "Puerto Rico", o: ["Costa Rica", "Portugal", "Panama"]},
+        {q: "Meaning 'Holy Sunday' in Latin.", a: "Dominica", o: ["Denmark", "Djibouti", "Dominican Republic"]},
+        {q: "Named after the legendary islands of 'Antilia'.", a: "Antilles (Caribbean)", o: ["Antarctica", "Australia", "Andorra"]},
+        {q: "Meaning 'Land of the Pure' in Persian/Urdu.", a: "Pakistan", o: ["Palestine", "Paraguay", "Peru"]},
+        {q: "Derived from the local name 'Cymru', meaning 'Fellow-Countrymen'.", a: "Wales", o: ["Scotland", "Ireland", "England"]},
+        {q: "Meaning 'Land of the Scoti' (a Celtic tribe).", a: "Scotland", o: ["Switzerland", "Sweden", "Senegal"]},
+        {q: "Derived from the Latin 'Helvetia'.", a: "Switzerland", o: ["Sweden", "Swaziland", "Spain"]},
+        {q: "Meaning 'Land of the Magyars'.", a: "Hungary", o: ["Haiti", "Honduras", "Holland"]},
+        {q: "Derived from 'Polanie', meaning 'People of the Fields'.", a: "Poland", o: ["Portugal", "Peru", "Paraguay"]},
+        {q: "Means 'Between the Rivers' (Tigris and Euphrates).", a: "Iraq (Mesopotamia)", o: ["Iran", "Israel", "India"]},
+        {q: "Derived from 'Aryan', meaning 'Land of the Noble'.", a: "Iran", o: ["Iraq", "Ireland", "India"]},
+        {q: "Named after the Roman name for the region 'Palaestina'.", a: "Palestine", o: ["Pakistan", "Panama", "Paraguay"]},
+        {q: "Meaning 'Great House' in Egyptian.", a: "Pharaoh (Egypt)", o: ["Ecuador", "Estonia", "Ethiopia"]},
+        {q: "Named after the explorer Abel Tasman (originally Staten Landt).", a: "New Zealand", o: ["Australia", "Norway", "Namibia"]},
+        {q: "Derived from 'A-Ma-Gau' (Bay of A-Ma).", a: "Macau", o: ["Malaysia", "Mexico", "Mali"]},
+        {q: "Means 'Red Land' in Arabic.", a: "Sudan", o: ["Syria", "Saudi Arabia", "Somalia"]},
+        {q: "Named after King Leopold II of Belgium.", a: "Congo (Leopoldville)", o: ["Chad", "Cameroon", "Central Africa"]},
+        {q: "Means 'The Islands' in Arabic.", a: "Algeria", o: ["Albania", "Angola", "Armenia"]},
+        {q: "Named after the ancient kingdom of Aksum.", a: "Ethiopia", o: ["Egypt", "Eritrea", "Estonia"]},
+        {q: "Derived from 'Belgae', a confederation of tribes.", a: "Belgium", o: ["Bulgaria", "Bolivia", "Benin"]},
+        {q: "Meaning 'Snowy' in Spanish.", a: "Nevada (USA)", o: ["Nicaragua", "Namibia", "Norway"]},
+        {q: "Derived from the river 'Chili'.", a: "Chile", o: ["China", "Chad", "Colombia"]},
+        {q: "Named 'Little Venice' (Veneziola) by explorers.", a: "Venezuela", o: ["Vietnam", "Vanuatu", "Vatican City"]},
+        {q: "Meaning 'Land of the High Castles'.", a: "Luxembourg", o: ["Liechtenstein", "Latvia", "Lithuania"]},
+        {q: "Derived from 'Uru-gua', meaning 'River of Birds'.", a: "Uruguay", o: ["Uganda", "Ukraine", "Uzbekistan"]},
+        {q: "Meaning 'Southern' in Latin.", a: "Australia", o: ["Austria", "Argentina", "Andorra"]},
+        {q: "Named after the legendary Christian king Prester John.", a: "Ethiopia (Historically linked)", o: ["Ecuador", "Egypt", "Eritrea"]},
+        {q: "Named after the Roman god of the Sea, Neptune.", a: "Antarctica (In older fiction/myths)", o: ["Arctic", "Atlantic", "Australia"]},
+        {q: "Named for the abundance of Cedar trees.", a: "Lebanon", o: ["Libya", "Laos", "Latvia"]},
+        {q: "Derived from 'Kishlak', meaning 'Winter Home'.", a: "Kazakhstan (Partial etymology)", o: ["Kyrgyzstan", "Kenya", "Kuwait"]},
+        {q: "Meaning 'Place of the Quetzal bird'.", a: "Guatemala", o: ["Guyana", "Greece", "Germany"]},
+        {q: "Named 'The Middle Kingdom'.", a: "China", o: ["Chad", "Chile", "Cuba"]},
+        {q: "Named 'Land of the White Elephant'.", a: "Thailand", o: ["Tibet", "Tanzania", "Togo"]},
+        {q: "Derived from the name of the Prophet Abraham.", a: "Brahmaputra (India/Region)", o: ["Brazil", "Belgium", "Bolivia"]},
+        {q: "Meaning 'The Flowering Land' in Spanish.", a: "Florida (USA)", o: ["Fiji", "France", "Finland"]},
+        {q: "Named after Cecil Rhodes.", a: "Rhodesia (Zimbabwe)", o: ["Russia", "Romania", "Rwanda"]},
+        {q: "Meaning 'Land of the Eagle' (Shqipëria).", a: "Albania", o: ["Algeria", "Andorra", "Angola"]},
+        {q: "Derived from the Mayan 'Cihuatlan', meaning 'Place of Women'.", a: "Zihuatanejo (Mexico)", o: ["Zambia", "Zimbabwe", "Zaire"]},
+        {q: "Meaning 'The Shield' in Arabic.", a: "Qatar", o: ["Kuwait", "Oman", "Yemen"]}
+    ];
+
+    let current = 0; let score = 0; 
+    let deck = [...originData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('question-target').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/80`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 80) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>Master Etymologist!</h2><p>You have traced the origins of 80 world names.<br>Final Score: ${score}/80</p><button onclick="location.reload()" class="btn" style="width:100%">Restart Chronology</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

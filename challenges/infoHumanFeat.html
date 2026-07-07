@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>The Heritage Map | 80 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --gene-indigo: #6c5ce7; 
+            --gene-orange: #e67e22;
+            --gene-dark: #2d3436; 
+            --gene-bg: #fff9f0;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-indigo: #f0edff;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--gene-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--gene-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--gene-dark);
+            box-shadow: 10px 10px 0px var(--gene-dark); 
+            width: 100%; 
+            max-width: 850px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--gene-orange);
+            font-size: 1.2rem;
+        }
+
+        .label { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            letter-spacing: 1px; 
+            display: block;
+        }
+        
+        .description-display { 
+            font-size: 1.4rem; 
+            line-height: 1.6; 
+            color: var(--gene-dark); 
+            background: #f8f9ff; 
+            padding: 35px; 
+            border-radius: 15px; 
+            border: 3px dashed var(--gene-indigo); 
+            margin-bottom: 30px; 
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-list { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--gene-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-family: inherit; 
+            font-size: 1.1rem; 
+            color: var(--gene-dark);
+            box-shadow: 4px 4px 0px var(--gene-dark);
+            text-align: center;
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--gene-dark);
+            background: var(--hover-indigo);
+            border-color: var(--gene-indigo);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--gene-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--gene-dark); }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--gene-orange); 
+            color: white; 
+            border: 3px solid var(--gene-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--gene-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--gene-dark);
+        }
+
+        @media (max-width: 600px) {
+            .options-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats"><span>Score: <span id="score">0</span> 🧬</span><span id="progress">1/80</span></div>
+    <span class="label">Inherited Feature / Description:</span>
+    <div class="description-display" id="target">...</div>
+    <span class="label">Select the correct term:</span>
+    <div class="options-list" id="choices"></div>
+    <button id="next-btn">Next Round →</button>
+</div>
+
+<script>
+    const traitData = [
+        {e: "The natural pigment that determines the darkness or lightness of human skin and hair.", c: "Melanin", o: ["Hemoglobin", "Keratin", "Collagen"]},
+        {e: "A skin feature where dark spots appear, often inherited and becoming more prominent with sun exposure.", c: "Freckles", o: ["Dimples", "Mps", "Vitiligo"]},
+        {e: "The term for observable physical characteristics of an individual resulting from the interaction of its genotype with the environment.", c: "Phenotype", o: ["Genotype", "Chromosome", "Heredity"]},
+        {e: "A fold of skin of the upper eyelid that covers the inner corner of the eye, common in East Asian populations.", c: "Epicanthic fold", o: ["Double eyelid", "Eyelid crease", "Orbital rim"]},
+        {e: "The hair type characterized by tight coils and high density, often inherited by people of African descent.", c: "Kinky / Woolly hair", o: ["Straight hair", "Wavy hair", "Silky hair"]},
+        {e: "The inherited inability of the skin to produce melanin, resulting in white skin and hair.", c: "Albinism", o: ["Jaundice", "Cyanosis", "Pallor"]},
+        {e: "Small natural indentations in the cheeks, caused by an inherited shortened muscle.", c: "Dimples", o: ["Cleft chin", "High cheekbones", "Widow's peak"]},
+        {e: "A V-shaped growth of hair toward the center of the forehead, which is a dominant inherited trait.", c: "Widow's Peak", o: ["Cowlick", "Receding hairline", "Straight hairline"]},
+        {e: "The shape of the nose characterized by a high, narrow bridge and a prominent curve.", c: "Aquiline nose", o: ["Snub nose", "Bulbous nose", "Flat nose"]},
+        {e: "An inherited trait where the earlobe is directly attached to the side of the head.", c: "Attached earlobe", o: ["Free earlobe", "Pointed ear", "Folded ear"]},
+        {e: "The biological units of heredity passed from parents to offspring.", c: "Genes", o: ["Cells", "Tissues", "Organs"]},
+        {e: "The inherited characteristic of being able to roll the sides of the tongue upward into a tube.", c: "Tongue rolling", o: ["Tongue clicking", "Tongue folding", "Tongue twisting"]},
+        {e: "The color of the iris determined by the amount of light-scattering and melanin.", c: "Eye Color", o: ["Pupil size", "Retina tint", "Vision depth"]},
+        {e: "A trait where the second toe is longer than the big toe.", c: "Morton's Toe", o: ["Hammer toe", "Club foot", "Flat foot"]},
+        {e: "The type of hair follicle shape that produces perfectly straight hair.", c: "Round follicle", o: ["Oval follicle", "Flat follicle", "Square follicle"]},
+        {e: "The type of hair follicle shape that produces curly or wavy hair.", c: "Oval or Flat follicle", o: ["Round follicle", "Triangular follicle", "Star follicle"]},
+        {e: "Large, full lips are an inherited feature often associated with adaptations to what kind of climate?", c: "Tropical / Hot", o: ["Arctic / Cold", "Desert / Dry", "High Altitude"]},
+        {e: "Narrow, thin lips are an inherited feature often historically associated with adaptations to...", c: "Cold climates", o: ["Humid climates", "Sea level", "Equatorial heat"]},
+        {e: "Red hair is caused by a mutation in which specific protein receptor?", c: "MC1R", o: ["DNA", "RNA", "ATP"]},
+        {e: "Blue eyes are a result of low melanin in which part of the eye?", c: "Stroma of the iris", o: ["Cornea", "Lens", "Optic nerve"]},
+        {e: "The inherited condition of having more than the standard number of fingers or toes.", c: "Polydactyly", o: ["Syndactyly", "Ectodactyly", "Brachydactyly"]},
+        {e: "A cleft in the middle of the chin caused by an underlying bone structure inheritance.", c: "Cleft chin", o: ["Pointed chin", "Square jaw", "Dimpled cheek"]},
+        {e: "The trait of being left-handed or right-handed.", c: "Handedness", o: ["Ambidexterity", "Dexterity", "Lateralization"]},
+        {e: "Inherited variations in the height of the bridge of the nose (e.g., high vs. flat).", c: "Nasal bridge", o: ["Nasal tip", "Nostril flare", "Septum width"]},
+        {e: "The rarest natural hair color in the human population.", c: "Red", o: ["Blonde", "Black", "Brown"]},
+        {e: "The most common natural eye color worldwide.", c: "Brown", o: ["Blue", "Green", "Hazel"]},
+        {e: "Inherited protection against ultraviolet (UV) radiation is primarily provided by...", c: "Dark skin (High melanin)", o: ["Thick skin", "Oily skin", "Pale skin"]},
+        {e: "The inheritance of the 'Bent Pinky' (clinodactyly) affects which finger?", c: "The fifth finger", o: ["The thumb", "The index finger", "The middle finger"]},
+        {e: "Genetic variation that allows adults to digest milk.", c: "Lactase persistence", o: ["Glucose tolerance", "Protein synthesis", "Vitamin D absorption"]},
+        {e: "The study of how traits are passed from parents to offspring.", c: "Genetics", o: ["Biology", "Anatomy", "Physiology"]},
+        {e: "A nose shape with a very short bridge and nostrils that point slightly upward.", c: "Snub nose", o: ["Greek nose", "Roman nose", "Hawk nose"]},
+        {e: "The type of melanin responsible for black and brown hair colors.", c: "Eumelanin", o: ["Pheomelanin", "Neuromelanin", "Phytomelanin"]},
+        {e: "The type of melanin responsible for red and blonde hair colors.", c: "Pheomelanin", o: ["Eumelanin", "Carotene", "Bilirubin"]},
+        {e: "Dense, bushy eyebrows compared to thin eyebrows is an example of...", c: "Inherited variation", o: ["Environmental damage", "Nutritional deficiency", "Age-related change"]},
+        {e: "The tendency for skin to tan rather than burn is an inherited...", c: "Protective response", o: ["Disease", "Allergy", "Injury"]},
+        {e: "Small, tight curls are an adaptation to help with...", c: "Scalp cooling", o: ["Heat retention", "Waterproofing", "UV reflection"]},
+        {e: "The width of the nostrils (flaring) is often an inherited adaptation related to...", c: "Air temperature / Humidity", o: ["Visual acuity", "Speech clarity", "Dietary habits"]},
+        {e: "The inherited 'Hitchhiker's Thumb' refers to a thumb that can...", c: "Bend backward", o: ["Not move", "Double in size", "Touch the wrist"]},
+        {e: "The color of skin is a 'polygenic' trait, meaning it is controlled by...", c: "Many genes", o: ["One gene", "The sun only", "Diet only"]},
+        {e: "Which of these is NOT an inherited feature?", c: "A scar", o: ["Nose shape", "Eye color", "Blood type"]},
+        {e: "The texture of earwax (wet vs. dry) is an inherited trait common in different ethnic groups.", c: "Earwax consistency", o: ["Hearing range", "Ear size", "Lobe shape"]},
+        {e: "Round faces vs. oval faces are determined by inherited...", c: "Bone structure", o: ["Fat distribution", "Skin elasticity", "Hairline shape"]},
+        {e: "A 'Roman Nose' is characterized by a...", c: "Prominent bridge", o: ["Flat bridge", "Wide tip", "Small nostrils"]},
+        {e: "The gap between the two front teeth (diastema) can be an...", c: "Inherited trait", o: ["Sign of illness", "Result of diet", "Injury only"]},
+        {e: "Having 'hazel' eyes means the eye has a combination of...", c: "Brown and Green/Gold", o: ["Blue and Grey", "Black and White", "Red and Violet"]},
+        {e: "Freckles are most common in people with...", c: "Fair skin", o: ["Olive skin", "Dark skin", "Tanned skin"]},
+        {e: "The 'Darwin's Tubercle' is a small inherited thickening on the...", c: "Helix of the ear", o: ["Bridge of the nose", "Knuckle of the hand", "Heel of the foot"]},
+        {e: "Long eyelashes vs. short eyelashes is a...", c: "Dominant vs Recessive trait", o: ["Random occurrence", "Nutritional trait", "Climate adaptation"]},
+        {e: "High cheekbones (malar bones) are prominent in many...", c: "Central Asian / Native American groups", o: ["Northern European groups", "Desert tribes only", "Island populations only"]},
+        {e: "The color of our skin helps our bodies produce which vitamin from sunlight?", c: "Vitamin D", o: ["Vitamin C", "Vitamin A", "Vitamin B12"]},
+        {e: "The inheritance of 'unibrows' (synophrys) is related to...", c: "High hair density", o: ["Skin oiliness", "Eye shape", "Nose length"]},
+        {e: "A very narrow, pointed chin is often called a...", c: "Heart-shaped face", o: ["Square face", "Round face", "Diamond face"]},
+        {e: "Heterochromia is an inherited (or acquired) condition where a person has...", c: "Different colored eyes", o: ["No eyelashes", "Three ears", "Purple skin"]},
+        {e: "The shape of the 'Cupid's Bow' refers to the inherited curve of the...", c: "Upper lip", o: ["Eyebrow", "Ear top", "Hairline"]},
+        {e: "Broad shoulders vs. narrow shoulders can be an...", c: "Inherited skeletal frame", o: ["Muscle-only trait", "Dietary result", "Age feature"]},
+        {e: "The thickness of the skin on the palms and soles is...", c: "Genetically determined", o: ["Changed by walking only", "Same for everyone", "Thinner in males"]},
+        {e: "Curly hair is more likely to be...", c: "Dry", o: ["Oily", "Straight", "Stronger than straight hair"]},
+        {e: "The 'Greek Nose' is characterized by a...", c: "Straight bridge from the forehead", o: ["Curved bridge", "Very wide base", "Hooked tip"]},
+        {e: "Melanin also protects the eyes from...", c: "UV damage", o: ["Dust", "Wind", "Water"]},
+        {e: "The specific arrangement of ridges on fingers, though influenced by the womb, has an inherited foundation.", c: "Fingerprints", o: ["Palm lines", "Nail shapes", "Knuckle hair"]},
+        {e: "Inherited 'Monolid' eyes lack a...", c: "Supratarsal fold (crease)", o: ["Tear duct", "Pupil", "Iris color"]},
+        {e: "Baldness (Alopecia) is often an...", c: "Inherited sex-linked trait", o: ["Infectious disease", "Lack of washing", "Dietary choice"]},
+        {e: "The distance between the eyes is an inherited feature known as...", c: "Interpupillary distance", o: ["Eye span", "Focus range", "Depth perception"]},
+        {e: "Fair skin is an adaptation to regions with...", c: "Low sunlight", o: ["High humidity", "High altitude", "Constant heat"]},
+        {e: "The 'Golden Ratio' is often used to measure inherited...", c: "Facial symmetry", o: ["Skin darkness", "Hair length", "Body weight"]},
+        {e: "Thick terminal hair on the arms and legs is an...", c: "Inherited trait", o: ["Sign of old age", "Result of shaving", "Always a disease"]},
+        {e: "A 'Cleft Palate' is a serious inherited...", c: "Developmental condition", o: ["Choice of speech", "Skin color", "Hair type"]},
+        {e: "The 'Nubian Nose' is typically...", c: "Long with a wide base", o: ["Short and pointed", "Very thin", "Hooked like an eagle"]},
+        {e: "Genetics determine the 'Set' of the eyes, such as...", c: "Deep-set or Protruding", o: ["Blinking speed", "Tear production", "Night vision level"]},
+        {e: "The presence of 'wisdom teeth' is an...", c: "Inherited dental trait", o: ["Result of eating candy", "Sign of high IQ", "Universal feature"]},
+        {e: "Inherited 'Duck Feet' refers to...", c: "Outward pointing toes", o: ["Webbed fingers", "Flat arches", "Small heels"]},
+        {e: "The size of the 'Adam's Apple' (laryngeal prominence) has a...", c: "Genetic and hormonal basis", o: ["Dietary cause", "Link to height only", "No biological function"]},
+        {e: "Skin 'Undertones' (Cool, Warm, Neutral) are...", c: "Genetically inherited", o: ["Changed by tanning", "Same for all families", "Caused by makeup"]},
+        {e: "The shape of the fingernails (wide, narrow, square) is...", c: "Inherited", o: ["Determined by cutting", "Based on diet", "Same for all humans"]},
+        {e: "White patches of skin caused by loss of pigment is called...", c: "Vitiligo", o: ["Albinism", "Eczema", "Psoriasis"]},
+        {e: "The inherited 'Greek Foot' means the...", c: "Second toe is longest", o: ["Big toe is longest", "All toes are equal", "Pinky toe is missing"]},
+        {e: "Human height is an inherited trait but is also heavily influenced by...", c: "Nutrition", o: ["Eye color", "Hair type", "Skin pigment"]},
+        {e: "The 'Bridge' of the nose connects the nose to the...", c: "Forehead / Skull", o: ["Cheeks", "Lips", "Chin"]},
+        {e: "A 'Widow's Peak' is more common in...", c: "Certain families (Dominant trait)", o: ["People who wear hats", "Old people only", "Athletes"]},
+        {e: "Variation in human features is what makes every person...", c: "Unique", o: ["Identical", "A robot", "The same"]}
+    ];
+
+    let current = 0; let score = 0; let deck = [...traitData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        if(current >= deck.length) return;
+        const item = deck[current];
+        document.getElementById('target').textContent = item.e;
+        document.getElementById('progress').textContent = `${current + 1}/${deck.length}`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        let choices = [item.c, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.c) { 
+                    b.classList.add('correct'); score++; 
+                } else { 
+                    b.classList.add('wrong'); 
+                    btns.forEach(btn => { if(btn.textContent === item.c) btn.classList.add('correct'); });
+                }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) {
+            load();
+        } else {
+            document.getElementById('game-box').innerHTML = `
+                <h2 style="color:var(--gene-indigo)">Genetic Genius!</h2>
+                <p>80 Inherited Features Explored.</p>
+                <p>Final Score: ${score}/80</p>
+                <button onclick="location.reload()" class="btn" style="width:100%">Restart Workshop</button>
+            `;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

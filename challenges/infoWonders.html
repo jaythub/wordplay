@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>Wonders of the World | 80 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --wonder-indigo: #6c5ce7; 
+            --wonder-yellow: #feca57;
+            --wonder-dark: #2d3436; 
+            --wonder-bg: #fffbf0;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-yellow: #fff4d3;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--wonder-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--wonder-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--wonder-dark);
+            box-shadow: 10px 10px 0px var(--wonder-dark); 
+            width: 100%; 
+            max-width: 800px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--wonder-indigo);
+            font-size: 1.2rem;
+        }
+
+        .label { 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            color: #636e72; 
+            text-transform: uppercase; 
+            font-size: 0.85rem; 
+            letter-spacing: 1.5px; 
+            display: block;
+        }
+        
+        .wonder-display { 
+            font-size: 1.4rem; 
+            line-height: 1.6; 
+            color: var(--wonder-dark); 
+            background: #f8f9ff; 
+            padding: 35px; 
+            border-radius: 15px; 
+            border: 3px dashed var(--wonder-indigo); 
+            margin-bottom: 30px; 
+            font-weight: bold;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--wonder-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            font-family: inherit; 
+            font-size: 1.1rem; 
+            color: var(--wonder-dark);
+            box-shadow: 4px 4px 0px var(--wonder-dark);
+        }
+
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--wonder-dark);
+            background: var(--hover-yellow);
+            border-color: var(--wonder-indigo);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--wonder-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--wonder-dark); }
+
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--wonder-indigo); 
+            color: white; 
+            border: 3px solid var(--wonder-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--wonder-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--wonder-dark);
+            background: #5b4cc4;
+        }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats"><span>Score: <span id="score">0</span> 🏛️</span><span id="progress">1/80</span></div>
+    <span class="label">The Description:</span>
+    <div class="wonder-display" id="target">...</div>
+    <span class="label">Identify the Wonder:</span>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Next Wonder →</button>
+</div>
+
+<script>
+    const wonderData = [
+        {q: "The only one of the Seven Ancient Wonders that still exists today.", a: "Great Pyramid of Giza", o: ["Hanging Gardens", "Colossus of Rhodes", "Lighthouse of Alexandria"]},
+        {q: "A massive white marble mausoleum built by an emperor for his favorite wife in Agra.", a: "Taj Mahal", o: ["Petra", "Alhambra", "Angkor Wat"]},
+        {q: "An ancient city in Jordan carved directly into vibrant red sandstone cliff faces.", a: "Petra", o: ["Machu Picchu", "Chichen Itza", "Palmyra"]},
+        {q: "A colossal bronze statue of the sun god Helios, once standing over a harbor entrance in Greece.", a: "Colossus of Rhodes", o: ["Statue of Zeus", "Christ the Redeemer", "Great Sphinx"]},
+        {q: "An Incan citadel set high in the Andes Mountains of Peru, built in the 15th century.", a: "Machu Picchu", o: ["Chichen Itza", "Easter Island", "Tikal"]},
+        {q: "A giant amphitheater in the center of Rome used for gladiatorial contests.", a: "The Colosseum", o: ["The Parthenon", "The Pantheon", "Hagia Sophia"]},
+        {q: "An immense series of fortifications built across the historical northern borders of a country.", a: "Great Wall of China", o: ["Hadrian's Wall", "The Berlin Wall", "Maginot Line"]},
+        {q: "A large Mayan city on the Yucatan Peninsula featuring the El Castillo pyramid.", a: "Chichen Itza", o: ["Tikal", "Palenque", "Teotihuacan"]},
+        {q: "An Art Deco statue of Jesus Christ overlooking the city of Rio de Janeiro.", a: "Christ the Redeemer", o: ["Statue of Liberty", "The Thinker", "Mount Rushmore"]},
+        {q: "A massive temple complex in Cambodia, originally built as a Hindu temple for the god Vishnu.", a: "Angkor Wat", o: ["Borobudur", "Bagan", "Prambanan"]},
+        {q: "The largest coral reef system in the world, located off the coast of Australia.", a: "Great Barrier Reef", o: ["Galapagos Islands", "Amazon Rainforest", "Mount Everest"]},
+        {q: "The highest mountain on Earth above sea level, located in the Himalayas.", a: "Mount Everest", o: ["K2", "Kilimanjaro", "Matterhorn"]},
+        {q: "A vast tropical rainforest in South America that contains the highest biodiversity on Earth.", a: "The Amazon", o: ["Congo Basin", "Daintree Rainforest", "Sherwood Forest"]},
+        {q: "A legendary tomb built for a Persian governor, which gave us the word for any grand tomb.", a: "Mausoleum at Halicarnassus", o: ["Temple of Artemis", "Statue of Zeus", "Great Pyramid"]},
+        {q: "A series of tiered gardens reportedly built in ancient Mesopotamia for a homesick queen.", a: "Hanging Gardens of Babylon", o: ["Gardens of Versailles", "Keukenhof", "Villa d'Este"]},
+        {q: "A giant seated figure made of ivory and gold plates, created by the sculptor Phidias.", a: "Statue of Zeus at Olympia", o: ["Colossus of Rhodes", "David", "Athena Parthenos"]},
+        {q: "A massive Greek temple dedicated to the goddess of the hunt, located in Ephesus.", a: "Temple of Artemis", o: ["The Parthenon", "The Pantheon", "Temple of Luxor"]},
+        {q: "The first lighthouse in the world, used to guide sailors into a busy Egyptian port.", a: "Lighthouse of Alexandria", o: ["Tower of Hercules", "Eddystone Light", "Colossus of Rhodes"]},
+        {q: "Massive stone monoliths (Moai) carved by the Rapa Nui people in Polynesia.", a: "Easter Island", o: ["Stonehenge", "Machu Picchu", "Tikal"]},
+        {q: "A prehistoric monument in England consisting of a ring of standing stones.", a: "Stonehenge", o: ["Avebury", "Carnac Stones", "Newgrange"]},
+        {q: "A famous Byzantine church in Istanbul known for its massive dome and gold mosaics.", a: "Hagia Sophia", o: ["Blue Mosque", "St. Peter's Basilica", "Notre Dame"]},
+        {q: "The world's largest hot desert, covering much of North Africa.", a: "Sahara Desert", o: ["Gobi Desert", "Atacama Desert", "Kalahari Desert"]},
+        {q: "A spectacular waterfall located on the border of Zambia and Zimbabwe.", a: "Victoria Falls", o: ["Niagara Falls", "Iguazu Falls", "Angel Falls"]},
+        {q: "A steep-sided canyon carved by the Colorado River in Arizona.", a: "Grand Canyon", o: ["Copper Canyon", "Fish River Canyon", "Verdon Gorge"]},
+        {q: "An active stratovolcano in Japan with a perfectly symmetrical cone.", a: "Mount Fuji", o: ["Mount Etna", "Mount Vesuvius", "Mount St. Helens"]},
+        {q: "A limestone island bay in Vietnam known for thousands of towering karsts.", a: "Ha Long Bay", o: ["Phang Nga Bay", "Milford Sound", "Bay of Fundy"]},
+        {q: "The largest church in the world, located within an independent city-state in Rome.", a: "St. Peter's Basilica", o: ["The Duomo", "St. Paul's Cathedral", "Sagrada Familia"]},
+        {q: "A massive unfinished cathedral in Barcelona designed by Antoni Gaudi.", a: "Sagrada Familia", o: ["Alhambra", "Seville Cathedral", "The Escorial"]},
+        {q: "A Moorish palace and fortress complex in Granada, Spain.", a: "Alhambra", o: ["Alcazar of Seville", "Mezquita", "Palace of Versailles"]},
+        {q: "The world's tallest building, located in Dubai.", a: "Burj Khalifa", o: ["Shanghai Tower", "Empire State Building", "CN Tower"]},
+        {q: "The deepest lake in the world, located in Siberia, Russia.", a: "Lake Baikal", o: ["Lake Superior", "Lake Victoria", "Lake Tanganyika"]},
+        {q: "A remote archipelago where Charles Darwin developed his theory of evolution.", a: "Galapagos Islands", o: ["Seychelles", "Maldives", "Fiji"]},
+        {q: "The world's highest uninterrupted waterfall, found in Venezuela.", a: "Angel Falls", o: ["Iguazu Falls", "Victoria Falls", "Yosemite Falls"]},
+        {q: "An ancient Neolithic village in the Orkney Islands of Scotland.", a: "Skara Brae", o: ["Stonehenge", "Knossos", "Pompeii"]},
+        {q: "A majestic red rock formation in the Northern Territory of Australia.", a: "Uluru (Ayers Rock)", o: ["The Olgas", "Devil's Tower", "Half Dome"]},
+        {q: "A 12th-century cathedral in Paris known for its Gothic architecture and gargoyles.", a: "Notre Dame", o: ["Chartres Cathedral", "Sainte-Chapelle", "Westminster Abbey"]},
+        {q: "The royal residence of French kings, famous for its Hall of Mirrors.", a: "Palace of Versailles", o: ["Buckingham Palace", "The Louvre", "Schönbrunn Palace"]},
+        {q: "An ancient city in Italy that was buried under volcanic ash from Mount Vesuvius.", a: "Pompeii", o: ["Herculaneum", "Ostia Antica", "Paestum"]},
+        {q: "The home of the Dalai Lama in Lhasa, Tibet, until 1959.", a: "Potala Palace", o: ["Forbidden City", "Summer Palace", "Himeji Castle"]},
+        {q: "The largest palace complex in the world, located in the heart of Beijing.", a: "Forbidden City", o: ["Imperial Palace", "Gyeongbokgung", "Changdeokgung"]},
+        {q: "A massive bronze clock tower in London, though the name technically refers to the bell.", a: "Big Ben", o: ["Eiffel Tower", "Tower of London", "Westminster Clock"]},
+        {q: "A white-shelled performance venue that is a symbol of Sydney.", a: "Sydney Opera House", o: ["Guggenheim Museum", "Lotus Temple", "The Shard"]},
+        {q: "The highest sand dunes in the world, found in this African desert.", a: "Namib Desert", o: ["Sahara", "Gobi", "Thar"]},
+        {q: "A salt flat in Bolivia that becomes a giant mirror when covered in water.", a: "Salar de Uyuni", o: ["Dead Sea", "Great Salt Lake", "Lake Natron"]},
+        {q: "An ancient Greek citadel located on a rocky outcrop above the city of Athens.", a: "The Acropolis", o: ["The Agora", "Delphi", "Olympia"]},
+        {q: "The lowest point on Earth's surface, so salty that people float easily.", a: "The Dead Sea", o: ["Lake Assal", "Caspian Sea", "Death Valley"]},
+        {q: "A giant ancient geoglyphs found in the desert of southern Peru.", a: "Nazca Lines", o: ["Sacsayhuaman", "Tiwanaku", "Chavin de Huantar"]},
+        {q: "The massive temple of the sun in the ancient city of Teotihuacan.", a: "Pyramid of the Sun", o: ["El Castillo", "Great Pyramid", "Temple of the Inscriptions"]},
+        {q: "A medieval castle in Germany that inspired the Disney Sleeping Beauty castle.", a: "Neuschwanstein Castle", o: ["Hohenzollern Castle", "Bran Castle", "Wartburg Castle"]},
+        {q: "The most visited museum in the world, home to the Mona Lisa.", a: "The Louvre", o: ["British Museum", "Metropolitan Museum", "The Uffizi"]},
+        {q: "The legendary home of the Greek gods, a mountain in northern Greece.", a: "Mount Olympus", o: ["Mount Parnassus", "Mount Athos", "Mount Ida"]},
+        {q: "A massive Buddhist temple in Indonesia, the largest in the world.", a: "Borobudur", o: ["Angkor Wat", "Shwedagon Pagoda", "Wat Phra Kaew"]},
+        {q: "A prehistoric cave system in France famous for its Paleolithic paintings.", a: "Lascaux Caves", o: ["Altamira", "Chauvet Cave", "Cueva de las Manos"]},
+        {q: "A stunning fjord in New Zealand's South Island, described by Rudyard Kipling as the eighth wonder.", a: "Milford Sound", o: ["Doubtful Sound", "Geirangerfjord", "Misty Fjords"]},
+        {q: "A natural light display in the Earth's sky, predominantly seen in high-latitude regions.", a: "Northern Lights (Aurora Borealis)", o: ["Meteor Shower", "Solar Eclipse", "The Milky Way"]},
+        {q: "The ancient capital of the Nabataean Kingdom, hidden behind a narrow canyon called the Siq.", a: "Petra", o: ["Persepolis", "Babylon", "Nineveh"]},
+        {q: "A giant landmark limestone monolith in the Strait of Gibraltar.", a: "Rock of Gibraltar", o: ["Sugarloaf Mountain", "Table Mountain", "The Needles"]},
+        {q: "The world's largest hot spring, located in Yellowstone National Park.", a: "Grand Prismatic Spring", o: ["Old Faithful", "Mammoth Hot Springs", "Blue Lagoon"]},
+        {q: "A spectacular group of waterfalls on the border between Brazil and Argentina.", a: "Iguazu Falls", o: ["Niagara Falls", "Victoria Falls", "Kaieteur Falls"]},
+        {q: "An ancient ceremonial center in the highlands of Mexico, known for the 'Avenue of the Dead'.", a: "Teotihuacan", o: ["Monte Alban", "Cholula", "Tula"]},
+        {q: "A white marble bell tower in Italy famous for its unintended tilt.", a: "Leaning Tower of Pisa", o: ["Giotto's Campanile", "Torre Mangia", "Big Ben"]},
+        {q: "The historic fortress and palace of the Russian President in Moscow.", a: "The Kremlin", o: ["Winter Palace", "Hermitage", "Red Square"]},
+        {q: "The world's largest monolithic statue, carved from a single piece of limestone in Giza.", a: "Great Sphinx", o: ["Colossi of Memnon", "Abu Simbel", "Mount Rushmore"]},
+        {q: "An ancient city of the Minoan civilization on the island of Crete.", a: "Knossos", o: ["Mycenae", "Troy", "Akrotiri"]},
+        {q: "A massive iron tower built as the entrance arch for the 1889 World's Fair.", a: "Eiffel Tower", o: ["Tokyo Tower", "Statue of Liberty", "The Shard"]},
+        {q: "A giant complex of 275 individual waterfalls, spanning nearly 3 kilometers.", a: "Iguazu Falls", o: ["Angel Falls", "Victoria Falls", "Niagara Falls"]},
+        {q: "An ancient mountain fortress in Israel overlooking the Dead Sea.", a: "Masada", o: ["Qumran", "Megiddo", "Jericho"]},
+        {q: "The spiritual heart of the Islamic world, located in Mecca.", a: "The Kaaba", o: ["Dome of the Rock", "Al-Aqsa Mosque", "Blue Mosque"]},
+        {q: "A massive rock-cut temple complex in Ethiopia, carved from the top down into the earth.", a: "Lalibela", o: ["Abu Simbel", "Ajanta Caves", "Ellora Caves"]},
+        {q: "A huge horseshoe-shaped canyon system in South Africa.", a: "Blyde River Canyon", o: ["Fish River Canyon", "Grand Canyon", "Tara Canyon"]},
+        {q: "The world's largest brick Gothic castle, located in Poland.", a: "Malbork Castle", o: ["Wawel Castle", "Prague Castle", "Bran Castle"]},
+        {q: "A series of giant salt pans in the middle of a desert, visible from space.", a: "Makgadikgadi Pans", o: ["Salar de Uyuni", "Badwater Basin", "Etosha Pan"]},
+        {q: "An iconic 17th-century bridge in Isfahan, Iran, with 33 arches.", a: "Si-o-se-pol", o: ["Ponte Vecchio", "Rialto Bridge", "Charles Bridge"]},
+        {q: "The legendary lost city of the Incas, rediscovered by Hiram Bingham in 1911.", a: "Machu Picchu", o: ["Cusco", "Choquequirao", "Ollantaytambo"]},
+        {q: "The ancient ruins of the capital of the Persian Empire.", a: "Persepolis", o: ["Pasargadae", "Susa", "Ecbatana"]},
+        {q: "A unique geological formation in Turkey known for 'fairy chimneys' and cave dwellings.", a: "Cappadocia", o: ["Pamukkale", "Meteora", "Giant's Causeway"]},
+        {w: "Mount Rushmore", q: "A colossal sculpture carved into the granite face of a mountain in South Dakota.", a: "Mount Rushmore", o: ["Crazy Horse Memorial", "Stone Mountain", "Mount Lee"]},
+        {q: "A massive set of 40,000 interlocking basalt columns in Northern Ireland.", a: "Giant's Causeway", o: ["Fingal's Cave", "Staffa", "Devils Postpile"]},
+        {q: "The world's largest religious monument, covering 162 hectares.", a: "Angkor Wat", o: ["Borobudur", "Vatican City", "Karnak Temple"]},
+        {q: "A grand arch in Paris honoring those who fought and died for France in the Revolutionary and Napoleonic Wars.", a: "Arc de Triomphe", o: ["Brandenburg Gate", "Gateway Arch", "Marble Arch"]}
+    ];
+
+    let current = 0; let score = 0; 
+    let deck = [...wonderData].sort(() => Math.random() - 0.5);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('target').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/80`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < 80) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>Explorer of the World!</h2><p>You have identified 80 wonders from across the globe.<br>Final Score: ${score}/80</p><button onclick="location.reload()" class="btn" style="width:100%">Journey Again</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

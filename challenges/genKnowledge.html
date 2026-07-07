@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MRM0K6T2T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8MRM0K6T2T');
+    </script>
+    <meta charset="UTF-8">
+    <title>General Knowledge Gauntlet | 200 Rounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --echo-indigo: #6c5ce7; 
+            --echo-dark: #2d3436; 
+            --echo-bg: #fff9f0;
+            --success: #55efc4; 
+            --error: #ff7675;
+            --hover-playful: #fbc02d; /* New Playful Hover Color! */
+            --hover-indigo: #f0edff;
+        }
+
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', "Comic Neue", sans-serif; 
+            background-color: var(--echo-bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--echo-dark);
+        }
+
+        #game-box { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 20px; 
+            border: 4px solid var(--echo-dark);
+            box-shadow: 10px 10px 0px var(--echo-dark); 
+            width: 100%; 
+            max-width: 850px; 
+            text-align: center;
+        }
+
+        .stats { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: var(--echo-indigo);
+            font-size: 1.2rem;
+        }
+        
+        .question-display { 
+            font-size: 1.5rem; 
+            line-height: 1.5; 
+            color: var(--echo-dark); 
+            background: #fff9c4; 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            border: 3px dashed #fbc02d;
+            font-weight: 800; 
+            min-height: 60px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        .label { 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 0.85rem; 
+            color: #636e72; 
+            margin-bottom: 12px; 
+            display: block; 
+            letter-spacing: 1px;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
+        
+        /* Updated Option Button Hover */
+        .btn { 
+            background: #fff; 
+            border: 3px solid var(--echo-dark); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.1s; 
+            color: var(--echo-dark); 
+            font-size: 1rem; 
+            font-family: inherit;
+            box-shadow: 4px 4px 0px var(--echo-dark);
+            text-align: center;
+        }
+        
+        .btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--echo-dark);
+            background: var(--hover-playful) !important; /* Playful Golden! */
+            border-color: var(--echo-indigo);
+        }
+
+        .btn.correct { background: var(--success) !important; border-color: var(--echo-dark); }
+        .btn.wrong { background: var(--error) !important; color: white; border-color: var(--echo-dark); }
+        
+        /* Updated Next Button Hover */
+        #next-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--echo-indigo); 
+            color: white; 
+            border: 3px solid var(--echo-dark); 
+            border-radius: 12px; 
+            margin-top: 25px; 
+            cursor: pointer; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 1.2rem;
+            font-family: inherit;
+            box-shadow: 5px 5px 0px var(--echo-dark);
+        }
+
+        #next-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px var(--echo-dark);
+            background: var(--hover-playful) !important; /* Playful Golden! */
+            color: var(--echo-dark);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="game-box">
+    <div class="stats">
+        <span>Score: <span id="score">0</span> 🏆</span>
+        <span id="progress">1/200</span>
+    </div>
+    <span class="label">Challenge Question:</span>
+    <div class="question-display" id="question-target">...</div>
+    <span class="label">Choose the Connection:</span>
+    <div class="options-grid" id="choices"></div>
+    <button id="next-btn">Next Challenge →</button>
+</div>
+
+<script>
+    const fullGkData = [
+        {q: "A boy who frightens weaker boys.", a: "Bully", o: ["Coward", "Rascal", "Giant"]},
+        {q: "A number of soldiers.", a: "Troop", o: ["Gang", "Crowd", "Flock"]},
+        {q: "The men and women who work on a ship.", a: "Crew", o: ["Staff", "Team", "Cast"]},
+        {q: "Children in a school.", a: "Pupils", o: ["Scholars", "Members", "Youths"]},
+        {q: "A man who protects sheep.", a: "Shepherd", o: ["Farmer", "Rancher", "Groom"]},
+        {q: "The low ground between two hills.", a: "Valley", o: ["Peak", "Plateau", "Cliff"]},
+        {q: "A ship which travels below the surface of the sea.", a: "Submarine", o: ["Yacht", "Tanker", "Hovercraft"]},
+        {q: "A place for storing a car.", a: "Garage", o: ["Dock", "Hangar", "Shed"]},
+        {q: "A field in which fruit trees grow.", a: "Orchard", o: ["Meadow", "Pasture", "Vineyard"]},
+        {q: "An instrument for measuring time.", a: "Clock", o: ["Compass", "Ruler", "Scale"]},
+        {q: "From what do we make butter?", a: "Milk / Cream", o: ["Water", "Oil", "Honey"]},
+        {q: "A man who makes things out of wood.", a: "Carpenter", o: ["Mason", "Smith", "Tailor"]},
+        {q: "A fertile place in the desert.", a: "Oasis", o: ["Dune", "Island", "Mirage"]},
+        {q: "A hundred years.", a: "Century", o: ["Decade", "Millennium", "Era"]},
+        {q: "Instrument for telling direction.", a: "Compass", o: ["Map", "GPS", "Radar"]},
+        {q: "Steps of a ladder.", a: "Rungs", o: ["Stairs", "Rails", "Planks"]},
+        {q: "Doctor who performs operations.", a: "Surgeon", o: ["Physician", "Nurse", "Dentist"]},
+        {q: "Front part of a ship.", a: "Bow", o: ["Stern", "Deck", "Mast"]},
+        {q: "A place where beer is made.", a: "Brewery", o: ["Distillery", "Winery", "Bakery"]},
+        {q: "What is daybreak sometimes termed?", a: "Dawn", o: ["Dusk", "Twilight", "Midnight"]},
+        {q: "Fish with the bones taken out.", a: "Fillet", o: ["Steak", "Sashimi", "Fritter"]},
+        {q: "A shallow crossing in river.", a: "Ford", o: ["Bridge", "Dam", "Creek"]},
+        {q: "The meaning of 'plume'.", a: "A large feather", o: ["A deep cave", "A heavy rain", "A small boat"]},
+        {q: "Girl or woman who serves at table.", a: "Waitress", o: ["Hostess", "Maid", "Chef"]},
+        {q: "The breaking of a bone.", a: "Fracture", o: ["Sprain", "Bruise", "Strain"]},
+        {q: "The flesh of a sheep.", a: "Mutton", o: ["Pork", "Venison", "Beef"]},
+        {q: "The first meal of the day.", a: "Breakfast", o: ["Lunch", "Dinner", "Brunch"]},
+        {q: "City which has the Eiffel Tower.", a: "Paris", o: ["London", "Rome", "Berlin"]},
+        {q: "Place in which photographs are taken.", a: "Studio", o: ["Gallery", "Darkroom", "Theater"]},
+        {q: "Place where people are buried.", a: "Cemetery", o: ["Vault", "Catacomb", "Library"]},
+        {q: "Another name for a policeman.", a: "Constable / Officer", o: ["Clerk", "Guard", "Warden"]},
+        {q: "Imaginary line round the middle of the earth.", a: "Equator", o: ["Meridian", "Axis", "Horizon"]},
+        {q: "Instrument measuring heat and cold.", a: "Thermometer", o: ["Barometer", "Speedometer", "Compass"]},
+        {q: "From what do we make cheese?", a: "Milk", o: ["Eggs", "Wheat", "Soy"]},
+        {q: "What kind of fish is a kipper?", a: "Smoked Herring", o: ["Salted Cod", "Fried Tuna", "Dried Salmon"]},
+        {q: "Footwear in hot countries.", a: "Sandals", o: ["Boots", "Sneakers", "Loafers"]},
+        {q: "Place where whisky is made.", a: "Distillery", o: ["Brewery", "Refinery", "Mill"]},
+        {q: "Goods carried out of a country.", a: "Exports", o: ["Imports", "Cargo", "Freight"]},
+        {q: "Place where birds are kept.", a: "Aviary", o: ["Aquarium", "Terrarium", "Stable"]},
+        {q: "Person who gives life in a good cause.", a: "Martyr", o: ["Hero", "Soldier", "Saint"]},
+        {q: "The air surrounding the earth.", a: "Atmosphere", o: ["Oxygen", "Stratosphere", "Biosphere"]},
+        {q: "A religious song.", a: "Hymn", o: ["Carol", "Anthem", "Ballad"]},
+        {q: "How does a fish breathe in water?", a: "Gills", o: ["Lungs", "Skin", "Fins"]},
+        {q: "The small top room of a house.", a: "Attic", o: ["Basement", "Cellar", "Pantry"]},
+        {q: "National dress of Scotland.", a: "Kilt", o: ["Toga", "Kimono", "Sari"]},
+        {q: "A three-sided figure.", a: "Triangle", o: ["Square", "Hexagon", "Pentagon"]},
+        {q: "Place where aeroplanes are kept.", a: "Hangar", o: ["Garage", "Dock", "Warehouse"]},
+        {q: "Vessel for holding flowers.", a: "Vase", o: ["Pot", "Jug", "Flask"]},
+        {q: "The meaning of 'steed'.", a: "A horse", o: ["A sword", "A ship", "A rider"]},
+        {q: "Patron saint of England.", a: "St. George", o: ["St. Andrew", "St. Patrick", "St. David"]},
+        {q: "Person who cannot hear or speak.", a: "Deaf-mute", o: ["Blind", "Lame", "Paralyzed"]},
+        {q: "Room onboard ship.", a: "Cabin", o: ["Suite", "Cell", "Wardrobe"]},
+        {q: "Soldier with three stripes on each arm.", a: "Sergeant", o: ["Captain", "Major", "Corporal"]},
+        {q: "How many legs has a fly?", a: "Six", o: ["Four", "Eight", "Two"]},
+        {q: "Place where iron goods are made.", a: "Smithy / Forge", o: ["Mill", "Quarry", "Tannery"]},
+        {q: "Water turned into gas.", a: "Steam", o: ["Ice", "Mist", "Rain"]},
+        {q: "Young that hatch from insect eggs.", a: "Larvae", o: ["Chicks", "Puppies", "Cubs"]},
+        {q: "Flesh of a pig.", a: "Pork", o: ["Beef", "Veal", "Mutton"]},
+        {q: "Goods taken into a country.", a: "Imports", o: ["Exports", "Smuggled", "Tariffs"]},
+        {q: "Place where leather is made.", a: "Tannery", o: ["Foundry", "Refinery", "Brewery"]},
+        {q: "Another name for a donkey.", a: "Ass / Donkey", o: ["Mule", "Pony", "Colt"]},
+        {q: "Machine which makes electricity.", a: "Generator", o: ["Motor", "Engine", "Turbine"]},
+        {q: "What is milk-fat called?", a: "Cream", o: ["Whey", "Curd", "Casein"]},
+        {q: "What is wind?", a: "Air in motion", o: ["Cloud movement", "Rain", "Gas"]},
+        {q: "What is a tripod?", a: "A three-legged stand", o: ["A camera lens", "A type of table", "A measuring tool"]},
+        {q: "Flesh of the deer.", a: "Venison", o: ["Mutton", "Pork", "Veal"]},
+        {q: "Name for smuggled goods.", a: "Contraband", o: ["Imports", "Cargo", "Freight"]},
+        {q: "Language spoken by ancient Romans.", a: "Latin", o: ["Greek", "Italian", "French"]},
+        {q: "Place where chickens are hatched.", a: "Hatchery", o: ["Stable", "Kennel", "Coop"]},
+        {q: "What is an astronaut?", a: "A space traveler", o: ["A star gazer", "A pilot", "An alien"]},
+        {q: "Wood used for a cricket bat.", a: "Willow", o: ["Oak", "Pine", "Teak"]},
+        {q: "What is the Milky Way?", a: "A galaxy of stars", o: ["A candy bar", "A river in space", "A cloud formation"]},
+        {q: "Guyana's former name.", a: "British Guiana", o: ["Suriname", "Belize", "Rhodesia"]},
+        {q: "Place where gas is stored.", a: "Gasometer / Tank", o: ["Refinery", "Well", "Pump"]},
+        {q: "Explain lbw (cricket term).", a: "Leg before wicket", o: ["Long ball wide", "Left bound wing", "Low ball weight"]},
+        {q: "What is a boneshaker?", a: "An early bicycle", o: ["A ghost", "A music instrument", "A cocktail"]},
+        {q: "Lightest common metal.", a: "Lithium", o: ["Aluminum", "Iron", "Lead"]},
+        {q: "Where is the longest wall in the world?", a: "China", o: ["Germany", "Israel", "Egypt"]},
+        {q: "Capital of Cuba.", a: "Havana", o: ["Santiago", "San Juan", "Kingston"]},
+        {q: "A place where fish are kept.", a: "Aquarium", o: ["Aviary", "Terrarium", "Stable"]},
+        {q: "Who was Man Friday?", a: "Robinson Crusoe's servant", o: ["A superhero", "A detective", "A sailor"]},
+        {q: "What is a mimic?", a: "Someone who imitates", o: ["A singer", "A painter", "A writer"]},
+        {q: "Spine's common name.", a: "Backbone", o: ["Neck", "Ribcage", "Skull"]},
+        {q: "What is a planet?", a: "Celestial body orbiting a star", o: ["A shooting star", "A moon", "The sun"]},
+        {q: "Meaning of scuttling a ship.", a: "Sinking it deliberately", o: ["Cleaning it", "Painting it", "Sailing fast"]},
+        {q: "Motto of the Scouts.", a: "Be Prepared", o: ["Be Kind", "Be Strong", "Be Brave"]},
+        {q: "Country of wooden shoes.", a: "The Netherlands", o: ["France", "Japan", "Norway"]},
+        {q: "What is a grotto?", a: "A small cave", o: ["A flower", "A boat", "A hat"]},
+        {q: "Place to lunch for payment.", a: "Restaurant / Cafe", o: ["Library", "Museum", "Cinema"]},
+        {q: "Where is the Empire State Building?", a: "New York", o: ["Chicago", "London", "Los Angeles"]},
+        {q: "Basin of a river.", a: "Land drained by river", o: ["The river mouth", "The source", "A waterfall"]},
+        {q: "What is capital punishment?", a: "Death penalty", o: ["A fine", "Prison", "Hard labor"]},
+        {q: "Planet closest to the sun.", a: "Mercury", o: ["Venus", "Mars", "Earth"]},
+        {q: "Long John Silver's story.", a: "Treasure Island", o: ["Peter Pan", "Moby Dick", "Kidnapped"]},
+        {q: "Picture of bones inside the body.", a: "X-ray", o: ["Portrait", "Sketch", "Map"]},
+        {q: "Starboard side.", a: "Right side", o: ["Left side", "Front", "Back"]},
+        {q: "Patron saint of Scotland.", a: "St. Andrew", o: ["St. George", "St. Patrick", "St. David"]},
+        {q: "What are the Antipodes?", a: "Places on opposite sides of Earth", o: ["Types of fish", "Ancient ruins", "Space stars"]},
+        {q: "Erin is another name for...", a: "Ireland", o: ["Scotland", "Wales", "England"]},
+        {q: "Song for two.", a: "Duet", o: ["Solo", "Trio", "Chorus"]},
+        {q: "Baker's dozen.", a: "13", o: ["12", "10", "14"]},
+        {q: "A centenarian.", a: "Person aged 100 or more", o: ["A Roman soldier", "A type of coin", "A math teacher"]},
+        {q: "Instrument for drawing circles.", a: "Compass", o: ["Ruler", "Protractor", "Level"]},
+        {q: "Another name for a jungle.", a: "Rainforest", o: ["Desert", "Savannah", "Tundra"]},
+        {q: "Aircraft without engine.", a: "Glider", o: ["Jet", "Helicopter", "Biplane"]},
+        {q: "Insect that makes honey.", a: "Bee", o: ["Wasp", "Ant", "Butterfly"]},
+        {q: "When is SOS used?", a: "Distress signal", o: ["Greeting", "Ending a call", "Celebration"]},
+        {q: "What is a cutlass?", a: "A short sword", o: ["A small boat", "A type of fish", "A hat"]},
+        {q: "Teeth of an adult person.", a: "32", o: ["28", "30", "36"]},
+        {q: "Patron saint of Ireland.", a: "St. Patrick", o: ["St. Andrew", "St. George", "St. David"]},
+        {q: "Solid water.", a: "Ice", o: ["Hail", "Snow", "Mist"]},
+        {q: "What is a loom?", a: "Machine for weaving", o: ["A type of light", "A farming tool", "A boat part"]},
+        {q: "What is a fjord?", a: "Narrow inlet of sea", o: ["A high mountain", "A deep forest", "A desert plain"]},
+        {q: "Instrument for tiny objects.", a: "Microscope", o: ["Telescope", "Periscope", "Binoculars"]},
+        {q: "King of Beasts.", a: "Lion", o: ["Tiger", "Elephant", "Eagle"]},
+        {q: "Patron saint of Wales.", a: "St. David", o: ["St. Patrick", "St. Andrew", "St. George"]},
+        {q: "Another name for an airman.", a: "Aviator / Pilot", o: ["Sailor", "Driver", "Soldier"]},
+        {q: "Bed on board ship.", a: "Berth / Bunk", o: ["Couch", "Sofa", "Hammock"]},
+        {q: "Sides of a hexagon.", a: "6", o: ["5", "8", "7"]},
+        {q: "What is a quadruped?", a: "Four-legged animal", o: ["Two-legged bird", "Sea creature", "Insect"]},
+        {q: "Animal for long distances without water.", a: "Camel", o: ["Horse", "Elephant", "Lion"]},
+        {q: "What is a hobo?", a: "A homeless traveler", o: ["A rich man", "A chef", "A sailor"]},
+        {q: "What is a rickshaw?", a: "Human-drawn carriage", o: ["A bicycle", "A small boat", "A train car"]},
+        {q: "Number of icebergs.", a: "A pack / field", o: ["A flock", "A herd", "A bunch"]},
+        {q: "City of high buildings.", a: "New York", o: ["London", "Paris", "Rome"]},
+        {q: "Insect carrying malaria.", a: "Mosquito", o: ["Fly", "Tick", "Flea"]},
+        {q: "Yellow part of an egg.", a: "Yolk", o: ["Albumen", "Shell", "White"]},
+        {q: "Who was Mars?", a: "Roman God of War", o: ["Greek God of Sea", "Planet scientist", "A king"]},
+        {q: "A person who is myopic is...", a: "Short-sighted", o: ["Blind", "Deaf", "Color-blind"]},
+        {q: "Skin of an orange.", a: "Peel / Rind", o: ["Shell", "Bark", "Leaf"]},
+        {q: "Crabs, lobsters and prawns are...", a: "Crustaceans", o: ["Mollusks", "Mammals", "Insects"]},
+        {q: "Soldiers on horseback.", a: "Cavalry", o: ["Infantry", "Navy", "Air force"]},
+        {q: "Who is a sheik?", a: "Arab leader / chief", o: ["A monk", "A priest", "A merchant"]},
+        {q: "Opening at top of volcano.", a: "Crater", o: ["Vent", "Peak", "Mouth"]},
+        {q: "How is bronze made?", a: "Copper and Tin", o: ["Iron and Carbon", "Gold and Silver", "Zinc and Lead"]},
+        {q: "Another name for a learner.", a: "Apprentice / Trainee", o: ["Master", "Expert", "Guide"]},
+        {q: "Way out sign above door.", a: "Exit", o: ["Entrance", "Push", "Pull"]},
+        {q: "Largest planet.", a: "Jupiter", o: ["Saturn", "Neptune", "Mars"]},
+        {q: "Top of a hill.", a: "Summit / Peak", o: ["Valley", "Base", "Ridge"]},
+        {q: "Meaning of umpire.", a: "Official in sports", o: ["A player", "A coach", "A fan"]},
+        {q: "Rope used by cowboy.", a: "Lasso", o: ["Leash", "Cable", "Thread"]},
+        {q: "To which country does a Yankee belong?", a: "USA", o: ["UK", "Canada", "Australia"]},
+        {q: "Another name for village.", a: "Hamlet", o: ["City", "Town", "State"]},
+        {q: "Soldiers on foot.", a: "Infantry", o: ["Cavalry", "Marines", "Pilots"]},
+        {q: "Place where stone is obtained.", a: "Quarry", o: ["Mine", "Well", "Forest"]},
+        {q: "White of an egg.", a: "Albumen", o: ["Yolk", "Shell", "Cream"]},
+        {q: "Another word for salary.", a: "Wages / Pay", o: ["Fine", "Debt", "Tax"]},
+        {q: "What is a coyote?", a: "A prairie wolf", o: ["A bird", "A snake", "A cat"]},
+        {q: "Coffee is obtained from...", a: "Beans / Seeds", o: ["Leaves", "Roots", "Bark"]},
+        {q: "Animal that chews the cud.", a: "Cow / Sheep", o: ["Lion", "Dog", "Horse"]},
+        {q: "Which letters are vowels?", a: "A, E, I, O, U", o: ["B, C, D, F", "X, Y, Z", "All letters"]},
+        {q: "Tree that drops acorns.", a: "Oak", o: ["Pine", "Maple", "Birch"]},
+        {q: "Animal with a 'brush' tail.", a: "Fox", o: ["Wolf", "Rabbit", "Deer"]},
+        {q: "What is a gondola?", a: "A Venetian boat", o: ["A hat", "A cheese", "A song"]},
+        {q: "Cider is made from...", a: "Apples", o: ["Grapes", "Pears", "Oranges"]},
+        {q: "A carnivorous creature eats...", a: "Meat", o: ["Plants", "Insects", "Everything"]},
+        {q: "Capital of England.", a: "London", o: ["Manchester", "Liverpool", "Birmingham"]},
+        {q: "Animal with a long neck.", a: "Giraffe", o: ["Elephant", "Ostrich", "Horse"]},
+        {q: "What is veal?", a: "Meat of a calf", o: ["Meat of a pig", "Meat of a deer", "Meat of a sheep"]},
+        {q: "Biggest ocean.", a: "Pacific", o: ["Atlantic", "Indian", "Arctic"]},
+        {q: "Creatures with antlers.", a: "Deer", o: ["Cows", "Goats", "Horses"]},
+        {q: "Kings of Ancient Egypt.", a: "Pharaohs", o: ["Caesars", "Sultans", "Tsars"]},
+        {q: "A young tree.", a: "Sapling", o: ["Seedling", "Sprout", "Twig"]},
+        {q: "Middle part of an apple.", a: "Core", o: ["Pit", "Stem", "Skin"]},
+        {q: "A person who hoards money.", a: "Miser", o: ["Banker", "Giver", "Trader"]},
+        {q: "Small leaf.", a: "Leaflet", o: ["Petal", "Stem", "Bud"]},
+        {q: "Mammal that can fly.", a: "Bat", o: ["Bird", "Flying Squirrel", "Insect"]},
+        {q: "Person who by desire lives alone.", a: "Recluse / Hermit", o: ["Monk", "Socialite", "Tourist"]},
+        {q: "Shellfish examples.", a: "Crab & Lobster", o: ["Tuna & Salmon", "Shark & Whale", "Eel & Snake"]},
+        {q: "Metal container for oil.", a: "Drum / Can", o: ["Box", "Bag", "Jar"]},
+        {q: "Human senses.", a: "Sight, Hearing, Smell, Taste, Touch", o: ["Running, Jumping, Swimming", "Thinking, Feeling, Dreaming", "Eating, Sleeping, Working"]},
+        {q: "Whisky is made in a...", a: "Distillery", o: ["Bakery", "Brewery", "Mill"]},
+        {q: "Accurate kind of clock.", a: "Atomic", o: ["Sundial", "Digital", "Quartz"]},
+        {q: "Colors of the rainbow.", a: "7", o: ["5", "6", "8"]},
+        {q: "Three-sided figure.", a: "Triangle", o: ["Circle", "Square", "Oval"]},
+        {q: "Patron saint of England.", a: "St. George", o: ["St. Nick", "St. Jude", "St. Peter"]},
+        {q: "Soldier with three stripes.", a: "Sergeant", o: ["Corporal", "Private", "Major"]},
+        {q: "Water turned to gas.", a: "Steam", o: ["Ice", "Mist", "Smoke"]},
+        {q: "Scotland's monster loch.", a: "Ness", o: ["Lomond", "Tay", "Katrine"]},
+        {q: "Donkey's other name.", a: "Ass", o: ["Mule", "Pony", "Horse"]},
+        {q: "Sugar cane drink.", a: "Rum", o: ["Gin", "Vodka", "Wine"]},
+        {q: "Smuggled goods.", a: "Contraband", o: ["Imports", "Exports", "Freight"]},
+        {q: "Astronaut travels in...", a: "Space", o: ["Ocean", "Air", "Desert"]},
+        {q: "Cricket bat wood.", a: "Willow", o: ["Oak", "Ash", "Maple"]},
+        {q: "Lightest common metal.", a: "Lithium", o: ["Aluminium", "Iron", "Gold"]},
+        {q: "NASA's field.", a: "Space Exploration", o: ["Deep Sea", "Medical Research", "Cooking"]},
+        {q: "Man Friday's master.", a: "Robinson Crusoe", o: ["Captain Hook", "Peter Pan", "Long John Silver"]},
+        {q: "Planet closest to sun.", a: "Mercury", o: ["Venus", "Earth", "Mars"]},
+        {q: "Empire State Building city.", a: "New York", o: ["Chicago", "Miami", "Boston"]},
+        {q: "Closest planet to Sun.", a: "Mercury", o: ["Mars", "Jupiter", "Venus"]},
+        {q: " Erin is...", a: "Ireland", o: ["England", "Wales", "Scotland"]},
+        {q: "Baker's dozen is...", a: "13", o: ["12", "11", "10"]},
+        {q: "Adult human teeth.", a: "32", o: ["28", "30", "34"]},
+        {q: "Frozen water.", a: "Ice", o: ["Hail", "Snow", "Mist"]},
+        {q: "Hexagon sides.", a: "6", o: ["5", "7", "8"]},
+        {q: "Arab chief.", a: "Sheik", o: ["Priest", "King", "Monk"]},
+        {q: "Egg yellow.", a: "Yolk", o: ["White", "Shell", "Skin"]},
+        {q: "Exit sign means...", a: "Way out", o: ["Way in", "Stay", "Danger"]},
+        {q: "Giraffe neck is...", a: "Long", o: ["Short", "Wide", "Thin"]},
+        {q: "Veal is from...", a: "Calf", o: ["Pig", "Sheep", "Cow"]},
+        {q: "Pacific is an...", a: "Ocean", o: ["Island", "River", "Sea"]},
+        {q: "Apple center.", a: "Core", o: ["Pit", "Skin", "Seed"]}
+    ];
+
+    let current = 0; let score = 0; 
+    let deck = [...fullGkData].sort(() => Math.random() - 0.5).slice(0, 200);
+
+    function load() {
+        const item = deck[current];
+        document.getElementById('question-target').textContent = item.q;
+        document.getElementById('progress').textContent = `${current + 1}/200`;
+        const box = document.getElementById('choices');
+        box.innerHTML = "";
+        
+        let choices = [item.a, ...item.o].sort(() => Math.random() - 0.5);
+        
+        choices.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = "btn"; b.textContent = opt;
+            b.onclick = () => {
+                const btns = document.querySelectorAll('.btn');
+                btns.forEach(btn => btn.disabled = true);
+                if(opt === item.a) { b.classList.add('correct'); score++; }
+                else { b.classList.add('wrong'); btns.forEach(btn => { if(btn.textContent === item.a) btn.classList.add('correct'); }); }
+                document.getElementById('score').textContent = score;
+                document.getElementById('next-btn').style.display = "block";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    document.getElementById('next-btn').onclick = () => {
+        document.getElementById('next-btn').style.display = "none";
+        current++; 
+        if(current < deck.length) load(); 
+        else {
+            document.getElementById('game-box').innerHTML = `<h2>Gauntlet Champion!</h2><p>You have conquered 200 rounds of general knowledge.<br>Final Score: ${score}/200</p><button onclick="location.reload()" class="btn" style="width:100%">Restart Challenge</button>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>
